@@ -1,0 +1,3 @@
+#!/bin/bash
+wnb&
+exit 0

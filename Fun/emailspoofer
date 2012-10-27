@@ -1,0 +1,33 @@
+#!/bin/bash
+host=dias.aueb.gr
+port=25
+sender=god@heavens.com
+recepient=p30xx@dias.aueb.gr
+subject="Message from GOD!"
+message="Elpizw na valete eykola themata!\nEpisis an thelete psifiste gia tin katargisi tis vuvuzelas!\nhttp://www.tinyurl.com/votenovuvuzelas\nYours trully , god :) !\n\n\nPowered by devine mail v4.0"
+
+(echo -e "EHLO localhost"
+sleep 1
+echo -e "MAIL FROM:<$sender>"
+sleep 1
+echo -e "RCPT TO:<$recepient>"
+sleep 1
+echo -e "DATA"
+sleep 1
+
+echo -e "subject:$subject"
+sleep 1
+
+echo "from:$sender"
+sleep 1
+
+echo "to:$recepient"
+sleep 1
+
+echo -e "$message"
+sleep 1
+echo -e "."
+sleep 1
+echo -e "QUIT\r") | telnet ${host} ${port}
+echo "Mail is Done"
+exit 0

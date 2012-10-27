@@ -1,0 +1,4 @@
+#!/bin/bash
+#mencoder $1 -ovc xvid -oac mp3lame -xvidencopts pass=1 -o $1-youtube.avi 
+ffmpeg -i $1 -vcodec libx264 -vpre medium -crf 24 -threads 0 -acodec libmp3lame -aq 100 $1-youtube.mp4
+exit 0

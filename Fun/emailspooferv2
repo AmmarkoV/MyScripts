@@ -1,0 +1,72 @@
+#!/bin/sh
+
+usage() {
+cat<<EOF
+Usage: $0 options
+
+This script is used to easily send mail with a different sender id.
+
+OPTIONS:
+  -h  host  (example.com)
+  -p  port (default is 25)
+  -s  sender (user@example.com)
+  -r  recipient (user@host)
+  -m  message to send ("message")
+  -t  title of mail ("title")
+  -d  use defaults
+EOF
+}
+
+port=25
+
+while getopts "h:p:s:r:m:t: d" o; do
+        case $o in
+                h ) host=$OPTARG;;
+                p ) port=$OPTARG;;
+                s ) sender=$OPTARG;;
+                r ) recipient=$OPTARG;;
+                m ) message=$OPTARG;;
+                t ) subject=$OPTARG;;
+                d ) echo "Using Defaults"
+                    host=dias.aueb.gr 
+                    port=25
+                    sender=rick@rolling.com
+                    recipient=pxxxxxxx@dias.aueb.gr
+                    subject="Urgent notification"
+                    message=":) http://www.youtube.com/watch?v=oHg5SJYRHA0" ;;
+        esac
+done
+
+if [ -z "$host" ] || [ -z "$sender" ] || [ -z "$recipient" ] || [ -z "$message" ] || [ -z "$subject" ];
+then
+    usage
+    exit 1
+fi
+
+(echo -e "EHLO localhost"
+sleep 1
+echo -e "MAIL FROM:<$sender>"
+sleep 1
+echo -e "RCPT TO:<$recipient>"
+sleep 1
+echo -e "DATA"
+sleep 1
+
+echo -e "subject:$subject"
+sleep 1
+
+echo "from:$sender"
+sleep 1
+
+echo "to:$recipient"
+sleep 1
+
+echo -e "$message"
+sleep 1
+echo -e "."
+sleep 1
+echo -e "QUIT\r") | telnet ${host} ${port}
+echo "Mail is Done"
+exit 0
+
+

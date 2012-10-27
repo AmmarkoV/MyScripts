@@ -1,0 +1,4 @@
+#!/bin/bash
+gksudo killall lxpanel
+lxpanel&
+exit 0

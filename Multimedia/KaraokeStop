@@ -1,0 +1,4 @@
+#!/bin/bash
+pacmd list-modules
+pactl unload-module `cat module_num`
+exit 0

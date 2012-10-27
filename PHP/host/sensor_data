@@ -1,0 +1,58 @@
+SENSOR DATA :
+
+coretemp-isa-0000
+Adapter: ISA adapter
+Core 0:      +42.0 C  (crit = +100.0 C)                  
+
+coretemp-isa-0002
+Adapter: ISA adapter
+Core 1:      +42.0 C  (crit = +100.0 C)                  
+
+w83627thf-isa-0290
+Adapter: ISA adapter
+in0:         +1.17 V  (min =  +0.00 V, max =  +3.84 V)   
+in1:         +1.02 V  (min =  +0.00 V, max =  +2.83 V)   
+in2:         +1.89 V  (min =  +1.01 V, max =  +1.04 V)   ALARM
+in3:         +3.01 V  (min =  +2.50 V, max =  +3.14 V)   
+in4:         +3.38 V  (min =  +1.42 V, max =  +0.00 V)   ALARM
+in7:         +2.96 V  (min =  +1.10 V, max =  +1.04 V)   ALARM
+in8:         +3.28 V  (min =  +4.03 V, max =  +1.86 V)   ALARM
+fan1:          0 RPM  (min = 1088 RPM, div = 8)  ALARM
+fan2:          0 RPM  (min = 337500 RPM, div = 4)  ALARM
+fan3:          0 RPM  (min = 28125 RPM, div = 2)  ALARM
+temp1:       +56.0 C  (high = +119.0 C, hyst =  +0.0 C)  sensor = thermistor
+temp2:       +35.5 C  (high = +80.0 C, hyst = +75.0 C)  sensor = diode
+temp3:       +35.5 C  (high = +80.0 C, hyst = +75.0 C)  sensor = diode
+beep_enable:enabled
+
+
+
+
+UPTIME DATA :
+
+ 07:26:27 up 45 days, 12:38,  0 users,  load average: 0.09, 0.11, 0.09
+
+
+
+SWAP DATA :
+
+             total       used       free     shared    buffers     cached
+Mem:       3074564    2932124     142440          0     190428    2237720
+-/+ buffers/cache:     503976    2570588
+Swap:      2010104          0    2010104
+
+
+
+DISK USAGE DATA :
+
+Filesystem    Type    Size  Used Avail Use% Mounted on
+/dev/sda1     ext4     19G  4.6G   13G  27% /
+none      devtmpfs    1.5G  300K  1.5G   1% /dev
+none         tmpfs    1.5G     0  1.5G   0% /dev/shm
+none         tmpfs    1.5G   19M  1.5G   2% /var/run
+none         tmpfs    1.5G     0  1.5G   0% /var/lock
+none         tmpfs    1.5G     0  1.5G   0% /lib/init/rw
+/dev/sda5     ext4    127G   11G  110G   9% /home
+
+
+

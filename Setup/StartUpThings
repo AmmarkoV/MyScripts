@@ -1,0 +1,16 @@
+#!/bin/bash
+/usr/bin/numlockx on
+#skype& 
+mumble&
+pidgin&
+audacious&
+firefox&
+thunderbird&
+gtg&
+sleep 3
+setxkbmap -option grp:switch,grp:alt_shift_toggle,grp_led:scroll us,gr
+mplayer -fs /home/ammar/Programs/WelcometotheWorldofTomorrow.webm
+#nautilus ~/Documents/Programming& 
+sleep 15
+notify-send Fortune "`fortune`" 
+exit 0
