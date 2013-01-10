@@ -1,7 +1,7 @@
 #!/bin/bash
 echo "LUbuntu handy Packages automation "
 
-BASICAPPS="firefox thunderbird vlc pidgin mumble gimp audacity audacious libreoffice synaptic catfish usb-creator-gtk vino xtightvncviewer baobab"
+BASICAPPS="firefox thunderbird vlc pidgin mumble gimp audacity audacious libreoffice synaptic catfish usb-creator-gtk vino xtightvncviewer baobab gcalctool"
 MOREAPPS="glabels freemind gtg gnotime gtk-recordmydesktop units firestarter qrencode"
 COMPATIBILITY="wine winetricks dosbox samba system-config-samba chntpw"
 ADVLIBS="sysv-rc-conf festival imagemagick numlockx gxmessage libnotify-bin htop gtkperf traceroute"
