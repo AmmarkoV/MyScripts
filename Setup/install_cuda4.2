@@ -1,25 +1,41 @@
 #!/bin/bash
 
-
 CUDA_VER64="cuda_5.0.35_linux_64_ubuntu11.10-1.run"
 CUDA_VER32="cuda_5.0.35_linux_32_ubuntu11.10-1.run"
-CUDA_VER="cuda_5.0.35_linux_64_ubuntu11.10-1.run"
+#CUDA_VER SHOULD INITIALLY BE THE SAME AS CUDA_VER32
+CUDA_VER="cuda_5.0.35_linux_32_ubuntu11.10-1.run"
 
 
 if [ -e $CUDA_VER64 ]
 then 
-  echo "Detected an 64bit executable"
-  CUDA_VER=$CUDA_VER64
-else
+  echo "Detected an existing 64bit executable of cuda"  
 fi
 
 if [ -e $CUDA_VER32 ]
 then 
-  echo "Detected an 32bit executable"
-  CUDA_VER=$CUDA_VER32
-else
+  echo "Detected an existing 32bit executable of cuda"  
 fi
 
+
+MACHINE_TYPE=`uname -m`
+if [ ${MACHINE_TYPE} == 'x86_64' ]; then
+  echo "This machine should best install a 64bit version of CUDA"
+  echo
+  echo   
+  echo "Would you like a 32 bit installation , despite your 64bit capable machine ?"
+  echo
+  echo -n "            (Y/N)?"
+  read answer
+  if test "$answer" != "Y" -a "$answer" != "y";
+  then 
+    CUDA_VER=$CUDA_VER64
+   fi
+else
+  echo "This machine should best install a 32bit version of CUDA" 
+  #CUDA_VER SHOULD ALREADY BE SET TO $CUDA_VER32
+fi
+ 
+echo "Working with $CUDA_VER" 
 
 if [ -e $CUDA_VER ]
 then 
@@ -28,7 +44,7 @@ else
   echo "This script is fixed to run for $CUDA_VER , if you want you can change the CUDA_VER variable in the start of the script to match a version that exists in your current directory  the other option is to try and download it now from nvidia!"
   echo
   echo
-  echo "Would you like to try and download a binary of cuda from nvidia now ? "
+  echo "Would you like to try and download cuda from nvidia now ? "
   echo
   echo -n "                Do you want to proceed (Y/N)?"
   read answer

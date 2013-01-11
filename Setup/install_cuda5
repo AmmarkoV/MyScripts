@@ -8,12 +8,12 @@ CUDA_VER="cuda_5.0.35_linux_32_ubuntu11.10-1.run"
 
 if [ -e $CUDA_VER64 ]
 then 
-  echo "Detected a 64bit executable of cuda"  
+  echo "Detected an existing 64bit executable of cuda"  
 fi
 
 if [ -e $CUDA_VER32 ]
 then 
-  echo "Detected a 32bit executable of cuda"  
+  echo "Detected an existing 32bit executable of cuda"  
 fi
 
 
@@ -28,17 +28,14 @@ if [ ${MACHINE_TYPE} == 'x86_64' ]; then
   read answer
   if test "$answer" != "Y" -a "$answer" != "y";
   then 
-    $CUDA_VER=$CUDA_VER64
+    CUDA_VER=$CUDA_VER64
    fi
 else
   echo "This machine should best install a 32bit version of CUDA" 
   #CUDA_VER SHOULD ALREADY BE SET TO $CUDA_VER32
 fi
-
-
-
-echo "Working with $CUDA_VER"
-exit 0
+ 
+echo "Working with $CUDA_VER" 
 
 if [ -e $CUDA_VER ]
 then 
