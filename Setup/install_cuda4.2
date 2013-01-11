@@ -1,15 +1,48 @@
 #!/bin/bash
 
+
+CUDA_VER64="cuda_5.0.35_linux_64_ubuntu11.10-1.run"
+CUDA_VER32="cuda_5.0.35_linux_32_ubuntu11.10-1.run"
 CUDA_VER="cuda_5.0.35_linux_64_ubuntu11.10-1.run"
+
+
+if [ -e $CUDA_VER64 ]
+then 
+  echo "Detected an 64bit executable"
+  CUDA_VER=$CUDA_VER64
+else
+fi
+
+if [ -e $CUDA_VER32 ]
+then 
+  echo "Detected an 32bit executable"
+  CUDA_VER=$CUDA_VER32
+else
+fi
 
 
 if [ -e $CUDA_VER ]
 then 
   echo "StartingUP! :)"
 else
-  echo "This script is fixed to run for $CUDA_VER , if you want you can change the CUDA_VER variable in the start of the script to match your version!"
-  echo "Hope nothing breaks! :) ,you ve been warned I have no responsibility!"
-  exit 0
+  echo "This script is fixed to run for $CUDA_VER , if you want you can change the CUDA_VER variable in the start of the script to match a version that exists in your current directory  the other option is to try and download it now from nvidia!"
+  echo
+  echo
+  echo "Would you like to try and download a binary of cuda from nvidia now ? "
+  echo
+  echo -n "                Do you want to proceed (Y/N)?"
+  read answer
+  if test "$answer" != "Y" -a "$answer" != "y";
+  then exit 0;
+  fi
+  wget "http://developer.download.nvidia.com/compute/cuda/5_0/rel-update-1/installers/$CUDA_VER"
+  if [ -e $CUDA_VER ]
+  then 
+   echo "Downloaded a fresh copy of $CUDA_VER , lets hope it is good :)"
+  else
+   echo "Could not download  $CUDA_VER "
+   exit 0
+  fi 
 fi
 
 
