@@ -1,9 +1,9 @@
 #!/bin/bash
 
-CUDA_VER64="cuda_5.0.35_linux_64_ubuntu11.10-1.run"
-CUDA_VER32="cuda_5.0.35_linux_32_ubuntu11.10-1.run"
+CUDA_VER64="cudatoolkit_4.2.9_linux_64_ubuntu11.04.run"
+CUDA_VER32="cudatoolkit_4.2.9_linux_32_ubuntu11.04.run"
 #CUDA_VER SHOULD INITIALLY BE THE SAME AS CUDA_VER32
-CUDA_VER="cuda_5.0.35_linux_32_ubuntu11.10-1.run"
+CUDA_VER="cudatoolkit_4.2.9_linux_32_ubuntu11.04.run"
 
 
 if [ -e $CUDA_VER64 ]
@@ -51,7 +51,7 @@ else
   if test "$answer" != "Y" -a "$answer" != "y";
   then exit 0;
   fi
-  wget "http://developer.download.nvidia.com/compute/cuda/5_0/rel-update-1/installers/$CUDA_VER"
+  wget "http://developer.download.nvidia.com/compute/cuda/4_2/rel/toolkit/$CUDA_VER"
   if [ -e $CUDA_VER ]
   then 
    echo "Downloaded a fresh copy of $CUDA_VER , lets hope it is good :)"
@@ -65,7 +65,9 @@ fi
 sudo apt-get install build-essential gcc-4.4 g++-4.4 freeglut3-dev
 sudo ./$CUDA_VER -override compiler
 
-cd ~/NVIDIA_CUDA-5.0_Samples
+cd ~
+mkdir .CUDA4.2
+cd ~/.CUDA4.2
 mkdir gccMagic
 cd gccMagic
   
@@ -83,36 +85,36 @@ else
    sudo sh -c 'echo "compiler-bindir = `pwd`" >>/usr/local/cuda/bin/nvcc.profile' 
 fi
 
-if echo $PATH | grep -q "cuda-5.0/bin"
+if echo $PATH | grep -q "cuda/bin"
 then
    echo "CUDA already mentioned in PATH "  
 else
    echo "Adding CUDA to PATH using bashrc!" 
-   sudo sh -c 'echo "export PATH=$PATH:/usr/local/cuda-5.0/bin" >>~/.bashrc' 
+   sudo sh -c 'echo "export PATH=$PATH:/usr/local/cuda/bin" >>~/.bashrc' 
 fi
 
 
-if [ -d "/usr/local/cuda-5.0/lib64" ]
+if [ -d "/usr/local/cuda/lib64" ]
 then
 echo "Detected 64bit lib folder"
  #64bit lib folder
-if echo $LD_LIBRARY_PATH | grep -q "cuda-5.0/lib64"
+if echo $LD_LIBRARY_PATH | grep -q "cuda/lib64"
 then
    echo "CUDA already in LD_LIBRARY_PATH " 
 else
    echo "Adding CUDA to LD_LIBRARY_PATH using bashrc!" 
-   sudo sh -c 'echo "export LD_LIBRARY_PATH=/usr/local/cuda-5.0/lib64:/lib" >>~/.bashrc' 
+   sudo sh -c 'echo "export LD_LIBRARY_PATH=/usr/local/cuda/lib64:/usr/local/cuda/lib" >>~/.bashrc' 
 fi 
-elif [ -d "/usr/local/cuda-5.0/lib" ]
+elif [ -d "/usr/local/cuda/lib" ]
 then
 echo "Detected 32bit lib folder"
 #32bit lib folder 
-if echo $LD_LIBRARY_PATH | grep -q "cuda-5.0/lib"
+if echo $LD_LIBRARY_PATH | grep -q "cuda/lib"
 then
    echo "CUDA already in LD_LIBRARY_PATH "  
 else
    echo "Adding CUDA to LD_LIBRARY_PATH using bashrc!" 
-   sudo sh -c 'echo "export LD_LIBRARY_PATH=/usr/local/cuda-5.0/lib" >>~/.bashrc' 
+   sudo sh -c 'echo "export LD_LIBRARY_PATH=/usr/local/cuda/lib" >>~/.bashrc' 
 fi
 fi
 
