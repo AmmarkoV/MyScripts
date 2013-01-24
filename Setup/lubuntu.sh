@@ -61,7 +61,15 @@ fi
 
 sudo apt-get remove abiword
 
+
+echo "Disable Apport maybe ? :P"
+sudo service apport stop
+gksu gedit /etc/default/apport
+
+
 echo "Configuration Complete" |  festival --tts
+
+
 
 # sensors-applet
 exit 0
