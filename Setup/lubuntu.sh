@@ -58,6 +58,9 @@ else
  chmod +x ~/.autostart.sh 
 fi
 
+#maybe add to /etc/fstab  :     tmpfs /tmp tmpfs defaults,noexec,nosuid 0 0
+
+#maybe add to /etc/fstab  :      tmpfs     /home/<user>/.mozilla/firefox/default/Cache tmpfs mode=1777,noatime 0 0 
 
 sudo apt-get remove abiword
 
