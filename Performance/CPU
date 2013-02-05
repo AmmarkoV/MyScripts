@@ -1,8 +1,0 @@
-
-[Desktop Entry]
-Encoding=UTF-8
-Type=Application
-Name=CPU Freq
-Name[en_US]=CPU Freq
-Exec=/home/ammar/Programs/cpufreq-govern-select.sh
-Comment[en_US]=
