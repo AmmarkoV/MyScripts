@@ -19,11 +19,27 @@ echo "Installation Complete" |  festival --tts
 if cat /etc/xdg/lxsession/Lubuntu/autostart | grep -q "setxkbmap"
 then
    echo "Language settings seem to be ok!" 
-  exit 0
+  #exit 0
 else
    echo "Language Settings dont seem to exist , including English/Greek , interchangable with alt-shift  .." 
    sudo sh -c 'echo "@setxkbmap -option grp:switch,grp:alt_shift_toggle,grp_led:scroll us,gr" >>/etc/xdg/lxsession/Lubuntu/autostart' 
 fi
+
+
+if cat /etc/sysctl.conf | grep -q "vm.swappiness"
+then
+   echo "Swappiness seems to be set-up ok!" 
+  #exit 0
+else
+   echo "Setting Swapiness to 10! .." 
+   sudo sh -c 'echo "vm.swappiness = 10" >>/etc/sysctl.conf' 
+   sudo sysctl vm.swappiness=10
+   sudo swapoff -a
+   sudo swapon -a
+fi
+
+
+
 
 if [ -f ~/.config/autostart/autostart.desktop ]
 then 
