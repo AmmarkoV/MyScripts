@@ -1,0 +1,12 @@
+#!/bin/bash
+
+
+for infile in "$@"; do
+
+  outfile=${infile%.png}.ppm
+
+  echo " $infile to $outfile"
+  convert $infile $outfile 
+done
+
+exit 0
