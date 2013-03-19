@@ -10,6 +10,10 @@ CODECS="ubuntu-restricted-extras pavucontrol beep ffmpeg  mplayer smplayer"
 sudo apt-get install $BASICAPPS $MOREAPPS $ADVLIBS $COMPATIBILITY $ADVLIBS $CODECS         
 
 
+#DVD Playback maybe ?
+#sudo apt-get install libdvdread4
+#sudo /usr/share/doc/libdvdread4/install-css.sh
+
 #esddsp festival palia
 echo "Installation Complete" |  festival --tts
 
