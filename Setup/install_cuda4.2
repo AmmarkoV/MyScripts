@@ -65,7 +65,10 @@ fi
 
 sudo apt-get install build-essential gcc-4.4 g++-4.4 freeglut3-dev
 sudo chmod +x $CUDA_VER
-sudo ./$CUDA_VER -override compiler
+
+#  -override compiler <- this doesnt work on CUDA4.2 installer? 
+sudo ./$CUDA_VER
+echo "If you got an Error about the compiler please try to add -override compiler after calling the CUDA script" 
 
 cd ~
 mkdir .CUDA4.2
