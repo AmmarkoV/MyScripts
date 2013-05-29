@@ -1,0 +1,5 @@
+#!/bin/bash
+sudo apt-get install wminput wmgui lswm
+lswm
+exit 0
+

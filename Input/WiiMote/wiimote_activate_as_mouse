@@ -1,0 +1,6 @@
+#!/bin/bash
+echo "Found here http://www.ubuntugeek.com/howto-get-wii-remote-working-in-ubuntu-810-intrepid-ibex.html"
+#lswm
+gksudo modprobe uinput 
+gksudo wminput 00:1F:C5:7B:A5:76
+exit 0

@@ -1,0 +1,4 @@
+#!/bin/bash
+
+gksudo killall wminput
+exit 0
