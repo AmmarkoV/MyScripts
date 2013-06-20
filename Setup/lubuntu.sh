@@ -6,6 +6,7 @@ MOREAPPS="glabels freemind gtg gnotime gtk-recordmydesktop units firestarter qre
 COMPATIBILITY="wine winetricks dosbox samba system-config-samba chntpw"
 ADVLIBS="sysv-rc-conf festival imagemagick numlockx gxmessage libnotify-bin htop gtkperf traceroute"
 CODECS="ubuntu-restricted-extras pavucontrol beep ffmpeg  mplayer smplayer"
+SECURITY="vidalia tor"
 
 sudo apt-get install $BASICAPPS $MOREAPPS $ADVLIBS $COMPATIBILITY $ADVLIBS $CODECS         
 

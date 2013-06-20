@@ -35,6 +35,12 @@
     echo exec("df -hT >> sensor_data"); 
     echo exec("echo \"\n\n\" >> sensor_data");
 
+    //ADD NET TABLE
+    echo exec("echo \"NETWORK CONNECTIONS :\n\" >> sensor_data");
+    echo exec("netstat --tcp --numeric  >> sensor_data"); 
+    echo exec("echo \"\n\n\" >> sensor_data");
+
+
 
     $file=fopen("sensor_data","r") or exit("Internal error!");
     if ($file) 
