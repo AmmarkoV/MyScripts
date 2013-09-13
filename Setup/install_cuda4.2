@@ -108,7 +108,7 @@ then
    echo "CUDA already in LD_LIBRARY_PATH " 
 else
    echo "Adding CUDA to LD_LIBRARY_PATH using bashrc!" 
-   sudo sh -c 'echo "export LD_LIBRARY_PATH=/usr/local/cuda/lib64:/usr/local/cuda/lib" >>~/.bashrc' 
+   sudo sh -c 'echo "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda/lib64:/usr/local/cuda/lib" >>~/.bashrc' 
 fi 
 elif [ -d "/usr/local/cuda/lib" ]
 then
@@ -119,7 +119,7 @@ then
    echo "CUDA already in LD_LIBRARY_PATH "  
 else
    echo "Adding CUDA to LD_LIBRARY_PATH using bashrc!" 
-   sudo sh -c 'echo "export LD_LIBRARY_PATH=/usr/local/cuda/lib" >>~/.bashrc' 
+   sudo sh -c 'echo "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda/lib" >>~/.bashrc' 
 fi
 fi
 
