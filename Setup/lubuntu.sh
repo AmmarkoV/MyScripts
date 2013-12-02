@@ -1,12 +1,12 @@
 #!/bin/bash
 echo "LUbuntu handy Packages automation "
 
-BASICAPPS="firefox thunderbird vlc pidgin mumble gimp audacity audacious libreoffice synaptic catfish usb-creator-gtk vino xtightvncviewer baobab gcalctool"
-GRAPHICS="hugin autopano-sift"
-MOREAPPS="glabels freemind gtg gnotime gtk-recordmydesktop units firestarter qrencode"
+BASICAPPS="firefox thunderbird vlc pidgin mumble gimp audacity audacious libreoffice synaptic catfish usb-creator-gtk vino xtightvncviewer baobab gcalctool xbacklight brasero"
+GRAPHICS="hugin" # autopano-sift"
+MOREAPPS="glabels freemind gtg gnotime gtk-recordmydesktop units qrencode lm-sensors" #firestarter
 COMPATIBILITY="wine winetricks dosbox samba system-config-samba chntpw"
 ADVLIBS="sysv-rc-conf festival imagemagick numlockx gxmessage libnotify-bin htop gtkperf traceroute"
-CODECS="ubuntu-restricted-extras pavucontrol beep ffmpeg  mplayer smplayer"
+CODECS="ubuntu-restricted-extras pavucontrol beep ffmpeg  mplayer smplayer avconv"
 SECURITY="vidalia tor"
 
 sudo apt-get install $BASICAPPS $MOREAPPS $ADVLIBS $COMPATIBILITY $ADVLIBS $CODECS $GRAPHICS         
@@ -89,7 +89,20 @@ sudo apt-get remove abiword
 
 echo "Disable Apport maybe ? :P"
 sudo service apport stop
-gksu gedit /etc/default/apport
+gksu leafpad /etc/default/apport
+
+
+#Check SSD partition for correct alignment , should return 0 
+#sudo blockdev --getalignoff /dev/sda1 
+
+#Check SSD for trim support
+sudo hdparm -I /dev/sda |grep TRIM
+sudo hdparm -I /dev/sdb |grep TRIM
+
+
+#TODO add to /etc/fstab : noatime,nodiratime,discard,errors=remount-ro
+#UUID=e3c59fb6-436d-4a42-84d4-9dc99daea30b /               ext4    noatime,nodiratime,discard,errors=remount-ro 0   
+
 
 
 echo "Configuration Complete" |  festival --tts
