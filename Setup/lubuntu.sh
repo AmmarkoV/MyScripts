@@ -5,7 +5,7 @@ BASICAPPS="firefox thunderbird vlc pidgin mumble gimp audacity audacious libreof
 GRAPHICS="hugin" # autopano-sift"
 MOREAPPS="glabels freemind gtg gnotime gtk-recordmydesktop units qrencode lm-sensors" #firestarter
 COMPATIBILITY="wine winetricks dosbox samba system-config-samba chntpw"
-ADVLIBS="sysv-rc-conf festival imagemagick numlockx gxmessage libnotify-bin htop gtkperf traceroute"
+ADVLIBS="sysv-rc-conf festival imagemagick numlockx gxmessage libnotify-bin htop gtkperf traceroute powertop"
 CODECS="ubuntu-restricted-extras pavucontrol beep   mplayer smplayer " #ffmpeg avconv
 SECURITY="vidalia tor"
 
