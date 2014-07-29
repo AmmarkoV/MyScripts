@@ -1,4 +1,6 @@
 #!/bin/bash
+cd /home/ammar/
+dpkg --get-selections > packageList.txt
 cd /
 mysqldump -u root -pPASS_HERE --all-databases | gzip > /home/ammar/mysql/mysql_`date +"%m-%d-%Y"`.sql.gz
 rm /home/ammar/backup.*
