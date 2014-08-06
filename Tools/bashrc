@@ -27,4 +27,4 @@ getprocpid()
 
 alias yolo='git commit -am "..." && git push origin master'
 alias cmakecbp='cmake .. -G "CodeBlocks - Unix Makefiles" '
-
+alias update='sudo apt-get update && sudo apt-get upgrade -y'
