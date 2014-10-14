@@ -1,5 +1,5 @@
 #!/bin/bash
-sudo ntpdate ntp.ubuntu.com
+sudo ntpdate -u pool.ntp.org
 sudo date -s now
 exit 0
 
