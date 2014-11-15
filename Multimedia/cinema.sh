@@ -30,7 +30,7 @@ startOfMovie
 #--------------------------------------------
 
 
-mplayer -ss 46 -endpos 17 -utf8 -fs -slang gr,en -sub Mad.Max.1979.1080p.BluRay.x264.anoXmous.srt  -v Mad.Max.1979.1080p.BluRay.x264.anoXmous_.mp4
+mplayer -ss 46 -endpos 67 -utf8 -fs -slang gr,en -sub Mad.Max.1979.1080p.BluRay.x264.anoXmous.srt  -v Mad.Max.1979.1080p.BluRay.x264.anoXmous_.mp4
  
 
 
@@ -39,7 +39,7 @@ intermission 10
 #--------------------------------------------
 
 
-mplayer -ss 46 -endpos 47 -utf8 -fs -slang gr,en -sub ../2.Mad.Max.2.The.Road.Warrior.1981.1080p.BluRay.x264.anoXmous/Mad.Max.2.The.Road.Warrior.1981.1080p.BluRay.x264.anoXmous_eng.srt  -v ../2.Mad.Max.2.The.Road.Warrior.1981.1080p.BluRay.x264.anoXmous/Mad.Max.2.The.Road.Warrior.1981.1080p.BluRay.x264.anoXmous_.mp4
+mplayer -ss 56 -endpos 47 -utf8 -fs -slang gr,en -sub ../2.Mad.Max.2.The.Road.Warrior.1981.1080p.BluRay.x264.anoXmous/Mad.Max.2.The.Road.Warrior.1981.1080p.BluRay.x264.anoXmous_eng.srt  -v ../2.Mad.Max.2.The.Road.Warrior.1981.1080p.BluRay.x264.anoXmous/Mad.Max.2.The.Road.Warrior.1981.1080p.BluRay.x264.anoXmous_.mp4
 
 #--------------------------------------------
 endOfMovie
