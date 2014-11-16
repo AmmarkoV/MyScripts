@@ -25,6 +25,21 @@ getprocpid()
  ps -A | grep $1 | cut -d ' ' -f2
 } 
 
+
+uploadFORTH() 
+{
+ scp -P 2222 $1 ammar@139.91.185.16:/home/ammar/
+} 
+
+downloadFORTH() 
+{
+ scp -P 2222 ammar@139.91.185.16:$1 /home/ammar/
+} 
+
+alias connectFORTH='ssh ammar@139.91.185.16 -p 2222 -c arcfour'
+
+
+
 alias yolo='git commit -am "..." && git push origin master'
 alias cmakecbp='cmake .. -G "CodeBlocks - Unix Makefiles" '
 alias update='sudo apt-get update && sudo apt-get upgrade -y'
