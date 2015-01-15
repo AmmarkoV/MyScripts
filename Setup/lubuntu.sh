@@ -52,6 +52,14 @@ fi
 
 
 
+if [ -d ~/.config/autostart ] 
+   then
+     echo "Autostart Directory exists"
+   else
+     echo "Autostart Directory Does not exist"
+     mkdir ~/.config/autostart
+   fi
+
 if [ -f ~/.config/autostart/autostart.desktop ]
 then 
  echo "Found per-user autostart shortcut"
