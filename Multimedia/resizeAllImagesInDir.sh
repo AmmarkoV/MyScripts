@@ -32,6 +32,9 @@ do
   count=$((count + 1))
 done 
 
+echo "Compressing"
+zip -r $RESIZEDDIR.zip $RESIZEDDIR 
+
 echo "Done .."
 
 cd $INDIR
