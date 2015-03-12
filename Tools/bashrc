@@ -1,4 +1,30 @@
 
+
+function gspeak
+{
+    if [[ "$#" -lt 2 ]]; then
+        echo "Usage: ${FUNCNAME} [\"REQUEST\"] [LANGUAGE SHORTCUT]"
+        return 0
+    fi
+
+    mpv "http://translate.google.com/translate_tts?ie=UTF-8&oe=UTF-8&q=$(echo $1 | sed 's/\s/+/')&tl=$(echo $2)" &>/dev/null
+}
+
+function gtranslate 
+{
+    if [[ "$#" -lt 2 ]]; then
+        echo "Usage: ${FUNCNAME} [\"REQUEST\"] [LANGUAGE SHORTCUT]"
+        return 0
+    fi
+
+    echo "»google.com« responded: $(
+        wget -qO- -U "" "translate.google.com/translate_a/t?client=t&ie=UTF-8&oe=UTF-8&text="$(
+            echo "$1" | sed 's/\s/%20/g'
+        )"&sl=auto&tl="$2"" | awk -F '\"' '{ print $2 }'
+    )"
+}
+
+
 extract () {
   if [ -f $1 ] ; then
       case $1 in
