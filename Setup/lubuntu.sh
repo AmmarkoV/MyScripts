@@ -5,7 +5,7 @@ BASICAPPS="firefox thunderbird vlc pidgin mumble gimp audacity audacious libreof
 GRAPHICS="hugin" # autopano-sift"
 MOREAPPS="glabels freemind gtg gnotime gtk-recordmydesktop units qrencode lm-sensors" #firestarter
 COMPATIBILITY="wine winetricks dosbox samba system-config-samba chntpw"
-ADVLIBS="sysv-rc-conf macchanger-gtk festival imagemagick numlockx gxmessage libnotify-bin htop gtkperf traceroute powertop"
+ADVLIBS="sysv-rc-conf macchanger-gtk festival imagemagick numlockx gxmessage libnotify-bin htop gtkperf traceroute powertop x11vnc"
 CODECS="ubuntu-restricted-extras pavucontrol beep   mplayer smplayer " #ffmpeg avconv
 SECURITY="vidalia tor"
 
@@ -118,6 +118,9 @@ sudo hdparm -I /dev/sdb |grep TRIM
 #TODO add to /etc/fstab : noatime,nodiratime,discard,errors=remount-ro
 #UUID=e3c59fb6-436d-4a42-84d4-9dc99daea30b /               ext4    noatime,nodiratime,discard,errors=remount-ro 0   
 
+
+sudo mv /usr/share/lubuntu/wallpapers/lubuntu-default-wallpaper.png /usr/share/lubuntu/wallpapers/lubuntu-default-wallpaperOLD.png
+sudo ln -s  /home/ammar/Pictures/Wallpapers/startup.png /usr/share/lubuntu/wallpapers/lubuntu-default-wallpaper.png
 
 
 echo "Configuration Complete" |  festival --tts
