@@ -13,8 +13,8 @@ sudo apt-get install $BASICAPPS $MOREAPPS $ADVLIBS $COMPATIBILITY $ADVLIBS $CODE
  
 
 #DVD Playback maybe ?
-#sudo apt-get install libdvdread4
-#sudo /usr/share/doc/libdvdread4/install-css.sh
+sudo apt-get install libdvdread4
+sudo /usr/share/doc/libdvdread4/install-css.sh
 
 #sudo update-alternatives --config x86_64-linux-gnu_gl_conf
 
