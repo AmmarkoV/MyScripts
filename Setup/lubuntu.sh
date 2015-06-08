@@ -119,6 +119,8 @@ sudo hdparm -I /dev/sdb |grep TRIM
 #TODO add to /etc/fstab : noatime,nodiratime,discard,errors=remount-ro
 #UUID=e3c59fb6-436d-4a42-84d4-9dc99daea30b /               ext4    noatime,nodiratime,discard,errors=remount-ro 0   
 
+#Disable intel powerclamp
+sudo sh -c 'echo "blacklist intel_powerclamp" > /etc/modprobe.d/disable-powerclamp.conf'
 
 sudo mv /usr/share/lubuntu/wallpapers/lubuntu-default-wallpaper.png /usr/share/lubuntu/wallpapers/lubuntu-default-wallpaperOLD.png
 sudo ln -s  /home/ammar/Pictures/Wallpapers/startup.png /usr/share/lubuntu/wallpapers/lubuntu-default-wallpaper.png
