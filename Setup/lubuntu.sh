@@ -90,7 +90,8 @@ else
  echo "thunderbird&" >> ~/.autostart.sh 
  echo "firefox&" >> ~/.autostart.sh 
  echo "mumble&" >> ~/.autostart.sh 
- echo "audacious&" >> ~/.autostart.sh 
+ echo "audacious&" >> ~/.autostart.sh
+ echo "#x11vnc -nap -wait 50 -noxdamage -passwd ammar -display :0 -forever -o ~/x11vnc.log -bg" >> ~/.autostart.sh 
  echo "exit 0" >> ~/.autostart.sh 
  chmod +x ~/.autostart.sh 
 fi
