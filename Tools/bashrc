@@ -1,4 +1,115 @@
 
+extract () {
+  if [ -f $1 ] ; then
+      case $1 in
+          *.tar.bz2)   tar xvjf $1    ;;
+          *.tar.gz)    tar xvzf $1    ;;
+          *.bz2)       bunzip2 $1     ;;
+          *.rar)       rar x $1       ;;
+          *.gz)        gunzip $1      ;;
+          *.tar)       tar xvf $1     ;;
+          *.tbz2)      tar xvjf $1    ;;
+          *.tgz)       tar xvzf $1    ;;
+          *.zip)       unzip $1       ;;
+          *.Z)         uncompress $1  ;;
+          *.7z)        7z x $1        ;;
+          *)           echo "don't know how to extract '$1'..." ;;
+      esac
+  else
+      echo "'$1' is not a valid file!"
+  fi
+}
+
+#export PATH=$PATH:/usr/local/cuda-6.0/bin
+#export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda-6.0/lib64:/lib
+
+export PATH=$PATH:/usr/local/cuda-5.5/bin
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda-5.5/lib64:/lib
+
+#export PATH=$PATH:/usr/local/cuda-5.0/bin
+#export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda-5.0/lib64:/lib
+
+#export PATH=$PATH:/usr/local/cuda-4.2/cuda/bin
+#export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda-4.2/cuda/lib64:/usr/local/cuda-4.2/cuda/lib
+
+
+export OPENNI2_INCLUDE=/home/ammar/Documents/3dParty/OpenNI-2.0.0/Include
+export OPENNI2_REDIST=/home/ammar/Documents/3dParty/OpenNI-2.0.0/Redist
+
+if [ -d /opt/ros/hydro/ ]
+then
+ source /opt/ros/hydro/setup.bash
+ source /home/ammar/Documents/Programming/FORTH/Hobbit/our_nodes/devel/setup.bash
+ #source /home/ammar/Documents/Programming/ROS/setup.bash 
+
+ #/opt/ros/hydro/stacks
+
+ export ROS_HOSTNAME=localhost
+ export ROS_MASTER_URI=http://localhost:11311
+ export ROS_PACKAGE_PATH=/opt/ros/hydro/share:/home/ammar/Documents/Programming/ROS:/home/ammar/Documents/Programming/FORTH/Hobbit/hobbit_hydro/:/home/ammar/Documents/Programming/FORTH/Hobbit/our_nodes
+fi
+
+
+export PATH=$PATH:/usr/local/cuda/bin
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda/lib64:/usr/local/cuda/lib
+
+export MBV_ROOT=/home/ammar/Documents/3dParty/mbv/trunk
+
+
+getprocpid() 
+{
+ ps -A | grep $1 | cut -d ' ' -f2
+} 
+
+alias yolo='git commit -am "..." && git push origin master'
+alias cmakecbp='cmake .. -G "CodeBlocks - Unix Makefiles" '
+source /opt/ros/jade/setup.bash
+
+uploadFORTH() 
+{
+ scp -c arcfour -P 2222 $1 ammar@139.91.185.16:/home/ammar/
+} 
+
+uploadFORTHDataset() 
+{
+ scp -c arcfour -P 2222 $1 ammar@139.91.185.16:/home/ammar/Documents/Programming/RGBDAcquisition/frames/
+} 
+
+uploadFORTHWeb() 
+{
+ scp -c arcfour -P 2222 $1 ammar@139.91.185.16:/home/ammar/public_html/
+} 
+
+downloadFORTH() 
+{
+ scp -c arcfour -P 2222 ammar@139.91.185.16:/home/ammar/$1 $1 
+} 
+
+downloadFORTHDataset()
+{
+ scp -c arcfour -P 2222 ammar@139.91.185.16:/home/ammar/Documents/Programming/RGBDAcquisition/frames/$1 $1
+}
+
+
+alias connectJazz='ssh cvrl-admin@139.91.185.24 -p 2222 -c arcfour'
+alias connectFORTH='ssh ammar@139.91.185.16 -p 2222 -c arcfour'
+alias connectHobbitA='ssh demo@192.168.0.101 -c arcfour '
+alias connectHobbitB='ssh demo@192.168.0.102 -c arcfour '
+alias connectHobbitC='ssh demo@192.168.0.103 -c arcfour ' 
+alias connectHobbitD='ssh demo@192.168.0.104 -c arcfour '
+alias connectHobbitE='ssh demo@192.168.0.105 -c arcfour '
+
+alias connectSpiti='ssh ammar@spiti.ammar.gr -c arcfour -p 2222'
+
+alias update='sudo apt-get update && sudo apt-get upgrade -y'
+ 
+
+# set PATH so it includes user's private bin if it exists
+if [ -d "$HOME/androidSDK/bin" ] ; then
+    PATH="$HOME/androidSDK/bin:$PATH"
+fi
+
+
 
 function gspeak
 {
@@ -23,49 +134,3 @@ function gtranslate
         )"&sl=auto&tl="$2"" | awk -F '\"' '{ print $2 }'
     )"
 }
-
-
-extract () {
-  if [ -f $1 ] ; then
-      case $1 in
-          *.tar.bz2)   tar xvjf $1    ;;
-          *.tar.gz)    tar xvzf $1    ;;
-          *.bz2)       bunzip2 $1     ;;
-          *.rar)       rar x $1       ;;
-          *.gz)        gunzip $1      ;;
-          *.tar)       tar xvf $1     ;;
-          *.tbz2)      tar xvjf $1    ;;
-          *.tgz)       tar xvzf $1    ;;
-          *.zip)       unzip $1       ;;
-          *.Z)         uncompress $1  ;;
-          *.7z)        7z x $1        ;;
-          *)           echo "don't know how to extract '$1'..." ;;
-      esac
-  else
-      echo "'$1' is not a valid file!"
-  fi
-}
-
-getprocpid() 
-{
- ps -A | grep $1 | cut -d ' ' -f2
-} 
-
-
-uploadFORTH() 
-{
- scp -c arcfour -P 2222 $1 ammar@139.91.185.16:/home/ammar/
-} 
-
-downloadFORTH() 
-{
- scp -c arcfour -P 2222 ammar@139.91.185.16:$1 /home/ammar/
-} 
-
-alias connectFORTH='ssh ammar@139.91.185.16 -p 2222 -c arcfour'
-
-
-
-alias yolo='git commit -am "..." && git push origin master'
-alias cmakecbp='cmake .. -G "CodeBlocks - Unix Makefiles" '
-alias update='sudo apt-get update && sudo apt-get upgrade -y'

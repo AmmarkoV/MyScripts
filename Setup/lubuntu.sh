@@ -92,6 +92,7 @@ else
  echo "mumble&" >> ~/.autostart.sh 
  echo "audacious&" >> ~/.autostart.sh
  echo "#x11vnc -nap -wait 50 -noxdamage -passwd ammar -display :0 -forever -o ~/x11vnc.log -bg" >> ~/.autostart.sh 
+ echo "#ssh -L 8080:192.168.1.1:80 ammar.gr -c arcfour -p 2222" >> ~/.autostart.sh
  echo "exit 0" >> ~/.autostart.sh 
  chmod +x ~/.autostart.sh 
 fi
