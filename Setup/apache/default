@@ -40,6 +40,10 @@
 
 </VirtualHost>
 
+#The following require a2enmod proxy 
+# and                  a2enmod proxy_http
+# and of course a      service apache2 restart
+
 <VirtualHost *:80>
  ServerName "myloader.ammar.gr"
  ProxyPreserveHost On 
