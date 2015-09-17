@@ -61,15 +61,15 @@
 <VirtualHost *:80>
  ServerName "myurl.ammar.gr"
  ProxyPreserveHost On 
- ProxyPass / "http://ammar.gr:8081/"
- ProxyPassReverse / "http://ammar.gr:8081/"
+ ProxyPass / "http://ammar.gr:8082/"
+ ProxyPassReverse / "http://ammar.gr:8082/"
 </VirtualHost>
 
 <VirtualHost *:80>
  ServerName "gps.ammar.gr"
  ProxyPreserveHost On 
- ProxyPass / "http://ammar.gr:8082/"
- ProxyPassReverse / "http://ammar.gr:8082/"
+ ProxyPass / "http://ammar.gr:8081/"
+ ProxyPassReverse / "http://ammar.gr:8081/"
 </VirtualHost>
 
 <VirtualHost *:80>
