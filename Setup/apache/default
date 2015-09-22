@@ -45,13 +45,6 @@
 # and of course a      service apache2 restart
 
 <VirtualHost *:80>
- ServerName "myloader.ammar.gr"
- ProxyPreserveHost On 
- ProxyPass / "http://ammar.gr:8080/"
- ProxyPassReverse / "http://ammar.gr:8080/"
-</VirtualHost>
-
-<VirtualHost *:80>
  ServerName "mytube.ammar.gr"
  ProxyPreserveHost On 
  ProxyPass / "http://ammar.gr:8080/"
@@ -78,6 +71,21 @@
  ProxyPass / "http://ammar.gr:8083/"
  ProxyPassReverse / "http://ammar.gr:8083/"
 </VirtualHost>
+
+<VirtualHost *:80>
+ ServerName "search.ammar.gr"
+ ProxyPreserveHost On 
+ ProxyPass / "http://ammar.gr:8084/"
+ ProxyPassReverse / "http://ammar.gr:8084/"
+</VirtualHost>
+
+<VirtualHost *:80>
+ ServerName "myloader.ammar.gr"
+ ProxyPreserveHost On 
+ ProxyPass / "http://ammar.gr:8085/"
+ ProxyPassReverse / "http://ammar.gr:8085/"
+</VirtualHost>
+
 
 
 
