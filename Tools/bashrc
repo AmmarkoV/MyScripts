@@ -80,6 +80,12 @@ uploadFORTHWeb()
  scp -c arcfour -P 2222 $1 ammar@139.91.185.16:/home/ammar/public_html/
 } 
 
+
+uploadFORTHWebPhoto() 
+{
+ scp -c arcfour -P 2222 $1 ammar@139.91.185.16:/home/ammar/public_html/photography/
+} 
+
 downloadFORTH() 
 {
  scp -c arcfour -P 2222 ammar@139.91.185.16:/home/ammar/$1 $1 
@@ -93,6 +99,7 @@ downloadFORTHDataset()
 
 alias connectJazz='ssh cvrl-admin@139.91.185.24 -p 2222 -c arcfour'
 alias connectFORTH='ssh ammar@139.91.185.16 -p 2222 -c arcfour'
+alias connectUOC='ssh ammarkov@gate1.csd.uoc.gr -c arcfour'
 alias connectHobbitA='ssh demo@192.168.0.101 -c arcfour '
 alias connectHobbitB='ssh demo@192.168.0.102 -c arcfour '
 alias connectHobbitC='ssh demo@192.168.0.103 -c arcfour ' 
