@@ -1,15 +1,16 @@
 #!/bin/bash
 echo "LUbuntu handy Packages automation "
 
-BASICAPPS="firefox thunderbird vlc pidgin mumble gimp audacity audacious libreoffice lyx synaptic catfish usb-creator-gtk vino xtightvncviewer baobab gcalctool xbacklight brasero smartmontools"
-GRAPHICS="hugin" # autopano-sift"
+BASICAPPS="firefox thunderbird vlc pidgin mumble audacity audacious libreoffice lyx synaptic catfish usb-creator-gtk vino xtightvncviewer baobab gcalctool xbacklight brasero smartmontools"
+GRAPHICS="hugin gimp luminance" # autopano-sift"
+AUDIO="mixxx"
 MOREAPPS="glabels freemind gtg gnotime gtk-recordmydesktop units qrencode lm-sensors" #firestarter
 COMPATIBILITY="wine winetricks dosbox samba system-config-samba chntpw"
 ADVLIBS="sysv-rc-conf macchanger-gtk festival imagemagick numlockx gxmessage libnotify-bin htop gtkperf traceroute powertop x11vnc"
 CODECS="ubuntu-restricted-extras pavucontrol beep   mplayer smplayer " #ffmpeg avconv
 SECURITY="vidalia tor"
 
-sudo apt-get install $BASICAPPS $MOREAPPS $ADVLIBS $COMPATIBILITY $ADVLIBS $CODECS $GRAPHICS         
+sudo apt-get install $BASICAPPS $MOREAPPS $ADVLIBS $COMPATIBILITY $ADVLIBS $AUDIO $CODECS $GRAPHICS         
  
 
 #DVD Playback maybe ?

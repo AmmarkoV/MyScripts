@@ -28,7 +28,7 @@ do
   outname="$RESIZEDDIR/$basename.JPG"
   echo "Processing image $i output is $outname $count / $totalCount" ; 
 
-  convert -size 800x1080 $i -resize 800x1080 $outname;
+  convert -size 1920x1080 $i -resize 1920x1080 $outname;
   count=$((count + 1))
 done 
 
