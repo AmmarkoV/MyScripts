@@ -41,7 +41,6 @@ fi
 if cat /etc/sysctl.conf | grep -q "vm.swappiness"
 then
    echo "Swappiness seems to be set-up ok!" 
-  #exit 0
 else
    echo "Setting Swapiness to 10! .." 
    sudo sh -c 'echo "vm.swappiness = 10" >>/etc/sysctl.conf' 
@@ -49,6 +48,17 @@ else
    sudo swapoff -a
    sudo swapon -a
 fi
+
+
+#if cat /etc/fstab | grep -q "/ramfs"
+#then
+#   echo "RAM fs seems to be set up ok!" 
+#else
+#   echo "Adding some ramfs partitions.." 
+#   sudo sh -c 'echo "none    /ramfs    ramfs   nodev,nosuid,noexec,nodiratime,size=256M    0   0" >>/etc/fstab' 
+#   sudo sh -c 'echo "none    /tmp    ramfs   nodev,nosuid,noexec,nodiratime,size=256M    0   0" >>/etc/fstab' 
+#   sudo mount -t ramfs -o nodev,nosuid,noexec,nodiratime,size=256M none /ramfs
+#fi
 
 
 
@@ -136,6 +146,11 @@ sudo sh -c 'echo "blacklist intel_powerclamp" > /etc/modprobe.d/disable-powercla
 
 sudo mv /usr/share/lubuntu/wallpapers/lubuntu-default-wallpaper.png /usr/share/lubuntu/wallpapers/lubuntu-default-wallpaperOLD.png
 sudo ln -s  /home/ammar/Pictures/Wallpapers/startup.png /usr/share/lubuntu/wallpapers/lubuntu-default-wallpaper.png
+
+
+firefox https://addons.mozilla.org/en-US/firefox/addon/os-x-yosemite/
+firefox https://addons.mozilla.org/en-US/firefox/addon/noscript/
+firefox https://addons.mozilla.org/en-US/firefox/addon/adblock-plus/?src=ss
 
 
 echo "Configuration Complete" |  festival --tts
