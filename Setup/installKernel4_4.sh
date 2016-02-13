@@ -28,6 +28,7 @@ fi
 sudo dpkg -i $FILE1 $FILE2 $FILE3
 
 sudo dpkg-reconfigure nvidia-*
+#sudo apt-get install linux-headers-$(uname -r) build-essential dkms git
 
 
 exit 0
