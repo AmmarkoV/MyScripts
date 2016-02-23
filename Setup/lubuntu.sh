@@ -106,10 +106,10 @@ else
  echo "#ssh -L 8080:192.168.1.1:80 ammar.gr -c arcfour -p 2222" >> ~/.autostart.sh
 
 
- echo "sleep 5" >> ~/.autostart.sh
+ echo "sleep 38" >> ~/.autostart.sh
  echo "xdotool key \"Ctrl+Alt+Right\" " >> ~/.autostart.sh
  echo "thunderbird&" >> ~/.autostart.sh
- echo "sleep 2" >> ~/.autostart.sh
+ echo "sleep 30" >> ~/.autostart.sh
  echo "xdotool key \"Ctrl+Alt+Left\" " >> ~/.autostart.sh
 
 
