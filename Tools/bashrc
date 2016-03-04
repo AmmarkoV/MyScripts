@@ -65,6 +65,9 @@ alias yolo='git commit -am "..." && git push origin master'
 alias cmakecbp='cmake .. -G "CodeBlocks - Unix Makefiles" '
 source /opt/ros/jade/setup.bash
 
+alias modprobenvidia='sudo modprobe nvidia_352 nvidia_352_uvm'
+
+
 uploadFORTH() 
 {
  scp -c arcfour -P 2222 $1 ammar@139.91.185.16:/home/ammar/
