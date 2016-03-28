@@ -147,8 +147,10 @@ sudo hdparm -I /dev/sdb |grep TRIM
 #Disable intel powerclamp
 sudo sh -c 'echo "blacklist intel_powerclamp" > /etc/modprobe.d/disable-powerclamp.conf'
 
+cd /usr/share/lubuntu/wallpapers/ 
+sudo wget https://raw.githubusercontent.com/AmmarkoV/MyScripts/master/Multimedia/startup.png 
 sudo mv /usr/share/lubuntu/wallpapers/lubuntu-default-wallpaper.png /usr/share/lubuntu/wallpapers/lubuntu-default-wallpaperOLD.png
-sudo ln -s  /home/ammar/Pictures/Wallpapers/startup.png /usr/share/lubuntu/wallpapers/lubuntu-default-wallpaper.png
+sudo ln -s  /usr/share/lubuntu/wallpapers/startup.png /usr/share/lubuntu/wallpapers/lubuntu-default-wallpaper.png
 
 
 firefox https://addons.mozilla.org/en-US/firefox/addon/os-x-yosemite/
