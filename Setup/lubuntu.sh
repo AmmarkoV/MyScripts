@@ -1,7 +1,7 @@
 #!/bin/bash
 echo "LUbuntu handy Packages automation "
 
-BASICAPPS="firefox thunderbird vlc pidgin mumble libreoffice lyx synaptic catfish usb-creator-gtk vino xtightvncviewer baobab gcalctool xbacklight brasero smartmontools"
+BASICAPPS="firefox thunderbird vlc pidgin mumble libreoffice lyx synaptic catfish usb-creator-gtk vino xtightvncviewer baobab gcalctool xbacklight brasero smartmontools iotop iftop"
 GRAPHICS="hugin gimp luminance-hdr" # autopano-sift"
 AUDIO="mixxx audacity audacious "
 MOREAPPS="glabels freemind gtg gnotime gtk-recordmydesktop units qrencode lm-sensors" #firestarter
@@ -16,6 +16,9 @@ sudo apt-get install $BASICAPPS $MOREAPPS $ADVLIBS $COMPATIBILITY $ADVLIBS $AUDI
 #DVD Playback maybe ?
 sudo apt-get install libdvdread4
 sudo /usr/share/doc/libdvdread4/install-css.sh
+
+#dbus is neede for gedit?
+#sudo apt-get install --reinstall dbus dbus-x11
 
 #sudo update-alternatives --config x86_64-linux-gnu_gl_conf
 
