@@ -101,6 +101,7 @@ downloadFORTHDataset()
 
 
 alias connectJazz='ssh cvrl-admin@139.91.185.24 -p 2222 -c arcfour'
+alias connectSpiti='ssh ammar@spiti.ammar.gr -p 2222 -c arcfour'
 alias connectFORTH='ssh ammar@139.91.185.16 -p 2222 -c arcfour'
 alias connectUOC='ssh ammarkov@gate1.csd.uoc.gr -c arcfour'
 alias connectHobbitA='ssh demo@192.168.0.101 -c arcfour '
