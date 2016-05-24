@@ -2,6 +2,7 @@
 while true 
 do
     xdotool click 1
+    sleep 0.1
     # xte 'mouseclick 1'
 done
 
