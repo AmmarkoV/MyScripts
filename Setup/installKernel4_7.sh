@@ -6,20 +6,23 @@ FILE3="linux-image-4.7.0-040700-generic_4.7.0-040700.201607241632_amd64.deb"
 SITE="http://kernel.ubuntu.com/~kernel-ppa/mainline/v4.7/"
  
 if [ -e $FILE1 ] 
+then
  echo "Already have $FILE1"
-elif
+else
  wget $SITE/$FILE1
 fi
 #==============================================
 if [ -e $FILE2 ] 
+then
  echo "Already have $FILE2"
-elif
+else
  wget $SITE/$FILE2
 fi
 #==============================================
 if [ -e $FILE3 ] 
+then
  echo "Already have $FILE3"
-elif
+else
  wget $SITE/$FILE3
 fi
 

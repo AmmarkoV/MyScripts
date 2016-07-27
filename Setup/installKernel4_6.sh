@@ -6,23 +6,25 @@ FILE3="linux-image-4.6.0-040600-generic_4.6.0-040600.201605151930_amd64.deb"
 SITE="http://kernel.ubuntu.com/~kernel-ppa/mainline/v4.6-yakkety/"
  
 if [ -e $FILE1 ] 
+then
  echo "Already have $FILE1"
-elif
+else
  wget $SITE/$FILE1
 fi
 #==============================================
 if [ -e $FILE2 ] 
+then
  echo "Already have $FILE2"
-elif
+else
  wget $SITE/$FILE2
 fi
 #==============================================
 if [ -e $FILE3 ] 
+then
  echo "Already have $FILE3"
-elif
+else
  wget $SITE/$FILE3
 fi
-
 
 
 sudo dpkg -i $FILE1 $FILE2 $FILE3
