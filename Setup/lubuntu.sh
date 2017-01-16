@@ -1,16 +1,21 @@
 #!/bin/bash
 echo "LUbuntu handy Packages automation "
 
-BASICAPPS="firefox thunderbird vlc pidgin mumble libreoffice lyx synaptic catfish usb-creator-gtk vino xtightvncviewer baobab gcalctool xbacklight brasero smartmontools iotop iftop"
+sudo apt-get install gksu
+
+BASICAPPS="firefox thunderbird vlc pidgin mumble libreoffice lyx synaptic catfish usb-creator-gtk vino xtightvncviewer baobab xbacklight brasero smartmontools iotop iftop" #gcalctool
 GRAPHICS="hugin gimp luminance-hdr" # autopano-sift"
 AUDIO="mixxx audacity audacious "
 MOREAPPS="glabels freemind gtg gnotime gtk-recordmydesktop units qrencode lm-sensors" #firestarter
-COMPATIBILITY="wine winetricks dosbox samba system-config-samba chntpw"
+COMPATIBILITY="wine1.6 winetricks dosbox samba system-config-samba chntpw"
 ADVLIBS="sysv-rc-conf macchanger-gtk festival imagemagick numlockx gxmessage libnotify-bin htop gtkperf traceroute powertop x11vnc"
 CODECS="ubuntu-restricted-extras pavucontrol beep   mplayer smplayer " #ffmpeg avconv
 SECURITY="vidalia tor"
 
-sudo apt-get install $BASICAPPS $MOREAPPS $ADVLIBS $COMPATIBILITY $ADVLIBS $AUDIO $CODECS $GRAPHICS         
+ALLINSTALLED="$BASICAPPS $MOREAPPS $ADVLIBS $COMPATIBILITY $ADVLIBS $AUDIO $CODECS $GRAPHICS"
+
+echo "Gonna Install $ALLINSTALLED"
+sudo apt-get install $ALLINSTALLED          
  
 
 #DVD Playback maybe ?
