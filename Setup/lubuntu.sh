@@ -6,9 +6,9 @@ sudo apt-get install gksu
 BASICAPPS="firefox thunderbird vlc pidgin mumble libreoffice lyx synaptic catfish usb-creator-gtk vino xtightvncviewer baobab xbacklight brasero smartmontools iotop iftop" #gcalctool
 GRAPHICS="hugin gimp luminance-hdr" # autopano-sift"
 AUDIO="mixxx audacity audacious "
-MOREAPPS="glabels freemind gtg gnotime gtk-recordmydesktop units qrencode lm-sensors" #firestarter
+MOREAPPS="glabels  gtg  gtk-recordmydesktop units qrencode lm-sensors" #firestarter freemind gnotime
 COMPATIBILITY="wine1.6 winetricks dosbox samba system-config-samba chntpw"
-ADVLIBS="sysv-rc-conf macchanger-gtk festival imagemagick numlockx gxmessage libnotify-bin htop gtkperf traceroute powertop x11vnc"
+ADVLIBS="macchanger-gtk festival imagemagick numlockx gxmessage libnotify-bin htop gtkperf traceroute powertop x11vnc" #sysv-rc-conf 
 CODECS="ubuntu-restricted-extras pavucontrol beep   mplayer smplayer " #ffmpeg avconv
 SECURITY="vidalia tor"
 
