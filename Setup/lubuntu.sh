@@ -8,7 +8,7 @@ GRAPHICS="hugin gimp luminance-hdr" # autopano-sift"
 AUDIO="mixxx audacity audacious "
 MOREAPPS="glabels  gtg  gtk-recordmydesktop units qrencode lm-sensors" #firestarter freemind gnotime
 COMPATIBILITY="wine1.6 winetricks dosbox samba system-config-samba chntpw"
-ADVLIBS="macchanger-gtk festival imagemagick numlockx gxmessage libnotify-bin htop gtkperf traceroute powertop x11vnc" #sysv-rc-conf 
+ADVLIBS="macchanger-gtk festival imagemagick numlockx gxmessage libnotify-bin htop gtkperf traceroute powertop x11vnc linux-tools-common" #sysv-rc-conf 
 CODECS="ubuntu-restricted-extras pavucontrol beep   mplayer smplayer " #ffmpeg avconv
 SECURITY="vidalia tor"
 
@@ -45,18 +45,29 @@ else
    sudo sh -c 'echo "@setxkbmap -option grp:switch,grp:alt_shift_toggle,grp_led:scroll us,gr" >>/etc/xdg/lxsession/Lubuntu/autostart' 
 fi
 
-
+MEM=`awk '/Mem:/ {print $2}' <(free)`
+if (( $MEM > 8000000 )) 
+then
+echo "We appear to have a lot of RAM ( $MEM bytes ) optimizing "
 if cat /etc/sysctl.conf | grep -q "vm.swappiness"
 then
-   echo "Swappiness seems to be set-up ok!" 
+   echo "Memory usage optimizations seems to be already set-up.." 
 else
-   echo "Setting Swapiness to 10! .." 
-   sudo sh -c 'echo "vm.swappiness = 10" >>/etc/sysctl.conf' 
+   echo "Optimizing memory usage for better disk access! .." 
    sudo sysctl vm.swappiness=10
+   sudo sysctl vm.dirty_ratio=99
+   sudo sysctl vm.dirty_background_ratio=50
+   sudo sysctl vm.vfs_cache_pressure=10 
+
+   sudo sh -c 'echo "vm.swappiness = 10" >>/etc/sysctl.conf' 
+   sudo sh -c 'echo "vm.dirty_ratio = 99" >>/etc/sysctl.conf' 
+   sudo sh -c 'echo "vm.dirty_background_ratio = 50" >>/etc/sysctl.conf' 
+   sudo sh -c 'echo "vm.vfs_cache_pressure= 10" >>/etc/sysctl.conf'  
+
    sudo swapoff -a
    sudo swapon -a
+fi 
 fi
-
 
 #if cat /etc/fstab | grep -q "/ramfs"
 #then
@@ -158,10 +169,11 @@ sudo mv /usr/share/lubuntu/wallpapers/lubuntu-default-wallpaper.png /usr/share/l
 sudo ln -s  /usr/share/lubuntu/wallpapers/startup.png /usr/share/lubuntu/wallpapers/lubuntu-default-wallpaper.png
 
 
-firefox https://addons.mozilla.org/en-US/firefox/addon/os-x-yosemite/
-firefox https://addons.mozilla.org/en-US/firefox/addon/noscript/
-firefox https://addons.mozilla.org/en-US/firefox/addon/adblock-plus/?src=ss
-
+firefox https://addons.mozilla.org/en-US/firefox/addon/os-x-yosemite/&
+firefox https://addons.mozilla.org/en-US/firefox/addon/noscript/&
+firefox https://addons.mozilla.org/en-US/firefox/addon/adblock-plus/?src=ss&
+firefox https://addons.mozilla.org/en-US/firefox/addon/video-downloadhelper/&
+firefox https://addons.mozilla.org/en-US/firefox/addon/download-youtube/&
 
 echo "Configuration Complete" |  festival --tts
 
