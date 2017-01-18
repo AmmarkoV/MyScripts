@@ -3,10 +3,14 @@ echo "LUbuntu handy Packages automation "
 
 sudo apt-get install gksu
 
+
+sudo add-apt-repository ppa:graphics-drivers/ppa
+sudo apt-get update
+
 BASICAPPS="firefox thunderbird vlc pidgin mumble libreoffice lyx synaptic catfish usb-creator-gtk vino xtightvncviewer baobab xbacklight brasero smartmontools iotop iftop" #gcalctool
 GRAPHICS="hugin gimp luminance-hdr" # autopano-sift"
 AUDIO="mixxx audacity audacious "
-MOREAPPS="glabels  gtg  gtk-recordmydesktop units qrencode lm-sensors" #firestarter freemind gnotime
+MOREAPPS="glabels  gtg  gtk-recordmydesktop units qrencode lm-sensors kdeconnect" #firestarter freemind gnotime
 COMPATIBILITY="wine1.6 winetricks dosbox samba system-config-samba chntpw"
 ADVLIBS="macchanger-gtk festival imagemagick numlockx gxmessage libnotify-bin htop gtkperf traceroute powertop x11vnc linux-tools-common" #sysv-rc-conf 
 CODECS="ubuntu-restricted-extras pavucontrol beep   mplayer smplayer " #ffmpeg avconv
@@ -121,6 +125,7 @@ else
  echo "firefox&" >> ~/.autostart.sh 
  echo "mumble&" >> ~/.autostart.sh 
  echo "audacious&" >> ~/.autostart.sh
+ echo "plasmawindowed org.kde.kdeconnect --statusnotifier" >> ~/.autostart.sh
  echo "#x11vnc -nap -wait 50 -noxdamage -passwd ammar -display :0 -forever -o ~/x11vnc.log -bg" >> ~/.autostart.sh 
  echo "#ssh -L 8080:192.168.1.1:80 ammar.gr -c arcfour -p 2222" >> ~/.autostart.sh
 
