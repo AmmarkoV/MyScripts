@@ -99,6 +99,7 @@ downloadFORTHDataset()
  scp -c arcfour -P 2222 ammar@139.91.185.16:/home/ammar/Documents/Programming/RGBDAcquisition/frames/$1 $1
 }
 
+alias forwardFORTHVNC='ssh -L 5900:localhost:5900 ammar@139.91.185.16 -p 2222'
 
 alias connectJazz='ssh cvrl-admin@139.91.185.24 -p 2222 -c arcfour'
 alias connectSpiti='ssh ammar@spiti.ammar.gr -p 2222 -c arcfour'
@@ -113,6 +114,8 @@ alias connectHobbitE='ssh demo@192.168.0.105 -c arcfour '
 alias connectSpiti='ssh ammar@spiti.ammar.gr -c arcfour -p 2222'
 
 alias update='sudo apt-get update && sudo apt-get upgrade -y'
+alias vncserver='x11vnc -nap -wait 50 -noxdamage -passwd ammar -display :0 -forever -o ~/x11vnc.log' # -bg
+
  
 
 # set PATH so it includes user's private bin if it exists
