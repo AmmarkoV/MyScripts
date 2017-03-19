@@ -19,9 +19,9 @@ sed -i 's/\"//g' winners.txt
 
 sed -i 's/Elina Paflioti//g' winners.txt
 sed -i 's/Acute Biologist//g' winners.txt
-sed '/^$/d' winners.txt > winnersFinal.txt.
+sed '/^$/d' winners.txt > winnersFinal.txt
 
-WINNER=`sort --random-sort winnersFinal.txt | head -n 1`
+WINNER=`sort -R winnersFinal.txt | head -n 1`
 
 
 
