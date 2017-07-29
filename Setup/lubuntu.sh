@@ -1,9 +1,15 @@
 #!/bin/bash
 echo "LUbuntu handy Packages automation "
 
-BASICAPPS="firefox thunderbird vlc pidgin mumble libreoffice lyx synaptic catfish usb-creator-gtk vino xtightvncviewer baobab gcalctool xbacklight brasero smartmontools iotop iftop"
+sudo apt-get install gksu
+
+
+sudo add-apt-repository ppa:graphics-drivers/ppa
+sudo apt-get update
+
+BASICAPPS="firefox thunderbird vlc pidgin mumble libreoffice lyx synaptic catfish usb-creator-gtk vino xtightvncviewer baobab xbacklight brasero smartmontools iotop iftop" #gcalctool
 GRAPHICS="hugin gimp luminance-hdr" # autopano-sift"
-AUDIO="mixxx audacity audacious "
+AUDIO="mixxx audacity audacious " 
 MOREAPPS="glabels freemind gtg gnotime gtk-recordmydesktop units qrencode lm-sensors" #firestarter
 COMPATIBILITY="samba system-config-samba chntpw" #wine winetricks dosbox 
 ADVLIBS="sysv-rc-conf macchanger-gtk festival imagemagick numlockx gxmessage libnotify-bin htop gtkperf traceroute powertop x11vnc"
@@ -11,7 +17,7 @@ CODECS="ubuntu-restricted-extras pavucontrol beep   mplayer smplayer " #ffmpeg a
 SECURITY="vidalia tor"
 
 sudo apt-get install $BASICAPPS $MOREAPPS $ADVLIBS $COMPATIBILITY $ADVLIBS $AUDIO $CODECS $GRAPHICS         
- exit 0
+  
 
 #DVD Playback maybe ?
 sudo apt-get install libdvdread4
@@ -40,18 +46,29 @@ else
    sudo sh -c 'echo "@setxkbmap -option grp:switch,grp:alt_shift_toggle,grp_led:scroll us,gr" >>/etc/xdg/lxsession/Lubuntu/autostart' 
 fi
 
-
+MEM=`awk '/Mem:/ {print $2}' <(free)`
+if (( $MEM > 8000000 )) 
+then
+echo "We appear to have a lot of RAM ( $MEM bytes ) optimizing "
 if cat /etc/sysctl.conf | grep -q "vm.swappiness"
 then
-   echo "Swappiness seems to be set-up ok!" 
+   echo "Memory usage optimizations seems to be already set-up.." 
 else
-   echo "Setting Swapiness to 10! .." 
-   sudo sh -c 'echo "vm.swappiness = 10" >>/etc/sysctl.conf' 
+   echo "Optimizing memory usage for better disk access! .." 
    sudo sysctl vm.swappiness=10
+   sudo sysctl vm.dirty_ratio=99
+   sudo sysctl vm.dirty_background_ratio=50
+   sudo sysctl vm.vfs_cache_pressure=10 
+
+   sudo sh -c 'echo "vm.swappiness = 10" >>/etc/sysctl.conf' 
+   sudo sh -c 'echo "vm.dirty_ratio = 99" >>/etc/sysctl.conf' 
+   sudo sh -c 'echo "vm.dirty_background_ratio = 50" >>/etc/sysctl.conf' 
+   sudo sh -c 'echo "vm.vfs_cache_pressure= 10" >>/etc/sysctl.conf'  
+
    sudo swapoff -a
    sudo swapon -a
+fi 
 fi
-
 
 #if cat /etc/fstab | grep -q "/ramfs"
 #then
@@ -106,6 +123,7 @@ else
  echo "firefox&" >> ~/.autostart.sh 
  echo "mumble&" >> ~/.autostart.sh 
  echo "audacious&" >> ~/.autostart.sh
+ echo "plasmawindowed org.kde.kdeconnect --statusnotifier" >> ~/.autostart.sh
  echo "#x11vnc -nap -wait 50 -noxdamage -passwd ammar -display :0 -forever -o ~/x11vnc.log -bg" >> ~/.autostart.sh 
  echo "#ssh -L 8080:192.168.1.1:80 ammar.gr -c arcfour -p 2222" >> ~/.autostart.sh
 
@@ -154,10 +172,11 @@ sudo mv /usr/share/lubuntu/wallpapers/lubuntu-default-wallpaper.png /usr/share/l
 sudo ln -s  /usr/share/lubuntu/wallpapers/startup.png /usr/share/lubuntu/wallpapers/lubuntu-default-wallpaper.png
 
 
-firefox https://addons.mozilla.org/en-US/firefox/addon/os-x-yosemite/
-firefox https://addons.mozilla.org/en-US/firefox/addon/noscript/
-firefox https://addons.mozilla.org/en-US/firefox/addon/adblock-plus/?src=ss
-
+firefox https://addons.mozilla.org/en-US/firefox/addon/os-x-yosemite/&
+firefox https://addons.mozilla.org/en-US/firefox/addon/noscript/&
+firefox https://addons.mozilla.org/en-US/firefox/addon/adblock-plus/?src=ss&
+firefox https://addons.mozilla.org/en-US/firefox/addon/video-downloadhelper/&
+firefox https://addons.mozilla.org/en-US/firefox/addon/download-youtube/&
 
 echo "Configuration Complete" |  festival --tts
 

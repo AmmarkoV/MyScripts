@@ -9,8 +9,12 @@
 	<Directory /home/ammar/public_html>
 		Options Indexes FollowSymLinks MultiViews
 		AllowOverride None
-		Order allow,deny
-		allow from all
+                #Apache 2.2
+		#Order allow,deny
+		#allow from all
+
+                #Apache 2.4
+                Require all granted
 	</Directory>
 
 	ScriptAlias /cgi-bin/ /usr/lib/cgi-bin/
