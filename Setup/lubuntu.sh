@@ -5,13 +5,13 @@ BASICAPPS="firefox thunderbird vlc pidgin mumble libreoffice lyx synaptic catfis
 GRAPHICS="hugin gimp luminance-hdr" # autopano-sift"
 AUDIO="mixxx audacity audacious "
 MOREAPPS="glabels freemind gtg gnotime gtk-recordmydesktop units qrencode lm-sensors" #firestarter
-COMPATIBILITY="wine winetricks dosbox samba system-config-samba chntpw"
+COMPATIBILITY="samba system-config-samba chntpw" #wine winetricks dosbox 
 ADVLIBS="sysv-rc-conf macchanger-gtk festival imagemagick numlockx gxmessage libnotify-bin htop gtkperf traceroute powertop x11vnc"
 CODECS="ubuntu-restricted-extras pavucontrol beep   mplayer smplayer " #ffmpeg avconv
 SECURITY="vidalia tor"
 
 sudo apt-get install $BASICAPPS $MOREAPPS $ADVLIBS $COMPATIBILITY $ADVLIBS $AUDIO $CODECS $GRAPHICS         
- 
+ exit 0
 
 #DVD Playback maybe ?
 sudo apt-get install libdvdread4
@@ -98,6 +98,7 @@ else
  echo "Generating new per-user autostart bash script"
  echo "#!/bin/bash" > ~/.autostart.sh
  echo "setxkbmap -option grp:switch,grp:alt_shift_toggle,grp_led:scroll us,gr" >> ~/.autostart.sh 
+ echo "xset r on" >> ~/.autostart.sh  
  echo "nm-applet&" >> ~/.autostart.sh 
  echo "numlockx on&" >> ~/.autostart.sh 
  echo "pidgin&" >> ~/.autostart.sh 
