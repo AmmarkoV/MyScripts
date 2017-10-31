@@ -48,6 +48,7 @@ const long StartupCommanderFrame::ID_GAUGE1 = wxNewId();
 const long StartupCommanderFrame::idMenuQuit = wxNewId();
 const long StartupCommanderFrame::idMenuAbout = wxNewId();
 const long StartupCommanderFrame::ID_STATUSBAR1 = wxNewId();
+const long StartupCommanderFrame::ID_TIMER1 = wxNewId();
 //*)
 
 BEGIN_EVENT_TABLE(StartupCommanderFrame,wxFrame)
@@ -85,11 +86,14 @@ StartupCommanderFrame::StartupCommanderFrame(wxWindow* parent,wxWindowID id)
     StatusBar1->SetFieldsCount(1,__wxStatusBarWidths_1);
     StatusBar1->SetStatusStyles(1,__wxStatusBarStyles_1);
     SetStatusBar(StatusBar1);
+    Timer1.SetOwner(this, ID_TIMER1);
+    Timer1.Start(100, false);
 
     Connect(ID_BUTTON1,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&StartupCommanderFrame::OnButtonStartupClick);
     Connect(ID_BUTTON2,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&StartupCommanderFrame::OnButtonExitClick);
     Connect(idMenuQuit,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&StartupCommanderFrame::OnQuit);
     Connect(idMenuAbout,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&StartupCommanderFrame::OnAbout);
+    Connect(ID_TIMER1,wxEVT_TIMER,(wxObjectEventFunction)&StartupCommanderFrame::OnTimer1Trigger);
     //*)
 }
 
@@ -115,12 +119,27 @@ void StartupCommanderFrame::OnButtonExitClick(wxCommandEvent& event)
     Close();
 }
 
-void StartupCommanderFrame::OnButtonStartupClick(wxCommandEvent& event)
+void executeMainScript()
 {
-  //wxExecute("/home/ammar/.autorun.sh",wxEXEC_ASYNC);
-  //int i=system("/bin/bash /home/ammar/testScript.sh&");
+  //int i=system("/bin/bash /home/ammar/MyScripts/Tools/StartupCommander/testScript.sh&");
   int i=system("/bin/bash /home/ammar/.startupcommander.sh &");
   if (i!=0) {fprintf(stderr,"Could not execute script..");}
 
+}
+
+void StartupCommanderFrame::OnButtonStartupClick(wxCommandEvent& event)
+{
+  executeMainScript();
   Close();
+}
+
+void StartupCommanderFrame::OnTimer1Trigger(wxTimerEvent& event)
+{
+  int progress = GaugeTimeout->GetValue();
+  GaugeTimeout->SetValue(progress+1);
+  if (progress==99)
+    {
+      executeMainScript();
+      Close();
+    }
 }

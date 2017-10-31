@@ -16,6 +16,7 @@
 #include <wx/menu.h>
 #include <wx/statusbr.h>
 #include <wx/frame.h>
+#include <wx/timer.h>
 //*)
 
 class StartupCommanderFrame: public wxFrame
@@ -32,6 +33,7 @@ class StartupCommanderFrame: public wxFrame
         void OnAbout(wxCommandEvent& event);
         void OnButtonExitClick(wxCommandEvent& event);
         void OnButtonStartupClick(wxCommandEvent& event);
+        void OnTimer1Trigger(wxTimerEvent& event);
         //*)
 
         //(*Identifiers(StartupCommanderFrame)
@@ -41,11 +43,13 @@ class StartupCommanderFrame: public wxFrame
         static const long idMenuQuit;
         static const long idMenuAbout;
         static const long ID_STATUSBAR1;
+        static const long ID_TIMER1;
         //*)
 
         //(*Declarations(StartupCommanderFrame)
         wxStatusBar* StatusBar1;
         wxGauge* GaugeTimeout;
+        wxTimer Timer1;
         wxButton* ButtonExit;
         wxButton* ButtonStartup;
         //*)
