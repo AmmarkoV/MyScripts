@@ -15,6 +15,8 @@
 #include <wx/intl.h>
 //*)
 
+int cooldown=100;
+
 //helper functions
 enum wxbuildinfoformat {
     short_f, long_f };
@@ -135,6 +137,12 @@ void StartupCommanderFrame::OnButtonStartupClick(wxCommandEvent& event)
 
 void StartupCommanderFrame::OnTimer1Trigger(wxTimerEvent& event)
 {
+  if (cooldown>0)
+  {
+    --cooldown;
+    return;
+  }
+
   int progress = GaugeTimeout->GetValue();
   GaugeTimeout->SetValue(progress+1);
   if (progress==99)
