@@ -119,7 +119,7 @@ void StartupCommanderFrame::OnButtonStartupClick(wxCommandEvent& event)
 {
   //wxExecute("/home/ammar/.autorun.sh",wxEXEC_ASYNC);
   //int i=system("/bin/bash /home/ammar/testScript.sh&");
-  int i=system("/bin/bash /home/ammar/.autostart.sh &");
+  int i=system("/bin/bash /home/ammar/.startupcommander.sh &");
   if (i!=0) {fprintf(stderr,"Could not execute script..");}
 
   Close();
