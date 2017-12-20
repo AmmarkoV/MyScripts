@@ -1,25 +1,26 @@
 #!/bin/bash
 
-#Really simple script to leech stuff from 4chan 
+#Really simple bash script to download all images or videos ( jpg , png , gif , webm )  from 4chan threads 
 #Made by AmmarkoV ( http://ammar.gr )
 #If you want to add this to your system
 # sudo cp 4chanleech /usr/bin/ 
 # or make an alias in your .bashrc file..
 
 if (( $# != 2 )); then
-    echo "Illegal number of parameters , call as 4chanleech http://4chan/linkhere webm"
+    echo "Wrong number of parameters , call as 4chanleech http://4chan/linkhere webm"
+    exit 1  
 fi
 
-wget $1 -O out.tmp 
+wget $1 -O .out.tmp 
 
-WHATTODOWNLOAD=`cat out.tmp | grep -o '<a .*href=.*>' | sed -e 's/<a /\n<a /g' | sed -e 's/<a .*href=['"'"'"]//' -e 's/["'"'"'].*$//' -e '/^$/ d' | grep $2`
- 
+WHATTODOWNLOAD=`cat .out.tmp | grep -o '<a .*href=.*>' | sed -e 's/<a /\n<a /g' | sed -e 's/<a .*href=['"'"'"]//' -e 's/["'"'"'].*$//' -e '/^$/ d' | grep $2 | uniq`
+ s
 for d in $WHATTODOWNLOAD ; do 
   echo $d 
   wget "http:$d"
 done
  
-rm out.tmp
+rm .out.tmp
 
 
 exit 0
