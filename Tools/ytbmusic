@@ -1,6 +1,8 @@
 #!/bin/bash
 
- youtube-dl --extract-audio --audio-format mp3 $@
+#sudo pip install --upgrade youtube_dl
+#export PATH=$PATH:~/lib/python 
+youtube-dl --extract-audio --audio-format mp3 $@
 
 
 exit 0
