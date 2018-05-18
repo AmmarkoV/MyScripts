@@ -11,7 +11,7 @@ GRAPHICS="hugin gimp luminance-hdr darktable" # autopano-sift"
 AUDIO="mixxx audacity audacious " 
 MOREAPPS="glabels gtg gtk-recordmydesktop units qrencode lm-sensors" #freemind firestarter gnotime
 COMPATIBILITY="samba system-config-samba chntpw" #wine winetricks dosbox 
-ADVLIBS="macchanger-gtk festival imagemagick numlockx gxmessage libnotify-bin htop gtkperf traceroute powertop x11vnc" #sysv-rc-conf 
+ADVLIBS="festival imagemagick numlockx gxmessage libnotify-bin htop gtkperf traceroute powertop x11vnc" #macchanger-gtk  sysv-rc-conf 
 CODECS="ubuntu-restricted-extras pavucontrol beep   mplayer smplayer " #ffmpeg avconv
 SECURITY="vidalia tor"
 
