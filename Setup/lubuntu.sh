@@ -30,10 +30,12 @@ sudo /usr/share/doc/libdvdread4/install-css.sh
 #esddsp festival palia
 echo "Installation Complete" |  festival --tts
 
-#sudo echo "resample-method = trivial" >> /etc/pulse/daemon.conf
+#Tell pulse audio not to stutter
+sudo echo "resample-method = trivial" >> /etc/pulse/daemon.conf
 #sudo echo "default-sample-rate=48000" >> /etc/pulse/daemon.conf
-#sudo echo "default-fragments = 14" >> /etc/pulse/daemon.conf
-#sudo echo "default-fragment-size-msec = 16" >> /etc/pulse/daemon.conf
+sudo echo "default-sample-rate=44100" >> /etc/pulse/daemon.conf
+sudo echo "default-fragments = 14" >> /etc/pulse/daemon.conf
+sudo echo "default-fragment-size-msec = 16" >> /etc/pulse/daemon.conf
 #sudo echo "frequency=48000" >> /etc/openal/alsoft.conf
 
 if cat /etc/xdg/lxsession/Lubuntu/autostart | grep -q "setxkbmap"
