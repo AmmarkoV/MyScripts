@@ -31,17 +31,26 @@ sudo /usr/share/doc/libdvdread4/install-css.sh
 echo "Installation Complete" |  festival --tts
 
 #Tell pulse audio not to stutter
-sudo echo "resample-method = trivial" >> /etc/pulse/daemon.conf
-#sudo echo "default-sample-rate=48000" >> /etc/pulse/daemon.conf
-sudo echo "default-sample-rate=44100" >> /etc/pulse/daemon.conf
-sudo echo "default-fragments = 14" >> /etc/pulse/daemon.conf
-sudo echo "default-fragment-size-msec = 16" >> /etc/pulse/daemon.conf
-#sudo echo "frequency=48000" >> /etc/openal/alsoft.conf
+
+
+if cat /etc/pulse/daemon.conf | grep -q "ammar"
+then
+   echo "PulseAudio settings seem to be ok!" 
+else
+ sudo echo "#ammar's lower stutter settings" >> /etc/pulse/daemon.conf
+ sudo echo "resample-method = trivial" >> /etc/pulse/daemon.conf
+ #sudo echo "default-sample-rate=48000" >> /etc/pulse/daemon.conf
+ sudo echo "default-sample-rate=44100" >> /etc/pulse/daemon.conf
+ sudo echo "default-fragments = 14" >> /etc/pulse/daemon.conf
+ sudo echo "default-fragment-size-msec = 16" >> /etc/pulse/daemon.conf
+ #sudo echo "frequency=48000" >> /etc/openal/alsoft.conf
+ #sudo echo "frequency=44100" >> /etc/openal/alsoft.conf
+fi
+
 
 if cat /etc/xdg/lxsession/Lubuntu/autostart | grep -q "setxkbmap"
 then
    echo "Language settings seem to be ok!" 
-  #exit 0
 else
    echo "Language Settings dont seem to exist , including English/Greek , interchangable with alt-shift  .." 
    sudo sh -c 'echo "@setxkbmap -option grp:switch,grp:alt_shift_toggle,grp_led:scroll us,gr" >>/etc/xdg/lxsession/Lubuntu/autostart' 
