@@ -1,6 +1,6 @@
 #!/bin/bash
 
-sudo apt-get install python3-venv 
+sudo apt-get install python3-venv python3-tk
 python3 -m venv tensorflow
 source tensorflow/bin/activate
 pip install numpy
