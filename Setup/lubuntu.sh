@@ -9,7 +9,7 @@ sudo apt-get update
 BASICAPPS="firefox thunderbird vlc pidgin mumble libreoffice myspell-el-gr lyx synaptic catfish usb-creator-gtk vino xtightvncviewer baobab xbacklight brasero smartmontools iotop iftop" #gcalctool
 GRAPHICS="hugin gimp luminance-hdr darktable" # autopano-sift"
 AUDIO="mixxx audacity audacious " 
-MOREAPPS="glabels gtg gtk-recordmydesktop units qrencode lm-sensors" #freemind firestarter gnotime
+MOREAPPS="glabels gtg gtk-recordmydesktop units qrencode lm-sensors gnome-system-monitor" #freemind firestarter gnotime
 COMPATIBILITY="samba system-config-samba chntpw" #wine winetricks dosbox 
 ADVLIBS="festival imagemagick numlockx gxmessage libnotify-bin htop gtkperf traceroute powertop x11vnc" #macchanger-gtk  sysv-rc-conf 
 CODECS="ubuntu-restricted-extras pavucontrol beep   mplayer smplayer " #ffmpeg avconv
