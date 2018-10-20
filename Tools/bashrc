@@ -114,7 +114,7 @@ alias connectHobbitE='ssh demo@192.168.0.105 -c arcfour '
 alias connectSpiti='ssh ammar@spiti.ammar.gr -c arcfour -p 2222'
 
 alias update='sudo apt-get update && sudo apt-get upgrade -y'
-alias vncserver='x11vnc -nap -wait 50 -noxdamage -passwd ammar -display :0 -forever -o ~/x11vnc.log' # -bg
+alias vncserver='x11vnc -nap -wait 50 -noxdamage -passwd ammar -noxrecord -display :0 -forever -o ~/x11vnc.log' # -bg
 
  
 
