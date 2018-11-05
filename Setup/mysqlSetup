@@ -1,0 +1,19 @@
+#!/bin/bash
+
+sudo mysql_secure_installation
+
+sudo mysql
+#>use mysql
+#UPDATE user SET password=password('raspberrypi') WHERE user='root';
+#UPDATE user SET authentication_string=password('raspberrypi') WHERE user='root';
+#SELECT user, plugin FROM mysql.user;
+#UPDATE mysql.user SET plugin='mysql_native_password' WHERE user = 'root';
+#SET PASSWORD FOR 'root'@'localhost' = PASSWORD('raspberrypi');
+#flush privileges;
+
+
+#show databases;
+#create database wordpress;
+#use wordpress;
+
+exit 0
