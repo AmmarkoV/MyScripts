@@ -6,7 +6,7 @@ sudo apt-get install gksu
 sudo add-apt-repository ppa:graphics-drivers/ppa
 sudo apt-get update
 
-BASICAPPS="firefox thunderbird vlc pidgin mumble libreoffice myspell-el-gr lyx synaptic catfish usb-creator-gtk vino xtightvncviewer baobab xbacklight brasero smartmontools iotop iftop" #gcalctool
+BASICAPPS="firefox thunderbird vlc pidgin mumble libreoffice myspell-el-gr hunspell-el lyx synaptic catfish usb-creator-gtk vino xtightvncviewer baobab xbacklight brasero smartmontools iotop iftop" #gcalctool
 GRAPHICS="hugin gimp luminance-hdr darktable" # autopano-sift"
 AUDIO="mixxx audacity audacious " 
 MOREAPPS="glabels gtg gtk-recordmydesktop units qrencode lm-sensors gnome-system-monitor" #freemind firestarter gnotime
