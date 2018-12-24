@@ -13,10 +13,11 @@ MOREAPPS="glabels gtg gtk-recordmydesktop units qrencode lm-sensors gnome-system
 COMPATIBILITY="samba system-config-samba chntpw" #wine winetricks dosbox 
 ADVLIBS="festival imagemagick numlockx gxmessage libnotify-bin htop gtkperf traceroute powertop x11vnc" #macchanger-gtk  sysv-rc-conf 
 CODECS="ubuntu-restricted-extras pavucontrol beep   mplayer smplayer " #ffmpeg avconv
-SECURITY="vidalia tor"
+SECURITY="vidalia tor network-manager-openvpn network-manager-openvpn-gnome"
 
 sudo apt-get install $BASICAPPS $MOREAPPS $ADVLIBS $COMPATIBILITY $ADVLIBS $AUDIO $CODECS $GRAPHICS         
-  
+   
+
 
 #DVD Playback maybe ?
 sudo apt-get install libdvdread4
