@@ -119,6 +119,35 @@ else
  chmod +x ~/.config/autostart/autostart.desktop
 fi
 
+
+
+
+
+if [ -f /etc/samba/smb.conf ]
+then 
+ if cat /etc/samba/smb.conf | grep -q "[SHARED]"
+then
+   echo "SAMBA seems to be already set-up.." 
+else
+ mkdir ~/SHARED
+ USER=`whoami`
+ echo "[SHARED]"  >> /etc/samba/smb.conf
+ echo "path = /home/$USER/SHARED"  >> /etc/samba/smb.conf
+ echo "writable = yes"  >> /etc/samba/smb.conf
+ echo "guest ok = yes"  >> /etc/samba/smb.conf
+ echo "guest only = yes"  >> /etc/samba/smb.conf
+ echo "read only = no"  >> /etc/samba/smb.conf
+ echo "create mode = 0777"  >> /etc/samba/smb.conf
+ echo "directory mode = 0777"  >> /etc/samba/smb.conf
+ echo "force user = nobody"  >> /etc/samba/smb.conf
+ sudo systemctl restart smbd
+ fi
+fi
+
+
+
+
+
 if [ -f ~/.autostart.sh ]
 then 
  echo "Found per-user autostart bash script"
