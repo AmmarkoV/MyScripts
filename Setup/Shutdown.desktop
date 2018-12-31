@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Shutdown
+GenericName=Shutdown 
+Icon=disconnect.png
+Exec=lxsession-logout
+Terminal=false
+StartupNotify=false
+Categories=Application;System Tools;
