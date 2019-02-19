@@ -1,9 +1,15 @@
 #!/bin/bash
-#CPU Frequency governor script by HoKaze (version 0.3)
+#CPU Frequency governor script by HoKaze (version 0.3) 
+#gksu was removed from ubuntu so ported to pkexec by AmmarkoV 
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd "$DIR"
+
 
 #runs this script as root if not already
 if [ ! $( id -u ) -eq 0 ]; then
-	exec gksu "${0}" # call this script as root
+	#exec gksu "${0}" # call this script as root
+	exec pkexec env DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY "$DIR/${0}" # call this script as root
 	exit ${?}  # since we're 'execing' above, we wont reach this exit
                # unless something goes wrong.
 fi
@@ -16,3 +22,4 @@ do
 	[ -f $CPUFREQ ] || continue
 	echo -n $governor > $CPUFREQ
 done
+
