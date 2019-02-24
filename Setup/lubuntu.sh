@@ -6,16 +6,18 @@ sudo apt-get install gksu
 sudo add-apt-repository ppa:graphics-drivers/ppa
 sudo apt-get update
 
-BASICAPPS="firefox thunderbird vlc pidgin mumble libreoffice myspell-el-gr hunspell-el lyx synaptic catfish usb-creator-gtk vino xtightvncviewer baobab xbacklight brasero smartmontools iotop iftop" #gcalctool
+#-----------------------------------------------------------------------------------------------------------------------
+BASICAPPS="firefox thunderbird vlc pidgin mumble libreoffice myspell-el-gr hunspell-el synaptic catfish usb-creator-gtk remmina baobab xbacklight brasero  " #gcalctool lyx vino xtightvncviewer 
 GRAPHICS="hugin gimp luminance-hdr darktable" # autopano-sift"
 AUDIO="mixxx audacity audacious " 
-MOREAPPS="glabels gtg gtk-recordmydesktop units qrencode lm-sensors gnome-system-monitor" #freemind firestarter gnotime
+MOREAPPS=" gtg gtk-recordmydesktop units qrencode lm-sensors gnome-system-monitor" #glabels freemind firestarter gnotime
 COMPATIBILITY="samba system-config-samba chntpw" #wine winetricks dosbox 
+SYSTEM="smartmontools iotop iftop iperf htop gtkperf traceroute powertop x11vnc" #macchanger-gtk  sysv-rc-conf 
 ADVLIBS="festival imagemagick numlockx gxmessage libnotify-bin htop gtkperf traceroute powertop x11vnc" #macchanger-gtk  sysv-rc-conf 
-CODECS="ubuntu-restricted-extras pavucontrol beep   mplayer smplayer " #ffmpeg avconv
-SECURITY="vidalia tor network-manager-openvpn network-manager-openvpn-gnome"
-
-sudo apt-get install $BASICAPPS $MOREAPPS $ADVLIBS $COMPATIBILITY $ADVLIBS $AUDIO $CODECS $GRAPHICS         
+CODECS="ubuntu-restricted-extras pavucontrol beep ffmpeg mplayer smplayer " #ffmpeg avconv
+SECURITY="network-manager-openvpn network-manager-openvpn-gnome" #vidalia tor 
+#-----------------------------------------------------------------------------------------------------------------------
+sudo apt-get install $BASICAPPS $MOREAPPS $ADVLIBS $COMPATIBILITY $SYSTEM $ADVLIBS $AUDIO $CODECS $GRAPHICS $SECURITY         
    
 
 
@@ -32,8 +34,6 @@ sudo /usr/share/doc/libdvdread4/install-css.sh
 echo "Installation Complete" |  festival --tts
 
 #Tell pulse audio not to stutter
-
-
 if cat /etc/pulse/daemon.conf | grep -q "ammar"
 then
    echo "PulseAudio settings seem to be ok!" 
@@ -49,6 +49,19 @@ else
 fi
 
 
+#Tweak TCP congestion
+if cat /etc/sysctl.d/10-custom-kernel-bbr.conf | grep -q "tcp_congestion_control=bbr"
+then
+   echo "TCP BBR congestion control settings seem to be set!" 
+else
+ echo "Setting up TCP BBR congestion control" 
+ sudo echo "net.core.default_qdisc=fq" >> /etc/sysctl.d/10-custom-kernel-bbr.conf
+ sudo echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.d/10-custom-kernel-bbr.conf
+ sudo sysctl --system
+fi
+ 
+
+#Setup languages on login..
 if cat /etc/xdg/lxsession/Lubuntu/autostart | grep -q "setxkbmap"
 then
    echo "Language settings seem to be ok!" 
@@ -56,6 +69,7 @@ else
    echo "Language Settings dont seem to exist , including English/Greek , interchangable with alt-shift  .." 
    sudo sh -c 'echo "@setxkbmap -option grp:switch,grp:alt_shift_toggle,grp_led:scroll us,gr" >>/etc/xdg/lxsession/Lubuntu/autostart' 
 fi
+
 
 MEM=`awk '/Mem:/ {print $2}' <(free)`
 if (( $MEM > 8000000 )) 
@@ -123,31 +137,6 @@ fi
 
 
 
-if [ -f /etc/samba/smb.conf ]
-then 
- if cat /etc/samba/smb.conf | grep -q "[SHARED]"
-then
-   echo "SAMBA seems to be already set-up.." 
-else
- mkdir ~/SHARED
- USER=`whoami`
- echo "[SHARED]"  >> /etc/samba/smb.conf
- echo "path = /home/$USER/SHARED"  >> /etc/samba/smb.conf
- echo "writable = yes"  >> /etc/samba/smb.conf
- echo "guest ok = yes"  >> /etc/samba/smb.conf
- echo "guest only = yes"  >> /etc/samba/smb.conf
- echo "read only = no"  >> /etc/samba/smb.conf
- echo "create mode = 0777"  >> /etc/samba/smb.conf
- echo "directory mode = 0777"  >> /etc/samba/smb.conf
- echo "force user = nobody"  >> /etc/samba/smb.conf
- sudo systemctl restart smbd
- fi
-fi
-
-
-
-
-
 if [ -f ~/.autostart.sh ]
 then 
  echo "Found per-user autostart bash script"
@@ -180,16 +169,52 @@ else
  chmod +x ~/.autostart.sh 
 fi
 
-#maybe add to /etc/fstab  :     tmpfs /tmp tmpfs defaults,noexec,nosuid 0 0
 
+
+
+#Create shared directory
+if [ -f /etc/samba/smb.conf ]
+then 
+ if cat /etc/samba/smb.conf | grep -q "[SHARED]"
+then
+   echo "SAMBA seems to be already set-up.." 
+else
+ mkdir ~/SHARED
+ USER=`whoami`
+ echo "[SHARED]"  >> /etc/samba/smb.conf
+ echo "path = /home/$USER/SHARED"  >> /etc/samba/smb.conf
+ echo "writable = yes"  >> /etc/samba/smb.conf
+ echo "guest ok = yes"  >> /etc/samba/smb.conf
+ echo "guest only = yes"  >> /etc/samba/smb.conf
+ echo "read only = no"  >> /etc/samba/smb.conf
+ echo "create mode = 0777"  >> /etc/samba/smb.conf
+ echo "directory mode = 0777"  >> /etc/samba/smb.conf
+ echo "force user = nobody"  >> /etc/samba/smb.conf
+ sudo systemctl restart smbd
+ fi
+fi
+
+
+
+
+#maybe add to /etc/fstab  :     tmpfs /tmp tmpfs defaults,noexec,nosuid 0 0
 #maybe add to /etc/fstab  :      tmpfs     /home/<user>/.mozilla/firefox/default/Cache tmpfs mode=1777,noatime 0 0 
 
-sudo apt-get remove abiword
+echo "Removing applications that we don't need.."
+sudo apt-get remove abiword gnumeric
 
 
-echo "Disable Apport maybe ? :P"
+
+echo "Saving you from Apport spam"
 sudo service apport stop
-gksu leafpad /etc/default/apport
+sudo echo "# set this to 0 to disable apport, or to 1 to enable it" > /etc/default/apport
+sudo echo "# ammar settings dont like it" >> /etc/default/apport
+sudo echo "#Can be temporarily overwritten using : sudo service apport start force_start=1" >> /etc/default/apport
+sudo echo "enabled=0" >> /etc/default/apport
+#echo "Disable Apport maybe ? :P"
+#gksu leafpad /etc/default/apport
+
+
 
 
 #Check SSD partition for correct alignment , should return 0 
