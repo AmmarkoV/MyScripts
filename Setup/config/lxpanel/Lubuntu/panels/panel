@@ -1,0 +1,186 @@
+# lxpanel <profile> config file. Manually editing is not recommended.
+# Use preference dialog in lxpanel to adjust config when you can.
+
+Global {
+  edge=bottom
+  allign=left
+  margin=0
+  widthtype=percent
+  width=100
+  height=24
+  transparent=1
+  tintcolor=#e1cece
+  alpha=255
+  setdocktype=1
+  setpartialstrut=1
+  usefontcolor=1
+  fontcolor=#000000
+  background=0
+  backgroundfile=/usr/share/lxpanel/images/lubuntu-background.png
+  iconsize=24
+}
+Plugin {
+  type=menu
+  Config {
+    image=/usr/share/lubuntu/images/lubuntu-logo.png
+    system {
+    }
+    separator {
+    }
+    item {
+      command=run
+    }
+    separator {
+    }
+    item {
+      image=gnome-logout
+      command=logout
+    }
+  }
+}
+Plugin {
+  type=launchbar
+  Config {
+    Button {
+      id=pcmanfm.desktop
+    }
+    Button {
+      id=lxterminal.desktop
+    }
+    Button {
+      id=firefox.desktop
+    }
+    Button {
+      id=mumble.desktop
+    }
+  }
+}
+Plugin {
+  type=space
+  Config {
+    Size=32
+  }
+}
+Plugin {
+  type=pager
+  Config {
+  }
+}
+Plugin {
+  type=launchtaskbar
+  Config {
+    Button {
+      id=menu://applications/Accessories/pcmanfm.desktop
+    }
+    Button {
+      id=lxde-x-www-browser.desktop
+    }
+    Button {
+      id=lxterminal.desktop
+    }
+    Button {
+      id=mumble.desktop
+    }
+    FlatButton=0
+    GroupedTasks=0
+    UseSmallerIcons=-1
+    LaunchTaskBarMode=1
+    ShowAllDesks=0
+  }
+}
+Plugin {
+  type=space
+  Config {
+    Size=4
+  }
+}
+Plugin {
+  type=wincmd
+  Config {
+    Button1=iconify
+    Button2=shade
+  }
+}
+Plugin {
+  type=space
+  Config {
+    Size=4
+  }
+}
+Plugin {
+  type=space
+  Config {
+    Size=4
+  }
+}
+Plugin {
+  type=thermal
+  Config {
+    NormalColor=#00ff00
+    Warning1Color=#fff000
+    Warning2Color=#ff0000
+    AutomaticLevels=1
+    Warning1Temp=95
+    Warning2Temp=100
+    AutomaticSensor=1
+  }
+}
+Plugin {
+  type=monitors
+  Config {
+    DisplayCPU=1
+    DisplayRAM=1
+    Action=/bin/bash "/home/ammar/Documents/Programming/MyScripts/Setup/lowMemoryScript.sh"
+    CPUColor=#0000FF
+    RAMColor=#FF0000
+  }
+}
+Plugin {
+  type=xkb
+  Config {
+    Model=pc105
+    LayoutsList=us
+    VariantsList=,
+    ToggleOpt=grp:shift_caps_toggle
+    DisplayType=1
+  }
+}
+Plugin {
+  type=bluetooth
+  Config {
+  }
+}
+Plugin {
+  type=tray
+  Config {
+  }
+}
+Plugin {
+  type=indicator
+  Config {
+    applications=1
+    datetime=0
+    messages=0
+    network=0
+    session=0
+    sound=1
+  }
+}
+Plugin {
+  type=dclock
+  Config {
+    ClockFmt=%R
+    TooltipFmt=%A %x
+    BoldFont=0
+    IconOnly=0
+    CenterText=0
+  }
+}
+Plugin {
+  type=launchbar
+  Config {
+    Button {
+      id=/usr/share/applications/lubuntu-logout.desktop
+    }
+  }
+}

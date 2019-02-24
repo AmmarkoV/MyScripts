@@ -6,17 +6,18 @@ sudo apt-get install gksu
 sudo add-apt-repository ppa:graphics-drivers/ppa
 sudo apt-get update
 
-BASICAPPS="firefox thunderbird vlc pidgin mumble libreoffice myspell-el-gr lyx synaptic catfish usb-creator-gtk vino xtightvncviewer baobab xbacklight brasero smartmontools iotop iftop" #gcalctool
+BASICAPPS="firefox thunderbird vlc pidgin mumble libreoffice myspell-el-gr hunspell-el lyx synaptic catfish usb-creator-gtk vino xtightvncviewer baobab xbacklight brasero smartmontools iotop iftop" #gcalctool
 GRAPHICS="hugin gimp luminance-hdr darktable" # autopano-sift"
 AUDIO="mixxx audacity audacious " 
 MOREAPPS="glabels gtg gtk-recordmydesktop units qrencode lm-sensors gnome-system-monitor" #freemind firestarter gnotime
 COMPATIBILITY="samba system-config-samba chntpw" #wine winetricks dosbox 
 ADVLIBS="festival imagemagick numlockx gxmessage libnotify-bin htop gtkperf traceroute powertop x11vnc" #macchanger-gtk  sysv-rc-conf 
 CODECS="ubuntu-restricted-extras pavucontrol beep   mplayer smplayer " #ffmpeg avconv
-SECURITY="vidalia tor"
+SECURITY="vidalia tor network-manager-openvpn network-manager-openvpn-gnome"
 
 sudo apt-get install $BASICAPPS $MOREAPPS $ADVLIBS $COMPATIBILITY $ADVLIBS $AUDIO $CODECS $GRAPHICS         
-  
+   
+
 
 #DVD Playback maybe ?
 sudo apt-get install libdvdread4
@@ -117,6 +118,35 @@ else
  cd $ORIG_DIR 
  chmod +x ~/.config/autostart/autostart.desktop
 fi
+
+
+
+
+
+if [ -f /etc/samba/smb.conf ]
+then 
+ if cat /etc/samba/smb.conf | grep -q "[SHARED]"
+then
+   echo "SAMBA seems to be already set-up.." 
+else
+ mkdir ~/SHARED
+ USER=`whoami`
+ echo "[SHARED]"  >> /etc/samba/smb.conf
+ echo "path = /home/$USER/SHARED"  >> /etc/samba/smb.conf
+ echo "writable = yes"  >> /etc/samba/smb.conf
+ echo "guest ok = yes"  >> /etc/samba/smb.conf
+ echo "guest only = yes"  >> /etc/samba/smb.conf
+ echo "read only = no"  >> /etc/samba/smb.conf
+ echo "create mode = 0777"  >> /etc/samba/smb.conf
+ echo "directory mode = 0777"  >> /etc/samba/smb.conf
+ echo "force user = nobody"  >> /etc/samba/smb.conf
+ sudo systemctl restart smbd
+ fi
+fi
+
+
+
+
 
 if [ -f ~/.autostart.sh ]
 then 
