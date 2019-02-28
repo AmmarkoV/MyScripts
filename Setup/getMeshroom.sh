@@ -1,5 +1,6 @@
 #!/bin/bash
 
+mkdir -p ~/Documents/3dParty
 cd ~/Documents/3dParty
 
 sudo apt-get install libpng-dev libjpeg-dev libtiff-dev libxxf86vm1 libxxf86vm-dev libxi-dev libxrandr-dev libopenimageio-dev libceres-dev graphviz
@@ -12,6 +13,7 @@ cd geogram/
 ./configure
 cd build/Linux64-gcc-dynamic-Release
 make 
+sudo make install
 cd ..
 cd ..
 cd ..
