@@ -5,7 +5,7 @@
 
 killall firefox
 killall thunderbird
-gnome-system-monitor
+#gnome-system-monitor
 
 
 exit 0
