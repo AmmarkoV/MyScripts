@@ -3,19 +3,8 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$DIR"
-
-sudo apt-get install cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev libtbb2 libtbb-dev
-<<<<<<< HEAD
-#sudo apt-get install   libjasper-dev
-sudo apt-get install build-essential libjpeg-dev libpng-dev libtiff5-dev  libdc1394-22-dev libeigen3-dev libtheora-dev libvorbis-dev libxvidcore-dev libx264-dev sphinx-common libtbb-dev yasm libfaac-dev libopencore-amrnb-dev libopencore-amrwb-dev libopenexr-dev libgstreamer-plugins-base1.0-dev libavutil-dev libavfilter-dev libavresample-dev python3-dev python3-numpy
-=======
-#sudo apt-get install python3.5-dev python3-numpy  libjasper-dev
-<<<<<<< HEAD
-sudo apt-get install build-essential libjpeg-dev libpng-dev libtiff5-dev  libdc1394-22-dev libeigen3-dev libtheora-dev libvorbis-dev libxvidcore-dev libx264-dev sphinx-common libtbb-dev yasm libfaac-dev libopencore-amrnb-dev libopencore-amrwb-dev libopenexr-dev libgstreamer-plugins-base1.0-dev libavutil-dev libavfilter-dev libavresample-dev libpython3-all-dev python3-numpy python3-dev
-=======
-sudo apt-get install build-essential libjpeg-dev libpng-dev libtiff5-dev  libdc1394-22-dev libeigen3-dev libtheora-dev libvorbis-dev libxvidcore-dev libx264-dev sphinx-common libtbb-dev yasm libfaac-dev libopencore-amrnb-dev libopencore-amrwb-dev libopenexr-dev libgstreamer-plugins-base1.0-dev libavutil-dev libavfilter-dev libavresample-dev libpython3-all-dev
->>>>>>> b1bf221897bb406d0e73932b6a11f11e28716f8d
->>>>>>> 13d8ba17c61ff0b7cf08572933f3683e59561357
+ 
+sudo apt-get install build-essential cmake git libgtk2.0-dev pkg-config ffmpeg libavcodec-dev libavformat-dev libavcodec-dev libavformat-dev libswscale-dev libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff5-dev  libdc1394-22-dev libeigen3-dev libtheora-dev libvorbis-dev libxvidcore-dev libx264-dev sphinx-common libtbb-dev yasm libfaac-dev libopencore-amrnb-dev libopencore-amrwb-dev libopenexr-dev libgstreamer-plugins-base1.0-dev libavutil-dev libavfilter-dev libavresample-dev libpython3-all-dev python3-numpy python3-dev 
 
 #cd "$1"
 echo "Will Install @ `pwd`"
