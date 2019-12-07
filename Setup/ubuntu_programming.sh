@@ -20,7 +20,7 @@ cd codelite
 mkdir build-release
 cd build-release
 cmake .. -DCMAKE_BUILD_TYPE=Release
-cmake --build . -j 4
+cmake --build . 
 sudo cmake --build . --target install
 #------------------------------------------------
 
