@@ -1,0 +1,22 @@
+#!/bin/bash
+
+CURRENT=`cat /sys/class/backlight/intel_backlight/brightness`
+MAX=`cat /sys/class/backlight/intel_backlight/max_brightness`
+
+Response=`zenity --scale --title "Brightness" --text "Select brightness." --min-value=600 --max-value=$MAX --step=1000 --value 10000` 
+
+if [ "$?" -eq "0" ] 
+then
+ echo "Success running zenity"
+ echo $Response |  tee /sys/class/backlight/intel_backlight/brightness
+
+if [ "$?" -eq "0" ] 
+then
+ echo "Success setting value"
+else
+ pkexec chmod 777 /sys/class/backlight/intel_backlight/brightness
+ echo $Response |  tee /sys/class/backlight/intel_backlight/brightness
+fi
+
+fi
+exit 0
