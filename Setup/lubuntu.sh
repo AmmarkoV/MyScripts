@@ -236,12 +236,12 @@ sudo wget https://raw.githubusercontent.com/AmmarkoV/MyScripts/master/Multimedia
 sudo mv /usr/share/lubuntu/wallpapers/lubuntu-default-wallpaper.png /usr/share/lubuntu/wallpapers/lubuntu-default-wallpaperOLD.png
 sudo ln -s  /usr/share/lubuntu/wallpapers/startup.png /usr/share/lubuntu/wallpapers/lubuntu-default-wallpaper.png
 
-
+firefox https://addons.mozilla.org/en-US/firefox/addon/tab-list/&
 firefox https://addons.mozilla.org/en-US/firefox/addon/os-x-yosemite/&
 firefox https://addons.mozilla.org/en-US/firefox/addon/noscript/&
 firefox https://addons.mozilla.org/en-US/firefox/addon/adblock-plus/?src=ss&
-firefox https://addons.mozilla.org/en-US/firefox/addon/video-downloadhelper/&
-firefox https://addons.mozilla.org/en-US/firefox/addon/download-youtube/&
+#firefox https://addons.mozilla.org/en-US/firefox/addon/video-downloadhelper/&
+#firefox https://addons.mozilla.org/en-US/firefox/addon/download-youtube/&
 
 echo "Configuration Complete" |  festival --tts
 
