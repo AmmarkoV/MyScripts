@@ -145,6 +145,7 @@ else
  echo "#!/bin/bash" > ~/.autostart.sh
  echo "setxkbmap -option grp:switch,grp:alt_shift_toggle,grp_led:scroll us,gr" >> ~/.autostart.sh 
  echo "xset r on" >> ~/.autostart.sh  
+ echo "#xscreensaver -nosplash" >> ~/.autostart.sh
  echo "nm-applet&" >> ~/.autostart.sh 
  echo "numlockx on&" >> ~/.autostart.sh 
  echo "pidgin&" >> ~/.autostart.sh 
