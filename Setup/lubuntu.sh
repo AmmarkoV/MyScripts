@@ -1,4 +1,9 @@
 #!/bin/bash
+
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd "$DIR"
+
 echo "LUbuntu handy Packages automation "
 
 sudo apt-get install gksu
@@ -13,11 +18,12 @@ AUDIO="mixxx audacity audacious "
 MOREAPPS=" gtg gtk-recordmydesktop units qrencode lm-sensors gnome-system-monitor" #glabels freemind firestarter gnotime
 COMPATIBILITY="samba system-config-samba chntpw" #wine winetricks dosbox 
 SYSTEM="smartmontools iotop iftop iperf ifmetric htop gtkperf traceroute powertop x11vnc" #macchanger-gtk  sysv-rc-conf 
+SCREENSAVERS="xscreensaver xscreensaver-data xscreensaver-data-extra  xscreensaver-gl xscreensaver-gl-extra"
 ADVLIBS="festival imagemagick numlockx gxmessage libnotify-bin htop gtkperf traceroute powertop x11vnc" #macchanger-gtk  sysv-rc-conf 
 CODECS="ubuntu-restricted-extras pavucontrol beep ffmpeg mplayer smplayer " #ffmpeg avconv
 SECURITY="network-manager-openvpn network-manager-openvpn-gnome" #vidalia tor 
 #-----------------------------------------------------------------------------------------------------------------------
-sudo apt-get install $BASICAPPS $MOREAPPS $ADVLIBS $COMPATIBILITY $SYSTEM $ADVLIBS $AUDIO $CODECS $GRAPHICS $SECURITY         
+sudo apt-get install $BASICAPPS $MOREAPPS $ADVLIBS $COMPATIBILITY $SYSTEM $SCREENSAVERS $ADVLIBS $AUDIO $CODECS $GRAPHICS $SECURITY         
    
 
 
@@ -218,6 +224,7 @@ sudo echo "enabled=0" >> /etc/default/apport
 
 
 
+
 #Check SSD partition for correct alignment , should return 0 
 #sudo blockdev --getalignoff /dev/sda1 
 
@@ -244,7 +251,52 @@ firefox https://addons.mozilla.org/en-US/firefox/addon/adblock-plus/?src=ss&
 #firefox https://addons.mozilla.org/en-US/firefox/addon/video-downloadhelper/&
 #firefox https://addons.mozilla.org/en-US/firefox/addon/download-youtube/&
 
+
+
+echo "Using a nice selection of XScreensavers"
+cd "$DIR"
+cp xscreensaver ~/.xscreensaver
+
+#----------------------------------------------------------
+if [ -f ~/.lock.sh ]
+then 
+ echo "Found per-user lock bash script"
+else 
+ echo "Generating new per-user lock bash script"
+ echo "#!/bin/bash" > ~/.lock.sh 
+ echo "NUMBEROFSCREENSAVERDAEMONSRUNNING=\`ps -A | grep xscreensaver | wc -l\`" > ~/.lock.sh
+ echo "if [ "$NUMBEROFSCREENSAVERDAEMONSRUNNING" -eq \"0\" ]; then" > ~/.lock.sh
+ echo "     echo \"XScreensaver not running, starting it up\" " > ~/.lock.sh
+ echo "     xscreensaver -nosplash&" > ~/.lock.sh
+ echo "     sleep 1" > ~/.lock.sh
+ echo "fi" > ~/.lock.sh
+ echo "xscreensaver-command -lock" > ~/.lock.sh
+ echo "exit 0" >> ~/.lock.sh 
+ chmod +x ~/.lock.sh 
+fi
+#----------------------------------------------------------
+#Create Lock Shortcut
+if [ -f ~/Desktop/lock.desktop ]
+then 
+ if cat ~/Desktop/lock.desktop | grep -q "NUMBEROFSCREENSAVERDAEMONSRUNNING"
+then
+   echo "XScreensaver seems to be already set-up.." 
+else
+ echo "[Desktop Entry]" > ~/Desktop/lock.desktop
+ echo "Type=Application" >> ~/Desktop/lock.desktop
+ echo "Name=Lock" >> ~/Desktop/lock.desktop
+
+ ORIG_DIR=`pwd`
+ cd ~
+ USER_DIR=`pwd`
+ echo "Exec=$USER_DIR/.lock.sh" >> ~/Desktop/lock.desktop
+ fi
+fi
+#----------------------------------------------------------
+
+
 echo "Configuration Complete" |  festival --tts
+
 
 
 
