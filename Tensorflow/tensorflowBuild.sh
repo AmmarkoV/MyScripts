@@ -19,15 +19,19 @@ then
    echo "Bazel includes seem to be set-up.." 
 else 
   USER=`whoami` 
-  echo "#Bazel cancer.." >> ~/.bashrc
+  echo "#BAZEL_CANCER" >> ~/.bashrc
   echo "source ~/.bazel/bin/bazel-complete.bash" >> ~/.bashrc
   echo "export PATH=\"\$PATH:\$HOME/bin\"" >> ~/.bashrc 
  fi
 fi
 
-
+if [ ! -d tensorflow ]
+then 
 git clone https://github.com/tensorflow/tensorflow.git
+fi
+
 cd tensorflow
+git pull
 git checkout r1.15
 ./configure
 
