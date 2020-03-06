@@ -7,9 +7,9 @@ cd ~/Documents
 mkdir 3dParty
 cd 3dParty
 
-wget http://ammar.gr/mocapnet/bazel-0.24.1-installer-linux-x86_64-fortensorflow-r1.15.sh
-chmod +x bazel-0.24.1-installer-linux-x86_64-fortensorflow-r1.15.sh
-./bazel-0.24.1-installer-linux-x86_64-fortensorflow-r1.15.sh --user
+wget http://ammar.gr/mocapnet/bazel-0.24.1-installer-linux-x86_64-for-tensorflow-r1.15.sh
+chmod +x bazel-0.24.1-installer-linux-x86_64-for-tensorflow-r1.15.sh
+./bazel-0.24.1-installer-linux-x86_64-for-tensorflow-r1.15.sh --user
 
 #Create shared directory
 if [ -f ~/.bashrc ]
