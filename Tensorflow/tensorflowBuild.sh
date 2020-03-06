@@ -1,7 +1,8 @@
 #!/bin/bash
 
-#build script for Ubuntu 18.04 
-#with cuda 10.0
+#Tensorflow is a great Neural network library that unfortunately is coupled to the terrible Bazel build system
+#This is a download and build script for Ubuntu 18.04, that should work building release 1.15  
+
 
 cd ~/Documents
 mkdir 3dParty
@@ -21,7 +22,8 @@ else
   USER=`whoami` 
   echo "#BAZEL_CANCER" >> ~/.bashrc
   echo "source ~/.bazel/bin/bazel-complete.bash" >> ~/.bashrc
-  echo "export PATH=\"\$PATH:\$HOME/bin\"" >> ~/.bashrc 
+  echo "export PATH=\"\$PATH:\$HOME/bin\"" >> ~/.bashrc
+  source ~/.bashrc 
  fi
 fi
 
