@@ -3,7 +3,7 @@
 #Tensorflow is a great Neural network library that unfortunately is coupled to the terrible Bazel build system
 #This is a download and build script for Ubuntu 18.04, that should work building release 1.15  
 
-sudo apt-get install python3-dev python3-pip python3-venv python3-tk
+sudo apt-get install python3-dev python3-pip python3-venv python3-tk gcc-6 g++-6
 
 pip install -U --user pip six numpy wheel setuptools mock 'future>=0.17.1'
 pip install -U --user keras_applications --no-deps
@@ -41,6 +41,11 @@ fi
 cd tensorflow
 git pull
 git checkout r1.15
+
+echo "Please specify the following path in the brilliant configuration script"
+echo "/usr/bin/gcc-6"
+
+
 ./configure
 
 bazel clean --expunge
