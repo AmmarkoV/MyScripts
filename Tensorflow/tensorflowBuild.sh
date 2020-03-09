@@ -49,7 +49,7 @@ echo "/usr/bin/gcc-6"
 ./configure
 
 bazel clean --expunge
-bazel build --config=opt --config=cuda --config=mkl --local_resources 2048,.5,1.0  //tensorflow/tools/pip_package:build_pip_package
+bazel build --config=opt --config=cuda --config=mkl --cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" --local_resources 2048,.5,1.0  //tensorflow/tools/pip_package:build_pip_package
 ./bazel-bin/tensorflow/tools/pip_package/build_pip_package ~/Documents/3dParty/
 
 
