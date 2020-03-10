@@ -54,7 +54,7 @@ bazel build --config=opt --config=cuda --config=mkl --config=monolithic --local_
 ./bazel-bin/tensorflow/tools/pip_package/build_pip_package ~/Documents/3dParty/
 
 
-bazel build --config opt //tensorflow/tools/lib_package:libtensorflow
+bazel build --config opt --config=cuda --config=monolithic  //tensorflow/tools/lib_package:libtensorflow
 mv bazel-bin/tensorflow/tools/lib_package/libtensorflow.tar.gz ~/Documents/3dParty/libtensorflow-r1.15.tar.gz
 
 
