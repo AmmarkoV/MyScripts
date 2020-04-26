@@ -255,6 +255,9 @@ firefox https://addons.mozilla.org/en-US/firefox/addon/adblock-plus/?src=ss&
 #firefox https://addons.mozilla.org/en-US/firefox/addon/video-downloadhelper/&
 #firefox https://addons.mozilla.org/en-US/firefox/addon/download-youtube/&
 
+#Hit about:config
+#set browser.sessionhistory.max_entries 10
+#set browser.cache.memory.enable 2048
 
 
 echo "Using a nice selection of XScreensavers"
