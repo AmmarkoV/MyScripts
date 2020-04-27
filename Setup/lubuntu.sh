@@ -226,8 +226,15 @@ sudo echo "enabled=0" >> /etc/default/apport
 #gksu leafpad /etc/default/apport
 
 
-
-
+#For Lubuntu 20.04 + PDF export is broken in Libreoffice except if 
+#TODO add this automatically ? 
+#LXQt settings -> Click Environment (Advanced) -> Click Add 
+#    Double click the empty variable name, and type SAL_VCL_QT5_USE_CAIRO, press Enter
+#    Double click the Value field, and type true, press Enter
+#    Click Close
+#    Click OK to the dialog box 
+#SAL_VCL_QT5_USE_CAIRO=true
+#is added to environment
 
 #Check SSD partition for correct alignment , should return 0 
 #sudo blockdev --getalignoff /dev/sda1 
