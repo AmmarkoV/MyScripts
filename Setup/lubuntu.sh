@@ -6,7 +6,7 @@ cd "$DIR"
 
 echo "LUbuntu handy Packages automation "
 
-sudo apt-get install gksu
+#sudo apt-get install gksu
 
 sudo add-apt-repository ppa:graphics-drivers/ppa
 sudo apt-get update
@@ -217,11 +217,11 @@ echo "Removing applications that we don't need.."
 
 
 echo "Saving you from Apport spam"
-sudo service apport stop
-sudo echo "# set this to 0 to disable apport, or to 1 to enable it" > /etc/default/apport
-sudo echo "# ammar settings dont like it" >> /etc/default/apport
-sudo echo "#Can be temporarily overwritten using : sudo service apport start force_start=1" >> /etc/default/apport
-sudo echo "enabled=0" >> /etc/default/apport
+ sudo service apport stop
+ sudo sh -c 'echo "# set this to 0 to disable apport, or to 1 to enable it" > /etc/default/apport' 
+ sudo sh -c 'echo "# ammar settings dont like it" >> /etc/default/apport' 
+ sudo sh -c 'echo "#Can be temporarily overwritten using : sudo service apport start force_start=1" >> /etc/default/apport' 
+ sudo sh -c 'echo "enabled=0" >> /etc/default/apport' 
 #echo "Disable Apport maybe ? :P"
 #gksu leafpad /etc/default/apport
 
@@ -233,7 +233,7 @@ then
  echo "Found already set sudo.conf so not modifying it.."
 else 
  echo "Adding ssh-askpass as a utility to handle sudo -A calls in your system"
- sudo echo "Path askpass /usr/bin/ssh-askpass" > /etc/sudo.conf 
+ sudo sh -c 'echo "Path askpass /usr/bin/ssh-askpass" > /etc/sudo.conf' 
 fi
 
 
@@ -267,8 +267,8 @@ sudo wget https://raw.githubusercontent.com/AmmarkoV/MyScripts/master/Multimedia
 sudo mv /usr/share/lubuntu/wallpapers/lubuntu-default-wallpaper.png /usr/share/lubuntu/wallpapers/lubuntu-default-wallpaperOLD.png
 sudo ln -s  /usr/share/lubuntu/wallpapers/startup.png /usr/share/lubuntu/wallpapers/lubuntu-default-wallpaper.png
 
-firefox https://addons.mozilla.org/en-US/firefox/addon/tab-list/&
-firefox https://addons.mozilla.org/en-US/firefox/addon/os-x-yosemite/&
+#firefox https://addons.mozilla.org/en-US/firefox/addon/tab-list/&
+#firefox https://addons.mozilla.org/en-US/firefox/addon/os-x-yosemite/&
 firefox https://addons.mozilla.org/en-US/firefox/addon/noscript/&
 firefox https://addons.mozilla.org/en-US/firefox/addon/adblock-plus/?src=ss&
 #firefox https://addons.mozilla.org/en-US/firefox/addon/video-downloadhelper/&
@@ -281,6 +281,7 @@ firefox https://addons.mozilla.org/en-US/firefox/addon/adblock-plus/?src=ss&
 
 echo "Using a nice selection of XScreensavers"
 cd "$DIR"
+wget https://raw.githubusercontent.com/AmmarkoV/MyScripts/master/Setup/xscreensaver
 cp xscreensaver ~/.xscreensaver
 
 #----------------------------------------------------------
