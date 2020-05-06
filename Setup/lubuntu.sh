@@ -212,7 +212,7 @@ fi
 #maybe add to /etc/fstab  :      tmpfs     /home/<user>/.mozilla/firefox/default/Cache tmpfs mode=1777,noatime 0 0 
 
 echo "Removing applications that we don't need.."
-sudo apt-get remove abiword gnumeric
+#sudo apt-get remove abiword gnumeric
 
 
 
@@ -224,6 +224,18 @@ sudo echo "#Can be temporarily overwritten using : sudo service apport start for
 sudo echo "enabled=0" >> /etc/default/apport
 #echo "Disable Apport maybe ? :P"
 #gksu leafpad /etc/default/apport
+
+
+
+#----------------------------------------------------------
+if [ -f /etc/sudo.conf ]
+then 
+ echo "Found already set sudo.conf so not modifying it.."
+else 
+ echo "Adding ssh-askpass as a utility to handle sudo -A calls in your system"
+ sudo echo "Path askpass /usr/bin/ssh-askpass" > /etc/sudo.conf 
+fi
+
 
 
 #For Lubuntu 20.04 + PDF export is broken in Libreoffice except if 
