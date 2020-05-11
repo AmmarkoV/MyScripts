@@ -19,7 +19,7 @@ sudo apt-get update
 BASICAPPS="firefox thunderbird vlc pidgin mumble libreoffice myspell-el-gr  synaptic catfish usb-creator-gtk remmina baobab xbacklight brasero  " #gcalctool hunspell-el lyx vino xtightvncviewer 
 GRAPHICS="hugin gimp luminance-hdr darktable" # autopano-sift"
 AUDIO="mixxx audacity audacious " 
-MOREAPPS=" gtg gtk-recordmydesktop units qrencode lm-sensors gnome-system-monitor" #glabels freemind firestarter gnotime
+MOREAPPS="simplescreenrecorder units qrencode lm-sensors " #gtg glabels freemind firestarter gnotime gtk-recordmydesktop gnome-system-monitor
 COMPATIBILITY="samba system-config-samba chntpw" #wine winetricks dosbox 
 SYSTEM="smartmontools iotop iftop iperf ifmetric htop gtkperf traceroute powertop x11vnc net-tools" #macchanger-gtk  sysv-rc-conf 
 SCREENSAVERS="xscreensaver xscreensaver-data xscreensaver-data-extra  xscreensaver-gl xscreensaver-gl-extra"
