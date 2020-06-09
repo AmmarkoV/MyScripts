@@ -269,8 +269,9 @@ sudo ln -s  /usr/share/lubuntu/wallpapers/startup.png /usr/share/lubuntu/wallpap
 
 #firefox https://addons.mozilla.org/en-US/firefox/addon/tab-list/&
 #firefox https://addons.mozilla.org/en-US/firefox/addon/os-x-yosemite/&
-firefox https://addons.mozilla.org/en-US/firefox/addon/noscript/&
+#firefox https://addons.mozilla.org/en-US/firefox/addon/noscript/&
 firefox https://addons.mozilla.org/en-US/firefox/addon/adblock-plus/?src=ss&
+firefox https://addons.mozilla.org/en-US/firefox/addon/user-agent-switcher-revived/
 #firefox https://addons.mozilla.org/en-US/firefox/addon/video-downloadhelper/&
 #firefox https://addons.mozilla.org/en-US/firefox/addon/download-youtube/&
 
