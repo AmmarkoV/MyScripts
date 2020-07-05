@@ -22,6 +22,8 @@ cd build-release
 cmake .. -DCMAKE_BUILD_TYPE=Release
 cmake --build . 
 sudo cmake --build . --target install
+
+echo "Dont forget to change the font to Ubuntu Mono to fix the weird font issues" 
 #------------------------------------------------
 
 echo "Installation Complete" | esddsp festival --tts
