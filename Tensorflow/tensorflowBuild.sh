@@ -1,5 +1,6 @@
 #!/bin/bash
 
+#Script last updated 23-06-2020
 
 #Get number of bytes in RAM
 RAM=`free | grep Mem | tr -s ' '| cut -f2 -d ' '`
