@@ -146,7 +146,9 @@ fi
 
 
 
-
+#This .autostart.sh file will be run on each session
+#you can edit it at any time using nano ~/.autostart.sh
+#this is software I typically use and want to automatically startup
 if [ -f ~/.autostart.sh ]
 then 
  echo "Found per-user autostart bash script"
@@ -158,20 +160,19 @@ else
  echo "#xscreensaver -nosplash&" >> ~/.autostart.sh
  echo "nm-applet&" >> ~/.autostart.sh 
  echo "numlockx on&" >> ~/.autostart.sh 
- echo "pidgin&" >> ~/.autostart.sh 
- echo "thunderbird&" >> ~/.autostart.sh 
  echo "firefox&" >> ~/.autostart.sh 
- echo "mumble&" >> ~/.autostart.sh 
- echo "audacious&" >> ~/.autostart.sh
+ echo "#mumble&" >> ~/.autostart.sh 
+ echo "#audacious&" >> ~/.autostart.sh
  echo "plasmawindowed org.kde.kdeconnect --statusnotifier" >> ~/.autostart.sh
  echo "#x11vnc -nap -wait 50 -noxdamage -passwd ammar -display :0 -forever -o ~/x11vnc.log -bg" >> ~/.autostart.sh 
  echo "#ssh -L 8080:192.168.1.1:80 ammar.gr -c arcfour -p 2222" >> ~/.autostart.sh
 
-
  echo "sleep 38" >> ~/.autostart.sh
+ #Go to the right workspace
  echo "xdotool key \"Ctrl+Alt+Right\" " >> ~/.autostart.sh
  echo "thunderbird&" >> ~/.autostart.sh
  echo "sleep 30" >> ~/.autostart.sh
+ #Go to the left workspace
  echo "xdotool key \"Ctrl+Alt+Left\" " >> ~/.autostart.sh
 
 
