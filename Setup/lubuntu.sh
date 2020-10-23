@@ -238,6 +238,24 @@ else
 fi
 
 
+#Do you want to setup a Web proxy on this machine?
+#This can provide a boost in your web browsing
+#sudo apt-get install squid3 
+#If squid is found the rest will autocomplete..! The proxy will work on local network machines port 3128
+
+#Create shared directory
+if [ -f /etc/squid/squid.conf ]
+then
+ USER=`whoami`
+ mkdir -p /home/$USER/cache/
+ echo "http_access allow localnet"  >> /etc/squid/conf.d/myProxy.conf
+ echo "acl localnet src 192.168.1.0/255.255.255.0"  >> /etc/squid/conf.d/myProxy.conf
+ echo "cache_dir diskd /home/$USER/cache 100 16 256"  >> /etc/squid/conf.d/myProxy.conf
+ echo "#Don't forget to run this if you change something here"  >> /etc/squid/conf.d/myProxy.conf
+ echo "#sudo systemctl restart squid.service"  >> /etc/squid/conf.d/myProxy.conf
+ sudo systemctl restart squid.service
+fi
+ 
 
 #For Lubuntu 20.04 + PDF export is broken in Libreoffice except if 
 #TODO add this automatically ? 
