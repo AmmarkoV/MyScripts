@@ -16,12 +16,12 @@ sudo apt-get update
 #sudo apt-get install --install-recommends linux-generic-hwe-18.04 xserver-xorg-hwe-18.04 
 
 #-----------------------------------------------------------------------------------------------------------------------
-BASICAPPS="firefox thunderbird vlc pidgin mumble libreoffice myspell-el-gr  synaptic catfish usb-creator-gtk remmina baobab xbacklight brasero  " #gcalctool hunspell-el lyx vino xtightvncviewer 
+BASICAPPS="firefox thunderbird vlc pidgin mumble libreoffice myspell-el-gr synaptic catfish usb-creator-gtk remmina baobab xbacklight brasero  " #gcalctool hunspell-el lyx vino xtightvncviewer 
 GRAPHICS="hugin gimp luminance-hdr darktable" # autopano-sift"
 AUDIO="mixxx audacity audacious " 
 MOREAPPS="simplescreenrecorder units qrencode lm-sensors " #gtg glabels freemind firestarter gnotime gtk-recordmydesktop gnome-system-monitor
 COMPATIBILITY="samba system-config-samba chntpw" #wine winetricks dosbox 
-SYSTEM="smartmontools iotop iftop iperf ifmetric htop gtkperf traceroute powertop x11vnc net-tools grub-customizer" #macchanger-gtk  sysv-rc-conf 
+SYSTEM="smartmontools iotop iftop iperf ifmetric htop gtkperf traceroute powertop x11vnc net-tools grub-customizer libvdpau-va-gl1 vdpauinfo" #macchanger-gtk  sysv-rc-conf 
 SCREENSAVERS="xscreensaver xscreensaver-data xscreensaver-data-extra  xscreensaver-gl xscreensaver-gl-extra"
 ADVLIBS="festival imagemagick numlockx gxmessage libnotify-bin htop gtkperf traceroute powertop x11vnc" #macchanger-gtk  sysv-rc-conf 
 CODECS="ubuntu-restricted-extras pavucontrol beep ffmpeg mplayer smplayer " #ffmpeg avconv
