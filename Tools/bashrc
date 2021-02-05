@@ -116,6 +116,8 @@ alias connectHobbitE='ssh demo@192.168.0.105 -c arcfour '
 
 alias connectSpiti='ssh ammar@spiti.ammar.gr -c arcfour -p 2222'
 
+alias capslock='xdotool key Caps_Lock'
+
 alias update='sudo apt-get update && sudo apt-get upgrade -y'
 alias vncserver='x11vnc -nap -wait 50 -noxdamage -passwd ammar -noxrecord -display :0 -forever -o ~/x11vnc.log' # -bg
 alias updatepip3="python3 -m pip list --outdated --format=freeze | grep -v '^\-e' | cut -d = -f 1  | xargs -n1 python3 -m pip install -U --user" 
