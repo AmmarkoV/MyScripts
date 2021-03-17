@@ -99,6 +99,8 @@ else
    sudo sh -c 'echo "vm.dirty_ratio = 99" >>/etc/sysctl.conf' 
    sudo sh -c 'echo "vm.dirty_background_ratio = 50" >>/etc/sysctl.conf' 
    sudo sh -c 'echo "vm.vfs_cache_pressure= 10" >>/etc/sysctl.conf'  
+  
+   sudo sh -c 'echo "vm.nr_hugepages=128" >>/etc/sysctl.conf'  
 
    sudo swapoff -a
    sudo swapon -a
