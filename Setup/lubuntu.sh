@@ -16,12 +16,12 @@ sudo apt-get update
 #sudo apt-get install --install-recommends linux-generic-hwe-18.04 xserver-xorg-hwe-18.04 
 
 #-----------------------------------------------------------------------------------------------------------------------
-BASICAPPS="firefox thunderbird vlc pidgin mumble libreoffice myspell-el-gr  synaptic catfish usb-creator-gtk remmina baobab xbacklight brasero  " #gcalctool hunspell-el lyx vino xtightvncviewer 
+BASICAPPS="firefox thunderbird vlc pidgin mumble libreoffice myspell-el-gr synaptic catfish usb-creator-gtk remmina baobab xbacklight brasero  " #gcalctool hunspell-el lyx vino xtightvncviewer 
 GRAPHICS="hugin gimp luminance-hdr darktable" # autopano-sift"
 AUDIO="mixxx audacity audacious " 
 MOREAPPS="simplescreenrecorder units qrencode lm-sensors " #gtg glabels freemind firestarter gnotime gtk-recordmydesktop gnome-system-monitor
 COMPATIBILITY="samba system-config-samba chntpw" #wine winetricks dosbox 
-SYSTEM="smartmontools iotop iftop iperf ifmetric htop gtkperf traceroute powertop x11vnc net-tools grub-customizer" #macchanger-gtk  sysv-rc-conf 
+SYSTEM="smartmontools iotop iftop iperf ifmetric htop gtkperf traceroute powertop x11vnc net-tools grub-customizer libvdpau-va-gl1 vdpauinfo neofetch" #macchanger-gtk  sysv-rc-conf 
 SCREENSAVERS="xscreensaver xscreensaver-data xscreensaver-data-extra  xscreensaver-gl xscreensaver-gl-extra"
 ADVLIBS="festival imagemagick numlockx gxmessage libnotify-bin htop gtkperf traceroute powertop x11vnc" #macchanger-gtk  sysv-rc-conf 
 CODECS="ubuntu-restricted-extras pavucontrol beep ffmpeg mplayer smplayer " #ffmpeg avconv
@@ -148,7 +148,9 @@ fi
 
 
 
-
+#This .autostart.sh file will be run on each session
+#you can edit it at any time using nano ~/.autostart.sh
+#this is software I typically use and want to automatically startup
 if [ -f ~/.autostart.sh ]
 then 
  echo "Found per-user autostart bash script"
@@ -160,20 +162,19 @@ else
  echo "#xscreensaver -nosplash&" >> ~/.autostart.sh
  echo "nm-applet&" >> ~/.autostart.sh 
  echo "numlockx on&" >> ~/.autostart.sh 
- echo "pidgin&" >> ~/.autostart.sh 
- echo "thunderbird&" >> ~/.autostart.sh 
  echo "firefox&" >> ~/.autostart.sh 
- echo "mumble&" >> ~/.autostart.sh 
- echo "audacious&" >> ~/.autostart.sh
+ echo "#mumble&" >> ~/.autostart.sh 
+ echo "#audacious&" >> ~/.autostart.sh
  echo "plasmawindowed org.kde.kdeconnect --statusnotifier" >> ~/.autostart.sh
  echo "#x11vnc -nap -wait 50 -noxdamage -passwd ammar -display :0 -forever -o ~/x11vnc.log -bg" >> ~/.autostart.sh 
  echo "#ssh -L 8080:192.168.1.1:80 ammar.gr -c arcfour -p 2222" >> ~/.autostart.sh
 
-
  echo "sleep 38" >> ~/.autostart.sh
+ #Go to the right workspace
  echo "xdotool key \"Ctrl+Alt+Right\" " >> ~/.autostart.sh
  echo "thunderbird&" >> ~/.autostart.sh
  echo "sleep 30" >> ~/.autostart.sh
+ #Go to the left workspace
  echo "xdotool key \"Ctrl+Alt+Left\" " >> ~/.autostart.sh
 
 
@@ -239,6 +240,24 @@ else
 fi
 
 
+#Do you want to setup a Web proxy on this machine?
+#This can provide a boost in your web browsing
+#sudo apt-get install squid3 
+#If squid is found the rest will autocomplete..! The proxy will work on local network machines port 3128
+
+#Create shared directory
+if [ -f /etc/squid/squid.conf ]
+then
+ USER=`whoami`
+ mkdir -p /home/$USER/cache/
+ echo "http_access allow localnet"  >> /etc/squid/conf.d/myProxy.conf
+ echo "acl localnet src 192.168.1.0/255.255.255.0"  >> /etc/squid/conf.d/myProxy.conf
+ echo "cache_dir diskd /home/$USER/cache 100 16 256"  >> /etc/squid/conf.d/myProxy.conf
+ echo "#Don't forget to run this if you change something here"  >> /etc/squid/conf.d/myProxy.conf
+ echo "#sudo systemctl restart squid.service"  >> /etc/squid/conf.d/myProxy.conf
+ sudo systemctl restart squid.service
+fi
+ 
 
 #For Lubuntu 20.04 + PDF export is broken in Libreoffice except if 
 #TODO add this automatically ? 
@@ -324,7 +343,7 @@ else
 fi
 #----------------------------------------------------------
 
-
+neofetch
 echo "Configuration Complete" |  festival --tts
 
 
