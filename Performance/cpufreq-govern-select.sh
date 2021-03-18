@@ -5,6 +5,9 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$DIR"
 
+#gksu
+#kdesudo
+#pkexec
 
 #runs this script as root if not already
 if [ ! $( id -u ) -eq 0 ]; then

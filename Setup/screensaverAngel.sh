@@ -1,10 +1,19 @@
 #!/bin/bash
 
+
+
 while :
 do 
- xscreensaver -nosplash
- sleep
- echo "XScreenSaver crashed ?"
+
+
+if pgrep -x "xscreensaver" >/dev/null
+then
+   sleep 10
+else
+    echo "XScreenSaver crashed ?"
+    xscreensaver -nosplash
+fi
+ sleep 10
 done 
 
 exit 0
