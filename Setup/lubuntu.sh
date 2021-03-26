@@ -20,7 +20,7 @@ BASICAPPS="firefox thunderbird vlc pidgin mumble libreoffice myspell-el-gr synap
 GRAPHICS="hugin gimp luminance-hdr darktable" # autopano-sift"
 AUDIO="mixxx audacity audacious " 
 MOREAPPS="simplescreenrecorder units qrencode lm-sensors " #gtg glabels freemind firestarter gnotime gtk-recordmydesktop gnome-system-monitor
-COMPATIBILITY="samba system-config-samba chntpw" #wine winetricks dosbox 
+COMPATIBILITY="samba chntpw" #wine winetricks dosbox system-config-samba 
 SYSTEM="smartmontools iotop iftop iperf ifmetric htop gtkperf traceroute powertop x11vnc net-tools grub-customizer libvdpau-va-gl1 vdpauinfo neofetch" #macchanger-gtk  sysv-rc-conf 
 SCREENSAVERS="xscreensaver xscreensaver-data xscreensaver-data-extra  xscreensaver-gl xscreensaver-gl-extra"
 ADVLIBS="festival imagemagick numlockx gxmessage libnotify-bin htop gtkperf traceroute powertop x11vnc" #macchanger-gtk  sysv-rc-conf 
@@ -31,9 +31,9 @@ sudo apt-get install $BASICAPPS $MOREAPPS $ADVLIBS $COMPATIBILITY $SYSTEM $SCREE
    
 
 
-#DVD Playback maybe ?
-sudo apt-get install libdvdread4
-sudo /usr/share/doc/libdvdread4/install-css.sh
+#DVD Playback maybe ?  :P no one uses DVD in 2021
+#sudo apt-get install libdvdread4
+#sudo /usr/share/doc/libdvdread4/install-css.sh
 
 #dbus is neede for gedit?
 #sudo apt-get install --reinstall dbus dbus-x11
