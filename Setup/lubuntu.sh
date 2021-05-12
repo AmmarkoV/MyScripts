@@ -30,6 +30,10 @@ SECURITY="network-manager-openvpn network-manager-openvpn-gnome" #vidalia tor
 sudo apt-get install $BASICAPPS $MOREAPPS $ADVLIBS $COMPATIBILITY $SYSTEM $SCREENSAVERS $ADVLIBS $AUDIO $CODECS $GRAPHICS $SECURITY         
    
 
+#Extra Server Security maybe?
+#sudo apt-get install fail2ban
+#sudo iptables -S <- gia na dei kaneis to ban list
+
 
 #DVD Playback maybe ?  :P no one uses DVD in 2021
 #sudo apt-get install libdvdread4
