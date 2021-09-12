@@ -16,7 +16,7 @@ sudo apt-get update
 #sudo apt-get install --install-recommends linux-generic-hwe-18.04 xserver-xorg-hwe-18.04 
 
 #-----------------------------------------------------------------------------------------------------------------------
-BASICAPPS="firefox thunderbird vlc pidgin mumble libreoffice myspell-el-gr synaptic catfish usb-creator-gtk remmina baobab xbacklight brasero  " #gcalctool hunspell-el lyx vino xtightvncviewer 
+BASICAPPS="firefox thunderbird vlc pidgin mumble libreoffice myspell-el-gr synaptic catfish usb-creator-gtk remmina baobab xbacklight brasero aisleriot" #gcalctool hunspell-el lyx vino xtightvncviewer 
 GRAPHICS="hugin gimp luminance-hdr darktable" # autopano-sift"
 AUDIO="mixxx audacity audacious " 
 MOREAPPS="simplescreenrecorder units qrencode lm-sensors " #gtg glabels freemind firestarter gnotime gtk-recordmydesktop gnome-system-monitor
