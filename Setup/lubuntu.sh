@@ -347,6 +347,13 @@ else
 fi
 #----------------------------------------------------------
 
+
+#Install Discord 
+#wget -O /tmp/discord-installer.deb "https://discordapp.com/api/download/canary?platform=linux&format=deb"
+#dpkg -i /tmp/discord-installer.deb
+ 
+
+
 neofetch
 echo "Configuration Complete" |  festival --tts
 

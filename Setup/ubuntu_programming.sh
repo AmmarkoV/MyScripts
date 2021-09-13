@@ -10,6 +10,17 @@ sudo apt-get install build-essential codelite codelite-plugins blender dia git  
 #schedutils mysql-workbench gitstats valkyrie
 #schedutils
 
+
+#Visual Studio
+#As seen in : https://www.ubuntupit.com/visual-studio-code-a-free-and-open-source-code-editor-for-ubuntu/
+#sudo sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main" > /etc/apt/sources.list.d/vscode.list'
+#curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
+#sudo mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg
+#sudo apt-get update && sudo apt-get dist-upgrade
+#sudo apt-get install code
+
+
+
 #Code lite...
 #------------------------------------------------
 echo "Now installing codelite"
