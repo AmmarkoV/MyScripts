@@ -349,6 +349,8 @@ fi
 
 
 #Install Steam
+#Steam needs 32bit libc
+#sudo apt-get install libc6-i386
 #wget -O ~/Downloads/steam.deb "https://cdn.cloudflare.steamstatic.com/client/installer/steam.deb"
 #dpkg -i ~/Downloads/steam.deb
 
