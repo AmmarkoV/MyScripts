@@ -348,6 +348,10 @@ fi
 #----------------------------------------------------------
 
 
+#Install Steam
+#wget -O ~/Downloads/steam.deb "https://cdn.cloudflare.steamstatic.com/client/installer/steam.deb"
+#dpkg -i ~/Downloads/steam.deb
+
 #Install Discord 
 #wget -O /tmp/discord-installer.deb "https://discordapp.com/api/download/canary?platform=linux&format=deb"
 #dpkg -i /tmp/discord-installer.deb
