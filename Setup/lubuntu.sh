@@ -4,12 +4,29 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$DIR"
 
+clear
 echo "LUbuntu handy Packages automation "
 
 #sudo apt-get install gksu
 
 sudo add-apt-repository ppa:graphics-drivers/ppa
 sudo apt-get update
+
+
+if lspci | grep  "NVIDIA"
+then
+  lspci | grep  "NVIDIA"
+  echo
+  echo "Do you want to install NVIDIA drivers and stuff? " 
+  echo
+  echo -n " (Y/N)?"
+  read answer
+  if test "$answer" != "N" -a "$answer" != "n";
+  then 
+    #Get Vulkan
+    sudo apt-get install nvidia-driver-470 vulkan vulkan-utils freeglut3 freeglut3-dev libglew-dev
+  fi
+
 
 
 #Go to latest kernel..
@@ -29,6 +46,10 @@ SECURITY="network-manager-openvpn network-manager-openvpn-gnome" #vidalia tor
 #-----------------------------------------------------------------------------------------------------------------------
 sudo apt-get install $BASICAPPS $MOREAPPS $ADVLIBS $COMPATIBILITY $SYSTEM $SCREENSAVERS $ADVLIBS $AUDIO $CODECS $GRAPHICS $SECURITY         
    
+
+#Also upgrade everything else..
+sudo apt-get dist-upgrade
+
 
 #Extra Server Security maybe?
 #sudo apt-get install fail2ban
