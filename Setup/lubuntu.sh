@@ -143,6 +143,14 @@ fi
 #fi
 
 
+#Add a DLNA server
+#sudo apt-get install minidlna
+#sudo nano /etc/minidlna.conf 
+#media_dir=V,/media/ammar/AmmarKriti/ammar/Videos/
+#media_dir=V,/home/ammar/Videos/DVD/
+#inotify=yes
+#nnotify_interval=30
+
 
 
 if [ -d ~/.config/autostart ] 
