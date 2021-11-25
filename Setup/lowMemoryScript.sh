@@ -5,6 +5,7 @@
 
 killall firefox
 killall MainThread #For some stupid reason the main process/thread of firefox is now called MainThread
+killall "Isolated Web Co" #For some stupid reason the main process/thread of firefox is now called MainThread
 killall "Web Content" #For some stupid reason the main process/thread of firefox is now called MainThread
 killall thunderbird
 #gnome-system-monitor
