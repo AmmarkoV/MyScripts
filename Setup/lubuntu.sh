@@ -26,7 +26,7 @@ then
     #Get Vulkan
     sudo apt-get install nvidia-driver-470 vulkan vulkan-utils freeglut3 freeglut3-dev libglew-dev nvtop
   fi
-
+fi
 
 
 #Go to latest kernel..
