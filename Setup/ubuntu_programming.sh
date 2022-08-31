@@ -11,6 +11,21 @@ sudo apt-get install build-essential codelite codelite-plugins blender dia git  
 #schedutils
 
 
+
+#Add legacy ssh connection for old git servers
+if [ -f /etc/ssh_config ]
+then 
+ if cat /etc/ssh_config | grep -q "HostKeyAlgorithms"
+then
+   echo "Legacy GIT ssh algorithms seems to be already set-up.." 
+else 
+ echo "HostKeyAlgorithms +ssh-rsa,ssh-dss"  >> /etc/ssh_config 
+ sudo systemctl restart ssh
+ fi
+fi
+
+
+
 #Visual Studio
 #As seen in : https://www.ubuntupit.com/visual-studio-code-a-free-and-open-source-code-editor-for-ubuntu/
 #sudo sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main" > /etc/apt/sources.list.d/vscode.list'
