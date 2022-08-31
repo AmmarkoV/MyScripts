@@ -324,6 +324,11 @@ sudo wget https://raw.githubusercontent.com/AmmarkoV/MyScripts/master/Multimedia
 sudo mv /usr/share/lubuntu/wallpapers/lubuntu-default-wallpaper.png /usr/share/lubuntu/wallpapers/lubuntu-default-wallpaperOLD.png
 sudo ln -s  /usr/share/lubuntu/wallpapers/startup.png /usr/share/lubuntu/wallpapers/lubuntu-default-wallpaper.png
 
+
+
+#https://make-linux-fast-again.com/
+# echo "GRUB_CMDLINE_LINUX_DEFAULT=\"quiet splash noibrs noibpb nopti nospectre_v2 nospectre_v1 l1tf=off nospec_store_bypass_disable no_stf_barrier mds=off tsx=on tsx_async_abort=off mitigations=off\"" >> /etc/default/grub
+
 #firefox https://addons.mozilla.org/en-US/firefox/addon/tab-list/&
 #firefox https://addons.mozilla.org/en-US/firefox/addon/os-x-yosemite/&
 #firefox https://addons.mozilla.org/en-US/firefox/addon/noscript/&
@@ -378,6 +383,8 @@ else
  fi
 fi
 #----------------------------------------------------------
+
+#
 
 
 #Install Steam
