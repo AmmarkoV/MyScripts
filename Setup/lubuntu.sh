@@ -135,6 +135,17 @@ else
 fi 
 fi
 
+
+#Add 8GB of swap as a file in /
+#sudo swapon --show
+#sudo fallocate -l 8G /swapfile
+#sudo chmod 600 /swapfile 
+#sudo mkswap /swapfile
+#sudo swapon /swapfile
+#sudo swapon --show
+#echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+
+
 #if cat /etc/fstab | grep -q "/ramfs"
 #then
 #   echo "RAM fs seems to be set up ok!" 
@@ -384,7 +395,6 @@ else
 fi
 #----------------------------------------------------------
 
-#
 
 
 #Install Steam
