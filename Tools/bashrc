@@ -122,6 +122,13 @@ alias update='sudo apt-get update && sudo apt-get upgrade -y'
 alias vncserver='x11vnc -nap -wait 50 -noxdamage -passwd ammar -noxrecord -display :0 -forever -o ~/x11vnc.log' # -bg
 alias updatepip3="python3 -m pip list --outdated --format=freeze | grep -v '^\-e' | cut -d = -f 1  | xargs -n1 python3 -m pip install -U --user" 
 #alias updatepip3="pip3 list --outdated --format=freeze | grep -v '^\-e' | cut -d = -f 1  | xargs -n1 pip3 install -U --user"
+alias cmakecbp='cmake .. -G "CodeBlocks - Unix Makefiles" '
+alias cmakecodelite='cmake .. -G "CodeLite - Unix Makefiles"'
+alias cleandocker='docker image prune -f  && docker container prune -f'
+alias dockerformat="docker system prune -a"
+alias capslock='xdotool key Caps_Lock'
+
+
 
 # set PATH so it includes user's private bin if it exists
 if [ -d "$HOME/androidSDK/bin" ] ; then
