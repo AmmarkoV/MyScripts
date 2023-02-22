@@ -125,7 +125,7 @@ alias updatepip3="python3 -m pip list --outdated --format=freeze | grep -v '^\-e
 alias cmakecbp='cmake .. -G "CodeBlocks - Unix Makefiles" '
 alias cmakecodelite='cmake .. -G "CodeLite - Unix Makefiles"'
 alias cleandocker='docker image prune -f  && docker container prune -f'
-alias dockerformat="docker system prune -a"
+alias formatdocker="docker system prune -a"
 alias capslock='xdotool key Caps_Lock'
 
 
