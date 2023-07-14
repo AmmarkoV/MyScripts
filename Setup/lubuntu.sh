@@ -44,8 +44,9 @@ SCREENSAVERS="xscreensaver xscreensaver-data xscreensaver-data-extra  xscreensav
 ADVLIBS="festival imagemagick numlockx gxmessage libnotify-bin htop gtkperf traceroute powertop x11vnc" #macchanger-gtk  sysv-rc-conf 
 CODECS="ubuntu-restricted-extras pavucontrol beep ffmpeg mplayer smplayer " #ffmpeg avconv
 SECURITY="network-manager-openvpn network-manager-openvpn-gnome" #vidalia tor 
+DIGITALSIGNING="poppler-utils poppler-data libnss3-tools"
 #-----------------------------------------------------------------------------------------------------------------------
-sudo apt-get install $BASICAPPS $MOREAPPS $ADVLIBS $COMPATIBILITY $SYSTEM $SCREENSAVERS $ADVLIBS $AUDIO $CODECS $GRAPHICS $SECURITY         
+sudo apt-get install $BASICAPPS $MOREAPPS $ADVLIBS $COMPATIBILITY $SYSTEM $SCREENSAVERS $ADVLIBS $AUDIO $CODECS $GRAPHICS $SECURITY $DIGITALSIGNING
 
 datectl
 #sudo chronyd -q

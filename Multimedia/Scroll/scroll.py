@@ -15,7 +15,7 @@ window_height = 1920
 image = cv2.imread(image_path)
 
 # Calculate the step size for scrolling
-step_x = 10
+step_x = 2
 step_y = 1
 
 i=10
@@ -37,4 +37,4 @@ for j in range(0, image.shape[1] - window_width + 1, step_x):
         cv2.imwrite('colorFrame_0_%05u.jpg' % frameNumber, frame)
         frameNumber+=1
 
-os.system("ffmpeg -framerate 30 -i colorFrame_0_%05d.jpg  -s 1080x1920  -y -r 30 -pix_fmt yuv420p -threads 8 scroll.mp4 && rm colorFrame*.jpg") 
+os.system("ffmpeg -framerate 120 -i colorFrame_0_%05d.jpg  -s 1080x1920  -y -r 120 -pix_fmt yuv420p -threads 8 scroll.mp4 && rm colorFrame*.jpg") 
