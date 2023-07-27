@@ -6,7 +6,8 @@ echo "Ammar's Ubuntu programming Packages :P "
 
 #codeblocks codeblocks-contrib wxformbuilder
 
-sudo apt-get install build-essential codelite codelite-plugins blender dia git  gource cmake mesa-utils wx-common libwxgtk3.0-gtk3-dev valgrind  sysprof htop hardinfo gtkperf  patchutils  doxygen doxygen-gui arbtt ghex chrpath cppcheck screen bluefish kcachegrind astyle
+sudo apt-get install build-essential codelite codelite-plugins blender dia git  gource cmake  extra-cmake-modules
+ mesa-utils wx-common libwxgtk3.0-gtk3-dev valgrind  sysprof htop hardinfo gtkperf  patchutils  doxygen doxygen-gui arbtt ghex chrpath cppcheck screen bluefish kcachegrind astyle
 #schedutils mysql-workbench gitstats valkyrie
 #schedutils
 
