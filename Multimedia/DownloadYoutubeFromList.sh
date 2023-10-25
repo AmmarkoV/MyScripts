@@ -44,8 +44,8 @@ then
 
 fi
 
-
-cat $1 | grep youtube | sort | xargs -L 1 sh -c 'youtube-dl --extract-audio --audio-format mp3 -l "$0"'
+#https://github.com/ytdl-org/ytdl-nightly/releases/tag/2023.08.07
+cat $1 | grep youtube | sort | xargs -L 1 sh -c './youtube-dl --extract-audio --audio-format mp3 -l "$0"'
 
 
 exit 0
