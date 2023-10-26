@@ -4,6 +4,17 @@ import cv2
 # Define the path to the input image
 image_path = 'in.jpg'
 
+
+
+import sys
+mem = 1.0 
+if (len(sys.argv)>1):
+       print('Argument List:', str(sys.argv))
+       for i in range(0, len(sys.argv)):
+           if (sys.argv[i]=="--from"):
+              image_path = sys.argv[i+1] 
+
+
 # Define the dimensions of the scrolling window
 window_width = 1080
 window_height = 1920
@@ -12,7 +23,23 @@ window_height = 1920
 #overlap = 334
 
 # Load the input image
-image = cv2.imread(image_path)
+originalImage = cv2.imread(image_path)
+
+
+
+# Calculate the scaling factor
+original_height, original_width, _ = originalImage.shape
+scaling_factor = window_height / original_height
+
+# Resize the image
+new_height = int(original_height * scaling_factor)
+new_width = int(original_width * scaling_factor)
+image = cv2.resize(originalImage, (new_width, new_height))
+
+
+
+
+
 
 # Calculate the step size for scrolling
 step_x = 2
