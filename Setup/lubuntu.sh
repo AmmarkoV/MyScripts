@@ -24,24 +24,43 @@ then
   if test "$answer" != "N" -a "$answer" != "n";
   then 
     #Get Vulkan
-    sudo apt-get install nvidia-driver-470 vulkan vulkan-utils freeglut3 freeglut3-dev libglew-dev nvtop
+    sudo apt-get install nvidia-driver-550 vulkan vulkan-utils freeglut3 freeglut3-dev libglew-dev nvtop
   fi
 fi
 
 
-#Go to latest kernel..
+if lsusb | grep  "Razer"
+then
+  lsusb | grep  "Razer"
+  echo
+  echo "Do you want to install Razer drivers and stuff? " 
+  echo
+  echo -n " (Y/N)?"
+  read answer
+  if test "$answer" != "N" -a "$answer" != "n";
+  then 
+    #Get Vulkan
+    sudo apt-get install openrazer-meta
+    sudo add-apt-repository ppa:polychromatic/stable
+    sudo apt update
+    sudo apt install polychromatic
+  fi
+fi
+
+
+#Go to hwe kernel..
 #sudo apt-get install --install-recommends linux-generic-hwe-18.04 xserver-xorg-hwe-18.04 
 
 #-----------------------------------------------------------------------------------------------------------------------
 BASICAPPS="firefox thunderbird vlc pidgin mumble libreoffice myspell-el-gr synaptic catfish usb-creator-gtk remmina baobab xbacklight brasero aisleriot" #gcalctool hunspell-el lyx vino xtightvncviewer 
-GRAPHICS="hugin gimp luminance-hdr darktable" # autopano-sift"
-AUDIO="mixxx audacity audacious " 
+GRAPHICS="gimp luminance-hdr darktable" #hugin autopano-sift"
+AUDIO="mixxx audacity audacious" 
 MOREAPPS="simplescreenrecorder units qrencode lm-sensors " #gtg glabels freemind firestarter gnotime gtk-recordmydesktop gnome-system-monitor
 COMPATIBILITY="samba chntpw" #wine winetricks dosbox system-config-samba 
-SYSTEM="smartmontools iat iotop iftop iperf ifmetric htop gtkperf traceroute powertop x11vnc net-tools grub-customizer libvdpau-va-gl1 curl wget vdpauinfo neofetch chrony" #macchanger-gtk  sysv-rc-conf 
+SYSTEM="smartmontools iat iotop iftop iperf ifmetric htop screen traceroute powertop x11vnc net-tools libvdpau-va-gl1 curl wget vdpauinfo neofetch chrony" #grub-customizer  macchanger-gtk  sysv-rc-conf 
 #iat converts from .iso to .bin etc
 SCREENSAVERS="xscreensaver xscreensaver-data xscreensaver-data-extra  xscreensaver-gl xscreensaver-gl-extra"
-ADVLIBS="festival imagemagick numlockx gxmessage libnotify-bin htop gtkperf traceroute powertop x11vnc" #macchanger-gtk  sysv-rc-conf 
+ADVLIBS="festival imagemagick numlockx gxmessage libnotify-bin htop  traceroute powertop x11vnc" #macchanger-gtk  sysv-rc-conf 
 CODECS="ubuntu-restricted-extras pavucontrol beep ffmpeg mplayer smplayer " #ffmpeg avconv
 SECURITY="network-manager-openvpn network-manager-openvpn-gnome" #vidalia tor 
 DIGITALSIGNING="poppler-utils poppler-data libnss3-tools" # r8168-dkms for elina laptop with RTL ethernet
@@ -395,6 +414,21 @@ else
  fi
 fi
 #----------------------------------------------------------
+
+
+
+#Don't use firefox snap
+#sudo snap remove firefox
+#sudo install -d -m 0755 /etc/apt/keyrings
+#wget -q https://packages.mozilla.org/apt/repo-signing-key.gpg -O- | sudo #tee /etc/apt/keyrings/packages.mozilla.org.asc > /dev/null
+#echo "deb [signed-by=/etc/apt/keyrings/packages.mozilla.org.asc] https://packages.mozilla.org/apt mozilla main" | sudo tee -a /etc/apt/sources.list.d/mozilla.list > /dev/null
+#echo '
+#Package: *
+#Pin: origin packages.mozilla.org
+#Pin-Priority: 1000
+#' | sudo tee /etc/apt/preferences.d/mozilla
+#sudo apt update && sudo apt install firefox
+
 
 
 
