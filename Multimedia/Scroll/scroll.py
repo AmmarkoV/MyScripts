@@ -42,7 +42,7 @@ image = cv2.resize(originalImage, (new_width, new_height))
 
 
 # Calculate the step size for scrolling
-step_x = 2
+step_x = 1
 step_y = 1
 
 i=10
