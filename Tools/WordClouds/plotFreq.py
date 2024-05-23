@@ -28,7 +28,7 @@ with open('cvpr_word_frequencies.txt', 'r') as file:
         word_frequencies[word] = int(count)
 
 # Define a list of filtered out words
-filtered_words = ['a', 'in', 'based', 'via', 'for', 'to', 'of', 'and', 'etc', 'with']  # Add more words as needed
+filtered_words = ['a', 'in', 'is', 'through', 'using', 'based', 'via', 'for', 'non', 'to', 'of', 'an', 'your', 'and', 'etc', 'the','from', 'by', 'on', 'end', 'with']  # Add more words as needed
 
 # Remove filtered words from word frequencies
 for word in filtered_words:
@@ -36,7 +36,7 @@ for word in filtered_words:
         del word_frequencies[word]
 
 # Generate the word cloud
-wordcloud = WordCloud(width=1080, height=1920, background_color='black').generate_from_frequencies(word_frequencies)
+wordcloud = WordCloud(width=1920, height=1080, background_color='black').generate_from_frequencies(word_frequencies)
 
 # Display the word cloud using matplotlib
 scale = 5
