@@ -39,7 +39,8 @@ for word in filtered_words:
 wordcloud = WordCloud(width=1080, height=1920, background_color='black').generate_from_frequencies(word_frequencies)
 
 # Display the word cloud using matplotlib
-plt.figure(figsize=(30, 15))
+scale = 5
+plt.figure(figsize=(scale*10, scale*5))
 plt.imshow(wordcloud, interpolation='bilinear')
 plt.axis('off')
 
