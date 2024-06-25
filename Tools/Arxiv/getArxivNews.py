@@ -51,7 +51,7 @@ if __name__ == "__main__":
     output_file = 'arxiv_recent.html'
     
     # Download the webpage using wget
-    #download_page(url, output_file)
+    download_page(url, output_file)
     
     # Parse the downloaded HTML file
     papers = parse_arxiv_html(output_file)
@@ -61,5 +61,7 @@ if __name__ == "__main__":
     for count,paper in enumerate(papers):
         print(f"#{count} arXiv ID: {paper['arxiv_id']}\nTitle: {paper['title']}\nURL: {paper['url']}\n")
 
-    write_titles_to_file(papers,"%s.description" % get_safe_filename() )
+    filename = "%s.description" % get_safe_filename()
+    write_titles_to_file(papers,filename)
+    os.system("python3 plotFreq.py %s"%filename)
 
