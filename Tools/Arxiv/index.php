@@ -39,10 +39,10 @@ $yesterdayDescFile = $yesterday . '.description';
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>File List</title>
+    <title>News..</title>
 </head>
 <body>
-    <h1>File List</h1>
+    <h1>News..</h1>
     
     <?php
     // Debugging: Output the previous day and the list of PNG files
@@ -57,7 +57,7 @@ $yesterdayDescFile = $yesterday . '.description';
 
     // Output the previous day's .description.png file if it exists
     if (in_array($yesterdayFile, $descriptionPngFiles)) {
-        echo "<h2>Yesterday's Description PNG</h2>";
+        //echo "<h2>Yesterday's Description PNG</h2>";
         echo "<p><img src='{$directory}{$yesterdayFile}' alt='$yesterdayFile' style='max-width:100%; height:auto;'></p>";
     } else {
         echo "<p>No description PNG file for yesterday ($yesterday) found.</p>";
