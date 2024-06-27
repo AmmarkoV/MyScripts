@@ -48,14 +48,22 @@ def write_titles_to_file(papers, file_path):
             file.write(paper['title'] + '\n')
 
 if __name__ == "__main__":
-    url = 'https://arxiv.org/list/cs.AI/recent?skip=0&show=2000'
-    output_file = 'arxiv_recent.html'
-    
-    # Download the webpage using wget
-    download_page(url, output_file)
-    
-    # Parse the downloaded HTML file
-    papers = parse_arxiv_html(output_file)
+    urls = [
+        'https://arxiv.org/list/cs.AI/recent?skip=0&show=2000',
+        'https://arxiv.org/list/cs.CV/recent?skip=0&show=2000'
+    ]
+
+    all_papers = []
+
+    for count, url in enumerate(urls):
+        output_file = f'arxiv_recent_{count}.html'
+        
+        # Download the webpage using wget
+        download_page(url, output_file)
+        
+        # Parse the downloaded HTML file
+        papers = parse_arxiv_html(output_file)
+        all_papers.extend(papers)
 
 
     # Print the retrieved papers
