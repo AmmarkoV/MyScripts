@@ -2,9 +2,13 @@
 //Do : crontab -e and then add
 // 0 23 * * * /bin/bash -c 'source /home/ammar/.bashrc && /usr/bin/python3 /home/ammar/public_html/news/getArxivNews.py'
 
-
 // Set the directory path
 $directory = 'files';
+
+// Ensure the directory path ends with a slash
+if (substr($directory, -1) !== '/') {
+    $directory .= '/';
+}
 
 // Get all files from the directory
 $files = scandir($directory);
@@ -53,7 +57,7 @@ $yesterdayFile = $yesterday . '.description.png';
     // Output the previous day's .description.png file if it exists
     if (in_array($yesterdayFile, $descriptionPngFiles)) {
         echo "<h2>Yesterday's Description PNG</h2>";
-        echo "<p><a href='$directory/$yesterdayFile' target='_blank'>$yesterdayFile</a> (<a href='https://www.google.com/search?q=$yesterdayFile' target='_blank'>Search in Google</a>)</p>";
+        echo "<p><a href='{$directory}{$yesterdayFile}' target='_blank'>$yesterdayFile</a> (<a href='https://www.google.com/search?q=$yesterdayFile' target='_blank'>Search in Google</a>)</p>";
     } else {
         echo "<p>No description PNG file for yesterday ($yesterday) found.</p>";
     }
@@ -62,7 +66,7 @@ $yesterdayFile = $yesterday . '.description.png';
     echo "<h2>Description Files</h2>";
     echo "<ul>";
     foreach ($descriptionFiles as $file) {
-        echo "<li><a href='$directory/$file' target='_blank'>$file</a> (<a href='https://www.google.com/search?q=$file' target='_blank'>Search in Google</a>)</li>";
+        echo "<li><a href='{$directory}{$file}' target='_blank'>$file</a> (<a href='https://www.google.com/search?q=$file' target='_blank'>Search in Google</a>)</li>";
     }
     echo "</ul>";
     ?>
