@@ -65,7 +65,7 @@ $yesterdayFile = $yesterday . '.description.png';
     // Output the .description files
     echo "<h2>Description Files</h2>";
     #foreach ($descriptionFiles as $file) 
-    $file = $yesterdayFile 
+    $file = $yesterdayFile ;
     {
         echo "<h3>$file</h3>";
         $content = file_get_contents($directory . $file);
