@@ -45,33 +45,40 @@ $yesterdayFile = $yesterday . '.description.png';
     
     <?php
     // Debugging: Output the previous day and the list of PNG files
-    echo "<p>Yesterday's date: $yesterday</p>";
-    echo "<p>Yesterday's file: $yesterdayFile</p>";
-    echo "<p>Available .description.png files:</p>";
-    echo "<ul>";
-    foreach ($descriptionPngFiles as $file) {
-        echo "<li>$file</li>";
-    }
-    echo "</ul>";
+    //echo "<p>Yesterday's date: $yesterday</p>";
+    //echo "<p>Yesterday's file: $yesterdayFile</p>";
+    //echo "<p>Available .description.png files:</p>";
+    //echo "<ul>";
+    //foreach ($descriptionPngFiles as $file) {
+    //    echo "<li>$file</li>";
+    // }
+    //echo "</ul>";
 
     // Output the previous day's .description.png file if it exists
     if (in_array($yesterdayFile, $descriptionPngFiles)) {
         echo "<h2>Yesterday's Description PNG</h2>";
         echo "<p><img src='{$directory}{$yesterdayFile}' alt='$yesterdayFile' style='max-width:100%; height:auto;'></p>";
-        echo "<p><a href='https://www.google.com/search?q=$yesterdayFile' target='_blank'>Search in Google</a></p>";
     } else {
         echo "<p>No description PNG file for yesterday ($yesterday) found.</p>";
     }
 
     // Output the .description files
     echo "<h2>Description Files</h2>";
-    foreach ($descriptionFiles as $file) {
-        echo "<h3>$file</h3>";
+    foreach ($descriptionFiles as $file) 
+    $file = $yesterdayFile 
+    {
+  echo "<h3>$file</h3>";
         $content = file_get_contents($directory . $file);
-        $content = nl2br(htmlspecialchars($content));
-        echo "<p>$content</p>";
-        echo "<p><a href='https://www.google.com/search?q=$file' target='_blank'>Search in Google</a></p>";
+        $lines = explode("\n", htmlspecialchars($content));
+        foreach ($lines as $line) {
+            $trimmedLine = trim($line);
+            if (!empty($trimmedLine)) {
+                echo "<p><a href='https://www.google.com/search?q=" . urlencode($trimmedLine) . "' target='_blank'>$trimmedLine</a></p>";
+            }
+        }
     }
+
+
     ?>
 </body>
 </html>
