@@ -40,6 +40,16 @@ $yesterdayFile = $yesterday . '.description.png';
     <h1>File List</h1>
     
     <?php
+    // Debugging: Output the previous day and the list of PNG files
+    echo "<p>Yesterday's date: $yesterday</p>";
+    echo "<p>Yesterday's file: $yesterdayFile</p>";
+    echo "<p>Available .description.png files:</p>";
+    echo "<ul>";
+    foreach ($descriptionPngFiles as $file) {
+        echo "<li>$file</li>";
+    }
+    echo "</ul>";
+
     // Output the previous day's .description.png file if it exists
     if (in_array($yesterdayFile, $descriptionPngFiles)) {
         echo "<h2>Yesterday's Description PNG</h2>";
@@ -58,3 +68,4 @@ $yesterdayFile = $yesterday . '.description.png';
     ?>
 </body>
 </html>
+

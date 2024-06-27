@@ -1,6 +1,7 @@
 import os
 from bs4 import BeautifulSoup
 from datetime import datetime
+#python3 -m pip install wordcloud pandas matplotlib beautifulsoup4
 
 def download_page(url, output_file):
     os.system(f'wget "{url}" -O {output_file}')
