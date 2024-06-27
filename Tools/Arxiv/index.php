@@ -3,7 +3,7 @@
 // 0 23 * * * /bin/bash -c 'source /home/ammar/.bashrc && /usr/bin/python3 /home/ammar/public_html/news/getArxivNews.py'
 
 // Set the directory path
-$directory = 'files';
+$directory = './';
 
 // Ensure the directory path ends with a slash
 if (substr($directory, -1) !== '/') {
