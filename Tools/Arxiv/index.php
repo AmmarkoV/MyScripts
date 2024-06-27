@@ -64,15 +64,17 @@ $yesterdayFile = $yesterday . '.description.png';
 
     // Output the .description files
     echo "<h2>Description Files</h2>";
-    foreach ($descriptionFiles as $file) 
+    #foreach ($descriptionFiles as $file) 
     $file = $yesterdayFile 
     {
-  echo "<h3>$file</h3>";
+        echo "<h3>$file</h3>";
         $content = file_get_contents($directory . $file);
         $lines = explode("\n", htmlspecialchars($content));
-        foreach ($lines as $line) {
+        foreach ($lines as $line) 
+        {
             $trimmedLine = trim($line);
-            if (!empty($trimmedLine)) {
+            if (!empty($trimmedLine)) 
+            {
                 echo "<p><a href='https://www.google.com/search?q=" . urlencode($trimmedLine) . "' target='_blank'>$trimmedLine</a></p>";
             }
         }
