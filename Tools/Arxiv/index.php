@@ -57,18 +57,21 @@ $yesterdayFile = $yesterday . '.description.png';
     // Output the previous day's .description.png file if it exists
     if (in_array($yesterdayFile, $descriptionPngFiles)) {
         echo "<h2>Yesterday's Description PNG</h2>";
-        echo "<p><a href='{$directory}{$yesterdayFile}' target='_blank'>$yesterdayFile</a> (<a href='https://www.google.com/search?q=$yesterdayFile' target='_blank'>Search in Google</a>)</p>";
+        echo "<p><img src='{$directory}{$yesterdayFile}' alt='$yesterdayFile' style='max-width:100%; height:auto;'></p>";
+        echo "<p><a href='https://www.google.com/search?q=$yesterdayFile' target='_blank'>Search in Google</a></p>";
     } else {
         echo "<p>No description PNG file for yesterday ($yesterday) found.</p>";
     }
 
     // Output the .description files
     echo "<h2>Description Files</h2>";
-    echo "<ul>";
     foreach ($descriptionFiles as $file) {
-        echo "<li><a href='{$directory}{$file}' target='_blank'>$file</a> (<a href='https://www.google.com/search?q=$file' target='_blank'>Search in Google</a>)</li>";
+        echo "<h3>$file</h3>";
+        $content = file_get_contents($directory . $file);
+        $content = nl2br(htmlspecialchars($content));
+        echo "<p>$content</p>";
+        echo "<p><a href='https://www.google.com/search?q=$file' target='_blank'>Search in Google</a></p>";
     }
-    echo "</ul>";
     ?>
 </body>
 </html>
