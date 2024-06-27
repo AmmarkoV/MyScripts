@@ -1,0 +1,60 @@
+<?php
+//Do : crontab -e and then add
+// 0 23 * * * /bin/bash -c 'source /home/ammar/.bashrc && /usr/bin/python3 /home/ammar/public_html/news/getArxivNews.py'
+
+
+// Set the directory path
+$directory = 'files';
+
+// Get all files from the directory
+$files = scandir($directory);
+
+// Filter and sort files
+$descriptionFiles = [];
+$descriptionPngFiles = [];
+foreach ($files as $file) {
+    if (strpos($file, '.description.png') !== false) {
+        $descriptionPngFiles[] = $file;
+    } elseif (strpos($file, '.description') !== false) {
+        $descriptionFiles[] = $file;
+    }
+}
+
+// Sort files by name
+sort($descriptionFiles);
+sort($descriptionPngFiles);
+
+// Get previous day's date
+$yesterday = date('Y-m-d', strtotime('yesterday'));
+$yesterdayFile = $yesterday . '.description.png';
+
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>File List</title>
+</head>
+<body>
+    <h1>File List</h1>
+    
+    <?php
+    // Output the previous day's .description.png file if it exists
+    if (in_array($yesterdayFile, $descriptionPngFiles)) {
+        echo "<h2>Yesterday's Description PNG</h2>";
+        echo "<p><a href='$directory/$yesterdayFile' target='_blank'>$yesterdayFile</a> (<a href='https://www.google.com/search?q=$yesterdayFile' target='_blank'>Search in Google</a>)</p>";
+    } else {
+        echo "<p>No description PNG file for yesterday ($yesterday) found.</p>";
+    }
+
+    // Output the .description files
+    echo "<h2>Description Files</h2>";
+    echo "<ul>";
+    foreach ($descriptionFiles as $file) {
+        echo "<li><a href='$directory/$file' target='_blank'>$file</a> (<a href='https://www.google.com/search?q=$file' target='_blank'>Search in Google</a>)</li>";
+    }
+    echo "</ul>";
+    ?>
+</body>
+</html>
