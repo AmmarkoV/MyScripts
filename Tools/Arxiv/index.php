@@ -65,7 +65,9 @@ $yesterdayDescFile = $yesterday . '.description';
 
     // Output the .description files
     echo "<h2>Description Files</h2>";
-    #foreach ($descriptionFiles as $file) 
+    #foreach ($descriptionFiles as $file)
+
+    $count = 1;
     $file = $yesterdayDescFile ;
     {
         echo "<h3>$file</h3>";
@@ -76,8 +78,11 @@ $yesterdayDescFile = $yesterday . '.description';
             $trimmedLine = trim($line);
             if (!empty($trimmedLine)) 
             {
-                echo "<p><a href='https://www.google.com/search?q=" . urlencode($trimmedLine) . "' target='_blank'>$trimmedLine</a></p>";
+                echo "<p><a href='https://www.google.com/search?q=" . urlencode($trimmedLine) . "' target='_blank'>".$count." - ".$trimmedLine."</a></p>";
+                $count = $count + 1;
+    
             }
+
         }
     }
 
