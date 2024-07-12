@@ -43,7 +43,8 @@ echo "Now installing codelite"
 mkdir -p ~/Documents/3dParty
 cd ~/Documents/3dParty
 git clone https://github.com/eranif/codelite
-sudo apt-get install libgtk2.0-dev pkg-config build-essential git cmake libssh-dev libwxbase3.0-dev libsqlite3-dev libwxsqlite3-3.0-dev
+sudo apt-get install libgtk2.0-dev pkg-config build-essential git cmake libssh-dev libwxbase3.0-dev libsqlite3-dev libwxsqlite3-3.0-dev libbison-dev flex
+
 cd codelite 
 mkdir build-release
 cd build-release
