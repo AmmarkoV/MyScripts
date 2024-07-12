@@ -53,7 +53,7 @@ fi
 
 #-----------------------------------------------------------------------------------------------------------------------
 BASICAPPS="firefox thunderbird vlc pidgin mumble libreoffice myspell-el-gr synaptic catfish usb-creator-gtk remmina baobab xbacklight brasero aisleriot" #gcalctool hunspell-el lyx vino xtightvncviewer 
-GRAPHICS="gimp luminance-hdr darktable" #hugin autopano-sift"
+GRAPHICS="gimp darktable" # luminance-hdr  hugin autopano-sift"
 AUDIO="mixxx audacity audacious" 
 MOREAPPS="simplescreenrecorder units qrencode lm-sensors " #gtg glabels freemind firestarter gnotime gtk-recordmydesktop gnome-system-monitor
 COMPATIBILITY="samba chntpw" #wine winetricks dosbox system-config-samba 
