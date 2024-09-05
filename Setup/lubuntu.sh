@@ -24,7 +24,7 @@ then
   if test "$answer" != "N" -a "$answer" != "n";
   then 
     #Get Vulkan
-    sudo apt-get install nvidia-driver-550 vulkan vulkan-utils freeglut3 freeglut3-dev libglew-dev nvtop
+    sudo apt-get install nvidia-driver-550 freeglut3 freeglut3-dev libglew-dev nvtop #vulkan vulkan-utils 
   fi
 fi
 
