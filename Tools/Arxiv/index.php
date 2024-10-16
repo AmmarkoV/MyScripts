@@ -38,18 +38,29 @@ $yesterdayDescFile = $yesterday . '.description';
     <meta charset="UTF-8">
     <title>News..</title>
     <script>
+        // Function to filter descriptions based on the input
         function filterDescriptions() {
-            const keyword = document.getElementById('filter-input').value.toLowerCase();
+            const keywordInput = document.getElementById('filter-input').value.toLowerCase();
+            const keywords = keywordInput.split(' ').filter(word => word.trim() !== ''); // Split input into words
+            
             const descriptions = document.querySelectorAll('.description-item');
             
             descriptions.forEach(function(description) {
                 const text = description.textContent.toLowerCase();
-                if (text.includes(keyword)) {
+                const matches = keywords.some(keyword => text.includes(keyword));
+                
+                if (matches) {
                     description.style.display = 'block'; // Show matching lines
                 } else {
                     description.style.display = 'none'; // Hide non-matching lines
                 }
             });
+        }
+
+        // Function to fill the textbox with predefined keywords and filter
+        function setKeywords(keywords) {
+            document.getElementById('filter-input').value = keywords;
+            filterDescriptions(); // Trigger the filtering
         }
     </script>
 </head>
@@ -67,8 +78,16 @@ $yesterdayDescFile = $yesterday . '.description';
     // Output the .description files
     echo "<h2>Description Files</h2>";
 
-    // Text input for filtering
-    echo "<input type='text' id='filter-input' onkeyup='filterDescriptions()' placeholder='Type a keyword to filter'>";
+    // Text input for filtering and buttons for setting keywords
+    echo "<input type='text' id='filter-input' onkeyup='filterDescriptions()' placeholder='Type keywords to filter'>";
+    
+    // Add buttons to set specific keywords for different computer vision areas
+    echo "<button onclick=\"setKeywords('pose body hand human HPE')\">Pose</button>";
+    echo "<button onclick=\"setKeywords('action HAR EAR')\">Action</button>";
+    echo "<button onclick=\"setKeywords('depth 3D reconstruction')\">Depth</button>";
+    echo "<button onclick=\"setKeywords('segmentation mask R-CNN')\">Segmentation</button>";
+    echo "<button onclick=\"setKeywords('detection object YOLO')\">Detection</button>";
+    echo "<button onclick=\"setKeywords('tracking video multi-object')\">Tracking</button>";
     
     $count = 1;
     $file = $yesterdayDescFile;
