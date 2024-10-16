@@ -1,7 +1,4 @@
 <?php
-//Do : crontab -e and then add
-// 0 23 * * * /bin/bash -c 'source /home/ammar/.bashrc && /usr/bin/python3 /home/ammar/public_html/news/getArxivNews.py'
-
 // Set the directory path
 $directory = './';
 
@@ -40,24 +37,28 @@ $yesterdayDescFile = $yesterday . '.description';
 <head>
     <meta charset="UTF-8">
     <title>News..</title>
+    <script>
+        function filterDescriptions() {
+            const keyword = document.getElementById('filter-input').value.toLowerCase();
+            const descriptions = document.querySelectorAll('.description-item');
+            
+            descriptions.forEach(function(description) {
+                const text = description.textContent.toLowerCase();
+                if (text.includes(keyword)) {
+                    description.style.display = 'block'; // Show matching lines
+                } else {
+                    description.style.display = 'none'; // Hide non-matching lines
+                }
+            });
+        }
+    </script>
 </head>
 <body>
     <h1>News..</h1>
     
     <?php
-    // Debugging: Output the previous day and the list of PNG files
-    //echo "<p>Yesterday's date: $yesterday</p>";
-    //echo "<p>Yesterday's file: $yesterdayFile</p>";
-    //echo "<p>Available .description.png files:</p>";
-    //echo "<ul>";
-    //foreach ($descriptionPngFiles as $file) {
-    //    echo "<li>$file</li>";
-    // }
-    //echo "</ul>";
-
     // Output the previous day's .description.png file if it exists
     if (in_array($yesterdayFile, $descriptionPngFiles)) {
-        //echo "<h2>Yesterday's Description PNG</h2>";
         echo "<p><img src='{$directory}{$yesterdayFile}' alt='$yesterdayFile' style='max-width:100%; height:auto;'></p>";
     } else {
         echo "<p>No description PNG file for yesterday ($yesterday) found.</p>";
@@ -65,28 +66,26 @@ $yesterdayDescFile = $yesterday . '.description';
 
     // Output the .description files
     echo "<h2>Description Files</h2>";
-    #foreach ($descriptionFiles as $file)
 
+    // Text input for filtering
+    echo "<input type='text' id='filter-input' onkeyup='filterDescriptions()' placeholder='Type a keyword to filter'>";
+    
     $count = 1;
-    $file = $yesterdayDescFile ;
-    {
+    $file = $yesterdayDescFile;
+    if (file_exists($directory . $file)) {
         echo "<h3>$file</h3>";
         $content = file_get_contents($directory . $file);
         $lines = explode("\n", htmlspecialchars($content));
-        foreach ($lines as $line) 
-        {
+        echo "<div id='description-list'>";
+        foreach ($lines as $line) {
             $trimmedLine = trim($line);
-            if (!empty($trimmedLine)) 
-            {
-                echo "<p><a href='https://www.google.com/search?q=" . urlencode($trimmedLine) . "' target='_blank'>".$count." - ".$trimmedLine."</a></p>";
-                $count = $count + 1;
-    
+            if (!empty($trimmedLine)) {
+                echo "<p class='description-item'><a href='https://www.google.com/search?q=" . urlencode($trimmedLine) . "' target='_blank'>".$count." - ".$trimmedLine."</a></p>";
+                $count++;
             }
-
         }
+        echo "</div>";
     }
-
-
     ?>
 </body>
 </html>
