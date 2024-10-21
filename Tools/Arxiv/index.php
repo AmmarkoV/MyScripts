@@ -125,7 +125,9 @@ a:active {
     $count = 1;
     $file = $yesterdayDescFile;
     if (file_exists($directory . $file)) {
-        echo "<h3>$file</h3>";
+        //echo "<h3>$file</h3>";
+        echo "<h3>$yesterday</h3>";
+
         $content = file_get_contents($directory . $file);
         $lines = explode("\n", htmlspecialchars($content));
         echo "<div id='description-list'>";
