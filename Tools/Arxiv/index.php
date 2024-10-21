@@ -29,14 +29,40 @@ sort($descriptionPngFiles);
 $yesterday = date('Y-m-d', strtotime('yesterday'));
 $yesterdayFile = $yesterday . '.description.png';
 $yesterdayDescFile = $yesterday . '.description';
-
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>News..</title>
+    <title>Computer Vision News..</title>
+
+<style>
+a:link {
+  color: black;
+  background-color: transparent;
+  text-decoration: none;
+}
+
+a:visited {
+  color: #999999;
+  background-color: transparent;
+  text-decoration: none;
+}
+
+a:hover {
+  color: red;
+  background-color: transparent;
+  text-decoration: underline;
+}
+
+a:active {
+  color: yellow;
+  background-color: transparent;
+  text-decoration: underline;
+}
+</style> 
+
     <script>
         // Function to filter descriptions based on the input
         function filterDescriptions() {
@@ -64,13 +90,18 @@ $yesterdayDescFile = $yesterday . '.description';
         }
     </script>
 </head>
-<body>
-    <h1>News..</h1>
+<body bgcolor="#CCCCCC">
+    <h1>Computer Vision News..</h1>
+
+    <table>
+     <tr>
+      <td width=40> </td>
+      <td>
     
     <?php
     // Output the previous day's .description.png file if it exists
     if (in_array($yesterdayFile, $descriptionPngFiles)) {
-        echo "<p><img src='{$directory}{$yesterdayFile}' alt='$yesterdayFile' style='max-width:100%; height:auto;'></p>";
+        echo "<p><center><img src='{$directory}{$yesterdayFile}' alt='$yesterdayFile' style='max-width:60%; height:auto;'></center></p>";
     } else {
         echo "<p>No description PNG file for yesterday ($yesterday) found.</p>";
     }
@@ -82,11 +113,12 @@ $yesterdayDescFile = $yesterday . '.description';
     echo "<input type='text' id='filter-input' onkeyup='filterDescriptions()' placeholder='Type keywords to filter'>";
     
     // Add buttons to set specific keywords for different computer vision areas
-    echo "<button onclick=\"setKeywords('pose body hand human HPE')\">Pose</button>";
+    echo "<button onclick=\"setKeywords('pose body hand HPE')\">Pose</button>";
     echo "<button onclick=\"setKeywords('action HAR EAR')\">Action</button>";
+    echo "<button onclick=\"setKeywords('count agnostic')\">Counting</button>";
     echo "<button onclick=\"setKeywords('depth 3D reconstruction')\">Depth</button>";
-    echo "<button onclick=\"setKeywords('segmentation mask R-CNN')\">Segmentation</button>";
-    echo "<button onclick=\"setKeywords('detection object YOLO')\">Detection</button>";
+    echo "<button onclick=\"setKeywords('segmentation mask classification R-CNN')\">Segmentation</button>";
+    echo "<button onclick=\"setKeywords('detection YOLO')\">Detection</button>";
     echo "<button onclick=\"setKeywords('tracking video multi-object')\">Tracking</button>";
     
     $count = 1;
@@ -106,6 +138,11 @@ $yesterdayDescFile = $yesterday . '.description';
         echo "</div>";
     }
     ?>
+
+ </td>
+ <td width=40></td>
+ </table>
+
 </body>
 </html>
 
