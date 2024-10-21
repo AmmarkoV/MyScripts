@@ -120,6 +120,7 @@ a:active {
     echo "<button onclick=\"setKeywords('segmentation mask classification R-CNN')\">Segmentation</button>";
     echo "<button onclick=\"setKeywords('detection YOLO')\">Detection</button>";
     echo "<button onclick=\"setKeywords('tracking video multi-object')\">Tracking</button>";
+    echo "<button onclick=\"setKeywords('transformer')\">Transformer</button>";
     
     $count = 1;
     $file = $yesterdayDescFile;
