@@ -64,6 +64,19 @@ a:active {
 </style> 
 
     <script>
+
+
+        function resetDescriptions() {
+            const keywordInput = document.getElementById('filter-input').value.toLowerCase();
+            const keywords = keywordInput.split(' ').filter(word => word.trim() !== ''); // Split input into words
+            
+            const descriptions = document.querySelectorAll('.description-item');
+            
+            descriptions.forEach(function(description) {
+                description.style.display = 'block'; // Show matching lines 
+            });
+        }
+
         // Function to filter descriptions based on the input
         function filterDescriptions() {
             const keywordInput = document.getElementById('filter-input').value.toLowerCase();
@@ -84,7 +97,8 @@ a:active {
         }
 
         // Function to fill the textbox with predefined keywords and filter
-        function setKeywords(keywords) {
+        function setKeywords(keywords) 
+       {
             document.getElementById('filter-input').value = keywords;
             filterDescriptions(); // Trigger the filtering
         }
@@ -110,11 +124,13 @@ a:active {
     echo "<h2>Description Files</h2>";
 
     // Text input for filtering and buttons for setting keywords
+    echo "<button onclick=\"resetDescriptions()\">C</button>";
     echo "<input type='text' id='filter-input' onkeyup='filterDescriptions()' placeholder='Type keywords to filter'>";
     
     // Add buttons to set specific keywords for different computer vision areas
     echo "<button onclick=\"setKeywords('pose body hand HPE')\">Pose</button>";
-    echo "<button onclick=\"setKeywords('action HAR EAR')\">Action</button>";
+    echo "<button onclick=\"setKeywords('action anticipation')\">Action</button>";
+    echo "<button onclick=\"setKeywords('caption')\">Caption</button>";
     echo "<button onclick=\"setKeywords('count agnostic')\">Counting</button>";
     echo "<button onclick=\"setKeywords('depth 3D reconstruction')\">Depth</button>";
     echo "<button onclick=\"setKeywords('segmentation mask classification R-CNN')\">Segmentation</button>";
