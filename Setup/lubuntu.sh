@@ -57,7 +57,7 @@ GRAPHICS="gimp darktable" # luminance-hdr  hugin autopano-sift"
 AUDIO="mixxx audacity audacious" 
 MOREAPPS="simplescreenrecorder units qrencode lm-sensors " #gtg glabels freemind firestarter gnotime gtk-recordmydesktop gnome-system-monitor
 COMPATIBILITY="samba chntpw" #wine winetricks dosbox system-config-samba 
-SYSTEM="smartmontools iat iotop iftop iperf ifmetric htop screen traceroute powertop x11vnc net-tools libvdpau-va-gl1 curl wget vdpauinfo neofetch chrony" #grub-customizer  macchanger-gtk  sysv-rc-conf 
+SYSTEM="smartmontools iat iotop iftop iperf ifmetric htop screen traceroute powertop x11vnc net-tools libvdpau-va-gl1 curl wget vdpauinfo neofetch chrony gddrescue" #grub-customizer  macchanger-gtk  sysv-rc-conf 
 #iat converts from .iso to .bin etc
 SCREENSAVERS="xscreensaver xscreensaver-data xscreensaver-data-extra  xscreensaver-gl xscreensaver-gl-extra"
 ADVLIBS="festival imagemagick numlockx gxmessage libnotify-bin htop  traceroute powertop x11vnc" #macchanger-gtk  sysv-rc-conf 
