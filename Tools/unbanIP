@@ -1,0 +1,22 @@
+fail2ban-client -i
+
+then in interactive mode type read the status of a jail:
+
+status sshd
+
+you'll get:
+
+Status for the jail: ssh
+|- Filter
+|  |- Currently failed: 0
+|  |- Total failed: 6
+|  `- File list:    /var/log/auth.log
+`- Actions
+   |- Currently banned: 1
+   |- Total banned: 2
+   `- Banned IP list:   203.113.167.162
+
+then type in fail2ban interactive mode:
+
+set sshd unbanip 203.113.167.162
+
