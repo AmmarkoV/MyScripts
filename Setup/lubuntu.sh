@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# This script is inteded to be run once after you perform a Lubuntu intallation
+# https://lubuntu.me/downloads/
+# Repositories and software comes and goes so feel free to customize this to match your preferences 
+
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$DIR"
@@ -7,10 +11,9 @@ cd "$DIR"
 clear
 echo "LUbuntu handy Packages automation "
 
-#sudo apt-get install gksu
-
-sudo add-apt-repository ppa:graphics-drivers/ppa
 sudo apt-get update
+
+#sudo apt-get install gksu
 
 
 if lspci | grep  "NVIDIA"
@@ -23,6 +26,8 @@ then
   read answer
   if test "$answer" != "N" -a "$answer" != "n";
   then 
+    sudo add-apt-repository ppa:graphics-drivers/ppa
+    sudo apt-get update
     #Get Vulkan
     sudo apt-get install nvidia-driver-550 freeglut3 freeglut3-dev libglew-dev nvtop #vulkan vulkan-utils 
   fi
