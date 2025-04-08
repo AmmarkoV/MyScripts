@@ -1,29 +1,60 @@
-// GoPro Hero-style camera dimensions
-camera_width = 71.8;
-camera_height = 50.8;
-camera_depth = 29;        // Approximate body without lens
-lens_depth = 4.6;         // Protrusion of lens (total 33.6 - 29)
-lens_diameter = 26;       // Approximate lens diameter
-lens_offset_x = 53;       // X offset from left
-lens_offset_y = 36;       // Y offset from bottom
+// Dimensions
+tolerance = 0.1;
+camera_width = 71.8 + tolerance;
+camera_height = 50.8 + tolerance;
+camera_depth = 29 + tolerance;        // Body only
+lens_depth = 4.6;
+lens_diameter = 26;
 
-// Main camera body
+// Rotated dimensions (vertical camera)
+camera_rotated_width = camera_height;
+camera_rotated_height = camera_width;
+
+// Stereo config
+lens_to_lens = 65;
+lens_offset_in_camera = 18.8;  // Distance from left of camera to lens center
+right_cam_x = lens_to_lens - lens_offset_in_camera;  // 59mm
+
+// Generate the base by subtracting both rotated cameras
 difference() 
 {
-    roundedCube([camera_width, camera_depth, camera_height], 3);
-    
-    // Optional: add holes or mounts here
+    // Outer block: big enough to contain both cameras
+    translate([-40, -5, -10])
+        cube([right_cam_x + camera_rotated_width - 45, 15, camera_rotated_height + 60]);
+ 
+    {
+        /*
+        translate([0, 5, 0])
+        cube([20, 25, 50]);
+        
+        translate([0, 5, right_cam_x+15 ])
+        cube([20, 25, 50]);*/
+        
+    // Left camera at origin
+    rotate([0, 0, 90])
+        camera();
+
+    // Right camera at X = 59mm
+    translate([0, 0, right_cam_x+15 ])
+    rotate([0, 0, 90])
+            camera();
+    }
 }
 
-// Front lens (cylindrical protrusion)
-translate([lens_offset_x, camera_depth, lens_offset_y])
-    rotate([90, 0, 0])
-        cylinder(h = lens_depth, d = lens_diameter, $fn = 100);
+// Reusable camera module
+module camera() 
+{
+    difference() 
+    {
+        roundedCube([camera_width, camera_depth, camera_height], 3);
+    }
+}
 
-
-// Utility: Rounded cube module
-module roundedCube(size, radius) {
-    hull() {
+// Rounded cube utility
+module roundedCube(size, radius) 
+{
+    hull() 
+    {
         for (x = [0, size[0]])
             for (y = [0, size[1]])
                 for (z = [0, size[2]])
