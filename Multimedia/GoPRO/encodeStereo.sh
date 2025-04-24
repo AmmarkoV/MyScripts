@@ -3,7 +3,7 @@
 #sudo apt install mkvtoolnix ffmpeg
 
 
-FILE="GX010006.MP4" 
+FILE="GX010009.MP4" 
 
 ffmpeg -i left/$FILE -i right/$FILE -filter_complex "\
 [0:v]hqdn3d=0:0:8:8,eq=contrast=1.2:brightness=-0.05:saturation=1.25,\
