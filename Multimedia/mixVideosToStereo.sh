@@ -1,5 +1,8 @@
 #!/bin/bash
 
+#sudo apt install mkvtoolnix ffmpeg
+
+
 #ffmpeg -i left.avi -i right.avi -filter_complex hstack -c:v ffv1 output.avi
 #stereo_mode=1
 
@@ -32,7 +35,7 @@
 #-vf hqdn3d=0:0:8:8
 #-vf vaguedenoiser=2:2:6:85:15
 
-FILE="MOVI0018.avi"
+FILE="GX010005.MP4"
 VERTICALCROP="40"
 ffmpeg -i left/$FILE -i right/$FILE -filter_complex "[0:v]hqdn3d=0:0:8:8[l1]; [l1]eq=contrast=1.2:brightness=-0.05:saturation=1.25[l2]; [l2]crop=in_w:in_h-$VERTICALCROP:0:$VERTICALCROP[l3]; [l3]scale=900:in_h-$VERTICALCROP[l4]; [1:v]hqdn3d=0:0:8:8[r1]; [r1]eq=contrast=1.2:brightness=-0.05:saturation=1.25[r2]; [r2]crop=in_w:in_h-$VERTICALCROP:0:0[r3];[r3]scale=900:in_h-$VERTICALCROP[r4];[l4][r4]hstack,format=yuv420p"  -c:v libx264 -crf 18 -metadata:s:v:0 stereo_mode=left_right -y -threads 0 c$FILE.mkv
 
