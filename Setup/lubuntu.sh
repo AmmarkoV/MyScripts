@@ -112,6 +112,25 @@ else
 fi
 
 
+
+
+#Allow apt-get to update kernels without symlinks 
+if cat /etc/kernel-img.conf | grep -q "do_symlinks"
+then
+   echo "Kernel image settings seem to be ok!" 
+else
+ sudo echo "do_symlinks = no"  >> /etc/kernel-img.conf
+ sudo echo "no_symlinks = yes" >> /etc/kernel-img.conf
+fi
+
+
+
+
+
+
+
+
+
 #Tweak TCP congestion
 if cat /etc/sysctl.d/10-custom-kernel-bbr.conf | grep -q "tcp_congestion_control=bbr"
 then
