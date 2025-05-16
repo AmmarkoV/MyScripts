@@ -29,7 +29,8 @@ then
     sudo add-apt-repository ppa:graphics-drivers/ppa
     sudo apt-get update
     #Get Vulkan
-    sudo apt-get install nvidia-driver-560 libglew-dev nvtop freeglut3-dev vulkan-tools vulkan-utility-libraries-de #freeglut3 
+    sudo apt-get install nvidia-driver-560 libglew-dev nvtop freeglut3-dev vulkan-tools vulkan-utility-libraries-de #freeglut3
+    sudo chmod u+x /usr/share/screen-resolution-extra/nvidia-polkit #This needs execution for resolution saving
   fi
 fi
 
