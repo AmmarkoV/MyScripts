@@ -29,7 +29,7 @@ then
     sudo add-apt-repository ppa:graphics-drivers/ppa
     sudo apt-get update
     #Get Vulkan
-    sudo apt-get install nvidia-driver-560 libglew-dev nvtop #freeglut3 freeglut3-dev vulkan vulkan-utils 
+    sudo apt-get install nvidia-driver-560 libglew-dev nvtop freeglut3-dev vulkan-tools vulkan-utility-libraries-de #freeglut3 
   fi
 fi
 
