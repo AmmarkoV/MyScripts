@@ -29,7 +29,8 @@ then
     sudo add-apt-repository ppa:graphics-drivers/ppa
     sudo apt-get update
     #Get Vulkan
-    sudo apt-get install nvidia-driver-560 freeglut3 freeglut3-dev libglew-dev nvtop #vulkan vulkan-utils 
+    sudo apt-get install nvidia-driver-560 libglew-dev nvtop freeglut3-dev vulkan-tools vulkan-utility-libraries-de #freeglut3
+    sudo chmod u+x /usr/share/screen-resolution-extra/nvidia-polkit #This needs execution for resolution saving
   fi
 fi
 
@@ -110,6 +111,25 @@ else
  #sudo echo "frequency=48000" >> /etc/openal/alsoft.conf
  #sudo echo "frequency=44100" >> /etc/openal/alsoft.conf
 fi
+
+
+
+
+#Allow apt-get to update kernels without symlinks 
+if cat /etc/kernel-img.conf | grep -q "do_symlinks"
+then
+   echo "Kernel image settings seem to be ok!" 
+else
+ sudo echo "do_symlinks = no"  >> /etc/kernel-img.conf
+ sudo echo "no_symlinks = yes" >> /etc/kernel-img.conf
+fi
+
+
+
+
+
+
+
 
 
 #Tweak TCP congestion
@@ -419,6 +439,12 @@ else
  fi
 fi
 #----------------------------------------------------------
+
+
+
+#Add sound when booting
+#sudo echo "GRUB_INIT_TUNE=\"1750 523 1 392 1 523 1 659 1 784 1 1047 1 784 1 415 1 523 1 622 1 831 1 622 1 831 1 1046 1 1244 1 1661 1 1244 1 466 1 587 1 698 1 932 1 1195 1 1397 1 1865 1 1397 1\"" >> /etc/default/grub
+#sudo update-grub
 
 
 
