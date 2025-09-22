@@ -129,6 +129,9 @@ alias cleandocker='docker image prune -f  && docker container prune -f'
 alias formatdocker="docker system prune -a"
 alias capslock='xdotool key Caps_Lock'
 
+alias usbwrite='watch -n 1 "grep Dirty /proc/meminfo"'
+
+
 
 
 # set PATH so it includes user's private bin if it exists
