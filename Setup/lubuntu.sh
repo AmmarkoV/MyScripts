@@ -202,6 +202,12 @@ fi
 #fi
 
 
+#Disable automount on BR-DVD-CD disks that may interfere with writing speed.. 
+#sudo sh -c 'echo "ACTION==\"add\", KERNEL==\"sr0\", ENV{UDISKS_IGNORE}=\"1\"" >> /etc/udev/rules.d/99-no-automount.rules' 
+#udevadm control --reload
+
+
+
 #Add a DLNA server
 #sudo apt-get install minidlna
 #sudo nano /etc/minidlna.conf 
