@@ -226,6 +226,8 @@ if [ -d ~/.config/autostart ]
      mkdir ~/.config/autostart
    fi
 
+
+
 if [ -f ~/.config/autostart/autostart.desktop ]
 then 
  echo "Found per-user autostart shortcut"
@@ -305,6 +307,31 @@ else
  sudo systemctl restart smbd
  fi
 fi
+
+
+
+#Create shared directory
+if [ -f ~/.local/share/applications/kde-sender.desktop ]
+then 
+ if cat ~/.local/share/applications/kde-sender.desktop | grep -q "Desktop"
+then
+   echo "KDE Sender Shortcut seems to exist.." 
+else
+ mkdir -p  ~/.local/share/applications/
+ USER=`whoami`
+ echo "[Desktop Entry]"  >> ~/.local/share/applications/kde-sender.desktop 
+ echo "Type=Application"  >> ~/.local/share/applications/kde-sender.desktop 
+ echo "Name=Send to Phone"  >> ~/.local/share/applications/kde-sender.desktop 
+ echo "Exec=kdeconnect-cli --device ef8c0afdfcbd48c5b50ca17838de0a56 --share %F"  >> ~/.local/share/applications/kde-sender.desktop 
+ echo "Icon=phone"  >> ~/.local/share/applications/kde-sender.desktop 
+ echo "Terminal=false"  >> ~/.local/share/applications/kde-sender.desktop 
+ echo "MimeType=application/octet-stream;inode/directory;image/*;video/*;audio/*;text/*;"  >> ~/.local/share/applications/kde-sender.desktop
+ update-desktop-database ~/.local/share/applications
+ fi
+fi
+
+
+
 
 
 
