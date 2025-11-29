@@ -511,6 +511,12 @@ fi
 #wget -O /tmp/discord-installer.deb "https://discordapp.com/api/download/canary?platform=linux&format=deb"
 #dpkg -i /tmp/discord-installer.deb
  
+#Install Signal
+#wget -O- https://updates.signal.org/desktop/apt/keys.asc | gpg --dearmor > signal-desktop-keyring.gpg;
+#cat signal-desktop-keyring.gpg | sudo tee /usr/share/keyrings/signal-desktop-keyring.gpg > /dev/null
+#wget -O signal-desktop.sources https://updates.signal.org/static/desktop/apt/signal-desktop.sources;
+#cat signal-desktop.sources | sudo tee /etc/apt/sources.list.d/signal-desktop.sources > /dev/null
+#sudo apt update && sudo apt install signal-desktop
 
 
 #Generate SSH Key
