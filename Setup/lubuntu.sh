@@ -532,7 +532,8 @@ else
     ssh-keygen -t ed25519 -C "$EMAIL"
 fi
 
-
+echo "SSH Public Key for Github : "
+cat $KEY_FILE
 
 neofetch
 echo "Configuration Complete" |  festival --tts
