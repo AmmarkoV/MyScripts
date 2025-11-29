@@ -532,7 +532,7 @@ else
     ssh-keygen -t ed25519 -C "$EMAIL"
 fi
 
-echo "SSH Public Key for Github : "
+echo "SSH Public Key for Github ( https://github.com/settings/keys ) : "
 cat $KEY_FILE
 
 neofetch
