@@ -513,6 +513,27 @@ fi
  
 
 
+#Generate SSH Key
+KEY_FILE="$HOME/.ssh/id_ed25519.pub"
+
+# Check if the public key exists
+if [ -f "$KEY_FILE" ]; then
+    echo "SSH key already exists at $KEY_FILE"
+else
+    echo "No SSH key found."
+
+    # Prompt for email
+    read -p "Enter your email for SSH key generation: (e.g. ammarkov@gmail.com)" EMAIL
+
+    # Ensure ~/.ssh exists
+    mkdir -p "$HOME/.ssh"
+
+    # Generate the key
+    ssh-keygen -t ed25519 -C "$EMAIL"
+fi
+
+
+
 neofetch
 echo "Configuration Complete" |  festival --tts
 
