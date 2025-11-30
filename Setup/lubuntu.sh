@@ -518,6 +518,10 @@ fi
 #cat signal-desktop.sources | sudo tee /etc/apt/sources.list.d/signal-desktop.sources > /dev/null
 #sudo apt update && sudo apt install signal-desktop
 
+#Install Mullvad
+#sudo curl -fsSLo /usr/share/keyrings/mullvad-keyring.asc https://repository.mullvad.net/deb/mullvad-keyring.asc
+#echo "deb [signed-by=/usr/share/keyrings/mullvad-keyring.asc arch=$( dpkg --print-architecture )] https://repository.mullvad.net/deb/stable stable main" | sudo tee /etc/apt/sources.list.d/mullvad.list
+#sudo apt update && sudo apt install mullvad-vpn
 
 #Generate SSH Key
 KEY_FILE="$HOME/.ssh/id_ed25519.pub"
