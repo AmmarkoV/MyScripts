@@ -164,3 +164,12 @@ function gtranslate
         )"&sl=auto&tl="$2"" | awk -F '\"' '{ print $2 }'
     )"
 }
+
+# Shrink video to half size (output: filename_s.mp4)
+shrink() {
+  for f in "$@"; do
+    base="${f%.*}"
+    ffmpeg -i "$f" -vf "scale=iw/2:ih/2" -c:v libx264 -crf 23 -preset fast -c:a copy "${base}_s.mp4"
+  done
+}
+
