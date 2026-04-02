@@ -1,0 +1,1 @@
+- [Emerging Research Trends](emerging_trends_2026-04-02.md) — Key trends in HCCV-relevant research from April 2, 2026
