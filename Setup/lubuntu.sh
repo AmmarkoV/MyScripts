@@ -76,7 +76,7 @@ if [ -n "$NVIDIA_GPU" ]; then
             sudo dpkg -i "/tmp/$CUDA_KEYRING_DEB"
             sudo apt-get update
             # Pin to a specific version or use cuda-toolkit for the latest
-            sudo apt-get install -y cuda-libraries-dev-12-6
+            sudo apt-get install -y cuda-libraries-dev-12-6 cuda-toolkit-12-6
             echo 'export PATH=/usr/local/cuda/bin:$PATH' >> ~/.bashrc
             echo 'export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH' >> ~/.bashrc
             source ~/.bashrc
