@@ -12,7 +12,7 @@ import sqlite3
 from datetime import datetime
 from pathlib import Path
 from typing import List, Optional, Dict, Any
-from paper_model import Paper, PaperCollection
+from paper_model import Paper, PaperCollection, MixedCollection
 
 
 # ============================================================================
@@ -334,6 +334,261 @@ def export_all_formats(
         db_path = f"{base_path}/papers.db"
         export_to_sqlite(collection, db_path, date_str)
         paths['sqlite'] = db_path
+
+    return paths
+
+
+# ============================================================================
+# Mixed Collection Export (Papers + HuggingFace Content)
+# ============================================================================
+
+def export_mixed_description_file(
+    collection: MixedCollection,
+    date_str: Optional[str] = None
+) -> str:
+    """Export .description file with all titles for index.php compatibility.
+
+    Args:
+        collection: MixedCollection to export
+        date_str: Date string (defaults to today)
+
+    Returns:
+        Path to created file
+    """
+    if date_str is None:
+        date_str = datetime.now().strftime('%Y-%m-%d')
+
+    output_path = f"{date_str}.description"
+    titles = collection.get_all_titles()
+
+    count = 0
+    with open(output_path, 'w', encoding='utf-8') as f:
+        for title in titles:
+            if title.strip():
+                f.write(title.strip() + '\n')
+                count += 1
+
+    return output_path
+
+
+def export_mixed_json(
+    collection: MixedCollection,
+    output_path: str
+) -> str:
+    """Export mixed collection to JSON file.
+
+    Args:
+        collection: MixedCollection to export
+        output_path: Output file path
+
+    Returns:
+        Path to created file
+    """
+    data = collection.to_export_format()
+    data['export_date'] = datetime.now().isoformat()
+
+    with open(output_path, 'w', encoding='utf-8') as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+
+    return output_path
+
+
+def export_mixed_sqlite(
+    collection: MixedCollection,
+    db_path: str,
+    import_date: Optional[str] = None
+) -> Dict[str, int]:
+    """Export mixed collection to SQLite database.
+
+    Args:
+        collection: MixedCollection to export
+        db_path: Database file path
+        import_date: Date of import (defaults to today)
+
+    Returns:
+        Dictionary of source -> count of inserted items
+    """
+    if import_date is None:
+        import_date = datetime.now().strftime('%Y-%m-%d')
+
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+
+    # Create papers table if not exists
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS papers (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            arxiv_id TEXT UNIQUE NOT NULL,
+            title TEXT NOT NULL,
+            url TEXT,
+            authors TEXT,
+            abstract TEXT,
+            categories TEXT,
+            published TEXT,
+            import_date TEXT,
+            source TEXT DEFAULT 'arxiv',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+
+    # Create blog_posts table if not exists
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS blog_posts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            url_slug TEXT UNIQUE NOT NULL,
+            title TEXT NOT NULL,
+            url TEXT,
+            authors TEXT,
+            excerpt TEXT,
+            thumbnail TEXT,
+            published TEXT,
+            import_date TEXT,
+            source TEXT DEFAULT 'huggingface_blog',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+
+    # Create models table if not exists
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS models (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            model_id TEXT UNIQUE NOT NULL,
+            title TEXT NOT NULL,
+            url TEXT,
+            author TEXT,
+            likes INTEGER DEFAULT 0,
+            downloads INTEGER DEFAULT 0,
+            tags TEXT,
+            pipeline_tag TEXT,
+            trending_rank INTEGER,
+            import_date TEXT,
+            source TEXT DEFAULT 'huggingface_models',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+
+    inserted = {'papers': 0, 'blog_posts': 0, 'models': 0}
+
+    # Insert papers
+    for paper in collection._papers:
+        try:
+            cursor.execute('''
+                INSERT OR IGNORE INTO papers
+                (arxiv_id, title, url, authors, abstract, categories, published, import_date, source)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                paper.arxiv_id, paper.title, paper.url,
+                json.dumps(paper.authors), paper.abstract,
+                json.dumps(paper.categories), paper.published,
+                import_date, 'arxiv'
+            ))
+            if cursor.rowcount > 0:
+                inserted['papers'] += 1
+        except sqlite3.Error as e:
+            print(f"Error inserting paper {paper.arxiv_id}: {e}")
+
+    # Insert blog posts
+    for post in collection._blog_posts:
+        try:
+            cursor.execute('''
+                INSERT OR IGNORE INTO blog_posts
+                (url_slug, title, url, authors, excerpt, thumbnail, published, import_date, source)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                post.get('url_slug', ''), post.get('title', ''), post.get('url', ''),
+                json.dumps(post.get('authors', [])), post.get('excerpt', ''),
+                post.get('thumbnail', ''), post.get('published', ''),
+                import_date, 'huggingface_blog'
+            ))
+            if cursor.rowcount > 0:
+                inserted['blog_posts'] += 1
+        except sqlite3.Error as e:
+            print(f"Error inserting blog post: {e}")
+
+    # Insert models
+    for model in collection._models:
+        try:
+            cursor.execute('''
+                INSERT OR IGNORE INTO models
+                (model_id, title, url, author, likes, downloads, tags, pipeline_tag, trending_rank, import_date, source)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                model.get('model_id', ''), model.get('title', ''), model.get('url', ''),
+                model.get('author', ''), model.get('likes', 0), model.get('downloads', 0),
+                json.dumps(model.get('tags', [])), model.get('pipeline_tag', ''),
+                model.get('trending_rank'), import_date, 'huggingface_models'
+            ))
+            if cursor.rowcount > 0:
+                inserted['models'] += 1
+        except sqlite3.Error as e:
+            print(f"Error inserting model: {e}")
+
+    conn.commit()
+    conn.close()
+
+    return inserted
+
+
+def export_all_formats(
+    collection,
+    base_path: Optional[str] = None,
+    date_str: Optional[str] = None,
+    use_sqlite: bool = True
+) -> Dict[str, str]:
+    """Export to all formats at once.
+
+    Works with both PaperCollection and MixedCollection.
+
+    Args:
+        collection: PaperCollection or MixedCollection to export
+        base_path: Base path for output files
+        date_str: Date string (defaults to today)
+        use_sqlite: Whether to create SQLite database
+
+    Returns:
+        Dictionary of format -> file path
+    """
+    if date_str is None:
+        date_str = datetime.now().strftime('%Y-%m-%d')
+
+    if base_path is None:
+        base_path = '.'
+
+    paths = {}
+
+    if isinstance(collection, MixedCollection):
+        # Text export (backward compatibility)
+        text_path = f"{base_path}/{date_str}.description"
+        export_mixed_description_file(collection, date_str)
+        paths['text'] = text_path
+
+        # JSON export
+        json_path = f"{base_path}/{date_str}.papers.json"
+        export_mixed_json(collection, json_path)
+        paths['json'] = json_path
+
+        # SQLite export
+        if use_sqlite:
+            db_path = f"{base_path}/papers.db"
+            export_mixed_sqlite(collection, db_path, date_str)
+            paths['sqlite'] = db_path
+
+    else:
+        # Original PaperCollection export
+        text_path = f"{base_path}/{date_str}.description"
+        export_to_text(collection.to_list(), text_path, 'title')
+        paths['text'] = text_path
+
+        # JSON export
+        json_path = f"{base_path}/{date_str}.papers.json"
+        export_to_json(collection, json_path)
+        paths['json'] = json_path
+
+        # SQLite export
+        if use_sqlite:
+            db_path = f"{base_path}/papers.db"
+            export_to_sqlite(collection, db_path, date_str)
+            paths['sqlite'] = db_path
 
     return paths
 

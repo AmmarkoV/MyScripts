@@ -32,6 +32,21 @@ then
     sudo apt-get install nvidia-driver-560 libglew-dev nvtop freeglut3-dev vulkan-tools vulkan-utility-libraries-de #freeglut3
     sudo chmod u+x /usr/share/screen-resolution-extra/nvidia-polkit #This needs execution for resolution saving
   fi
+
+  echo
+  echo "Do you want to install NVIDIA CUDA 12.2 and stuff? " 
+  echo
+  echo -n " (Y/N)?"
+  read answer
+  if test "$answer" != "N" -a "$answer" != "n";
+  then 
+    # Add NVIDIA's repo for Ubuntu 24.04
+    wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-keyring_1.1-1_all.deb
+    sudo dpkg -i cuda-keyring_1.1-1_all.deb
+    sudo apt update
+    sudo apt install cuda-libraries-dev-12-2
+  fi
+
 fi
 
 

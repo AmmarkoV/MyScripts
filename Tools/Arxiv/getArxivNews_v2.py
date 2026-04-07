@@ -19,8 +19,9 @@ from typing import List
 # Add current directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from paper_model import Paper, PaperCollection, extract_authors
+from paper_model import Paper, PaperCollection, MixedCollection, extract_authors
 from export_formats import export_all_formats
+from huggingface_scraper import fetch_hf_blog, fetch_hf_models
 
 # Configure logging
 logging.basicConfig(
@@ -90,7 +91,7 @@ def parse_arxiv_html(file_path: str) -> List[Paper]:
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Scrape recent papers from arxiv')
+    parser = argparse.ArgumentParser(description='Scrape recent papers from arxiv and HuggingFace')
     parser.add_argument(
         '--categories', '-c',
         type=str,
@@ -109,6 +110,23 @@ def main():
         help='Skip SQLite export'
     )
     parser.add_argument(
+        '--no-huggingface',
+        action='store_true',
+        help='Skip HuggingFace blog and models'
+    )
+    parser.add_argument(
+        '--hf-blog-limit',
+        type=int,
+        default=20,
+        help='Max blog posts to fetch from HuggingFace (default: 20)'
+    )
+    parser.add_argument(
+        '--hf-models-limit',
+        type=int,
+        default=50,
+        help='Max models to fetch from HuggingFace (default: 50)'
+    )
+    parser.add_argument(
         '--quiet', '-q',
         action='store_true',
         help='Suppress output except errors'
@@ -125,10 +143,12 @@ def main():
 
     logger.info(f"Fetching from categories: {categories}")
 
-    # Collect papers
-    collection = PaperCollection()
+    # Use MixedCollection to hold all content
+    collection = MixedCollection()
     temp_files = []
 
+    # Fetch arxiv papers
+    logger.info("=== Fetching Arxiv Papers ===")
     for idx, category in enumerate(categories):
         url = f'https://arxiv.org/list/{category}/recent?skip=0&show={args.count}'
         output_file = f'arxiv_temp_{category.replace(".", "_")}_{idx}.html'
@@ -139,13 +159,33 @@ def main():
             continue
 
         papers = parse_arxiv_html(output_file)
-        added = collection.add_many(papers)
+        added = collection.add_papers(papers)
         logger.info(f"{category}: {len(papers)} fetched, {added} new")
 
-    logger.info(f"Total unique papers: {len(collection)}")
+    logger.info(f"Total unique papers: {len(collection._papers)}")
+
+    # Fetch HuggingFace content
+    if not args.no_huggingface:
+        logger.info("\n=== Fetching HuggingFace Content ===")
+
+        # Fetch blog posts
+        logger.info("Fetching HuggingFace blog posts...")
+        blog_posts = fetch_hf_blog(limit=args.hf_blog_limit)
+        blog_dicts = [post.to_dict() for post in blog_posts]
+        added_blogs = collection.add_blog_posts(blog_dicts)
+        logger.info(f"Blog posts: {len(blog_posts)} fetched, {added_blogs} new")
+
+        # Fetch trending models
+        logger.info("Fetching trending HuggingFace models...")
+        models = fetch_hf_models(limit=args.hf_models_limit, sort="trending")
+        model_dicts = [model.to_dict() for model in models]
+        added_models = collection.add_models(model_dicts)
+        logger.info(f"Models: {len(models)} fetched, {added_models} new")
+
+    logger.info(f"\nTotal items in collection: {len(collection)}")
 
     if len(collection) == 0:
-        logger.error("No papers collected!")
+        logger.error("No content collected!")
         sys.exit(1)
 
     # Export to all formats
@@ -175,7 +215,11 @@ def main():
 
     # Print summary
     print(f"\n{'='*50}")
-    print(f"Processed {len(collection)} unique papers")
+    print(f"Collection Summary:")
+    print(f"  Papers (arxiv):       {len(collection._papers)}")
+    print(f"  Blog Posts (HF):      {len(collection._blog_posts)}")
+    print(f"  Models (HF):          {len(collection._models)}")
+    print(f"  Total:                {len(collection)}")
     print(f"\nOutput files:")
     for fmt, path in paths.items():
         print(f"  {fmt}: {path}")

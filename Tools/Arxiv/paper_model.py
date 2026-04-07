@@ -143,6 +143,126 @@ class PaperCollection:
         return iter(self._papers)
 
 
+class MixedCollection:
+    """A collection that can hold papers, blog posts, and models.
+
+    This class provides a unified interface for managing content from
+    multiple sources (arxiv, HuggingFace blog, HuggingFace models).
+    """
+
+    def __init__(self):
+        self._papers: List[Paper] = []
+        self._paper_id_set: set = set()
+        self._blog_posts: List[dict] = []
+        self._blog_slug_set: set = set()
+        self._models: List[dict] = []
+        self._model_id_set: set = set()
+
+    # Paper methods
+    def add_paper(self, paper: Paper) -> bool:
+        """Add paper if not already present."""
+        if paper.arxiv_id in self._paper_id_set:
+            return False
+        self._papers.append(paper)
+        self._paper_id_set.add(paper.arxiv_id)
+        return True
+
+    def add_papers(self, papers: List[Paper]) -> int:
+        """Add multiple papers."""
+        count = 0
+        for paper in papers:
+            if self.add_paper(paper):
+                count += 1
+        return count
+
+    # Blog post methods
+    def add_blog_post(self, blog_post: dict) -> bool:
+        """Add blog post if not already present.
+
+        Args:
+            blog_post: Dictionary with 'url_slug' key
+
+        Returns:
+            True if added, False if duplicate
+        """
+        url_slug = blog_post.get('url_slug', '')
+        if url_slug in self._blog_slug_set:
+            return False
+        self._blog_posts.append(blog_post)
+        self._blog_slug_set.add(url_slug)
+        return True
+
+    def add_blog_posts(self, blog_posts: List[dict]) -> int:
+        """Add multiple blog posts."""
+        count = 0
+        for post in blog_posts:
+            if self.add_blog_post(post):
+                count += 1
+        return count
+
+    # Model methods
+    def add_model(self, model: dict) -> bool:
+        """Add model if not already present.
+
+        Args:
+            model: Dictionary with 'model_id' key
+
+        Returns:
+            True if added, False if duplicate
+        """
+        model_id = model.get('model_id', '')
+        if model_id in self._model_id_set:
+            return False
+        self._models.append(model)
+        self._model_id_set.add(model_id)
+        return True
+
+    def add_models(self, models: List[dict]) -> int:
+        """Add multiple models."""
+        count = 0
+        for model in models:
+            if self.add_model(model):
+                count += 1
+        return count
+
+    # Unified methods
+    def get_all_titles(self) -> List[str]:
+        """Get all titles from all sources."""
+        titles = []
+        titles.extend([p.title for p in self._papers if p.title])
+        titles.extend([b.get('title', '') for b in self._blog_posts if b.get('title')])
+        titles.extend([m.get('title', m.get('model_id', '')) for m in self._models])
+        return titles
+
+    def get_all_items(self) -> List[dict]:
+        """Get all items as dictionaries with source tag."""
+        items = []
+        items.extend([p.to_dict() for p in self._papers])
+        items.extend(self._blog_posts)
+        items.extend(self._models)
+        return items
+
+    def to_export_format(self) -> dict:
+        """Convert to format suitable for export."""
+        return {
+            'papers': [p.to_dict() for p in self._papers],
+            'blog_posts': self._blog_posts,
+            'models': self._models,
+            'counts': {
+                'papers': len(self._papers),
+                'blog_posts': len(self._blog_posts),
+                'models': len(self._models),
+                'total': len(self._papers) + len(self._blog_posts) + len(self._models)
+            }
+        }
+
+    def __len__(self) -> int:
+        return len(self._papers) + len(self._blog_posts) + len(self._models)
+
+    def __repr__(self) -> str:
+        return f"MixedCollection(papers={len(self._papers)}, blog_posts={len(self._blog_posts)}, models={len(self._models)})"
+
+
 def extract_authors(author_text: str) -> List[str]:
     """Extract author names from arxiv author list text.
 

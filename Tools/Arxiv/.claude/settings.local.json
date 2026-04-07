@@ -4,7 +4,8 @@
       "WebSearch",
       "WebFetch(domain:arxiv.org)",
       "WebFetch(domain:ammar.gr)",
-      "Bash(curl -k http://ammar.gr/news/2026-04-02.description)"
+      "Bash(curl -k http://ammar.gr/news/2026-04-02.description)",
+      "Bash(python3:*)"
     ]
   }
 }
