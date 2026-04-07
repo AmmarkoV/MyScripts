@@ -1,576 +1,599 @@
 #!/bin/bash
 
-# This script is inteded to be run once after you perform a Lubuntu intallation
+# Post-installation script for Lubuntu 24.04+
 # https://lubuntu.me/downloads/
-# Repositories and software comes and goes so feel free to customize this to match your preferences 
+# Repositories and software come and go — feel free to customize to match your preferences.
 
+set -euo pipefail
+
+# -----------------------------------------------------------------------------------------------------------------------
+# Helpers
+# -----------------------------------------------------------------------------------------------------------------------
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$DIR"
 
+# Ensure we're NOT running as root (script uses sudo internally)
+if [ "$EUID" -eq 0 ]; then
+    echo "Run this as a normal user (not root). It will sudo as needed."
+    exit 1
+fi
+
+# Reusable yes/no prompt: prompt_yn "Question text"  →  returns 0 for yes, 1 for no
+prompt_yn() {
+    local ans
+    read -rp "$1 (Y/N)? " ans
+    [[ "$ans" =~ ^[Yy]$ ]]
+}
+
+# Append lines to a root-owned file safely
+# Usage: sudo_append "line" /path/to/file
+sudo_append() {
+    echo "$1" | sudo tee -a "$2" > /dev/null
+}
+
+# Write to a root-owned file safely (overwrite)
+# Usage: sudo_write "line" /path/to/file
+sudo_write() {
+    echo "$1" | sudo tee "$2" > /dev/null
+}
+
 clear
-echo "LUbuntu handy Packages automation "
+echo "Lubuntu handy packages — post-install automation"
+echo "================================================="
 
-sudo apt-get update
+# -----------------------------------------------------------------------------------------------------------------------
+# NVIDIA
+# -----------------------------------------------------------------------------------------------------------------------
 
-#sudo apt-get install gksu
+NVIDIA_GPU=$(lspci | grep "NVIDIA" || true)
+if [ -n "$NVIDIA_GPU" ]; then
+    echo
+    echo "Detected NVIDIA GPU: $NVIDIA_GPU"
+    echo
 
+    if prompt_yn "Install NVIDIA drivers (nvidia-driver-570, Vulkan, nvtop)?"; then
+        sudo add-apt-repository -y ppa:graphics-drivers/ppa
+        sudo apt-get update
+        # Update the driver version below to match your GPU generation
+        sudo apt-get install -y nvidia-driver-570 libglew-dev nvtop freeglut3-dev \
+            vulkan-tools vulkan-utility-libraries-dev
+        # Allow resolution saving via polkit helper
+        POLKIT_HELPER="/usr/share/screen-resolution-extra/nvidia-polkit"
+        [ -f "$POLKIT_HELPER" ] && sudo chmod u+x "$POLKIT_HELPER"
+    fi
 
-if lspci | grep  "NVIDIA"
-then
-  lspci | grep  "NVIDIA"
-  echo
-  echo "Do you want to install NVIDIA drivers and stuff? " 
-  echo
-  echo -n " (Y/N)?"
-  read answer
-  if test "$answer" != "N" -a "$answer" != "n";
-  then 
-    sudo add-apt-repository ppa:graphics-drivers/ppa
-    sudo apt-get update
-    #Get Vulkan
-    sudo apt-get install nvidia-driver-560 libglew-dev nvtop freeglut3-dev vulkan-tools vulkan-utility-libraries-de #freeglut3
-    sudo chmod u+x /usr/share/screen-resolution-extra/nvidia-polkit #This needs execution for resolution saving
-  fi
+    if prompt_yn "Install NVIDIA CUDA toolkit (via official NVIDIA repo)?"; then
+        CUDA_KEYRING_DEB="cuda-keyring_1.1-1_all.deb"
+        CUDA_KEYRING_URL="https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/$CUDA_KEYRING_DEB"
+        CUDA_KEYRING_SHA256="9b9b4df8f29a6e64a0e6ab66e05be48caa4d45a14a2b6b34965dc89f1d0c5cc7"
 
-  echo
-  echo "Do you want to install NVIDIA CUDA 12.2 and stuff? " 
-  echo
-  echo -n " (Y/N)?"
-  read answer
-  if test "$answer" != "N" -a "$answer" != "n";
-  then 
-    # Add NVIDIA's repo for Ubuntu 24.04
-    wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-keyring_1.1-1_all.deb
-    sudo dpkg -i cuda-keyring_1.1-1_all.deb
-    sudo apt update
-    sudo apt install cuda-libraries-dev-12-2
-  fi
-
+        wget -q -O "/tmp/$CUDA_KEYRING_DEB" "$CUDA_KEYRING_URL"
+        echo "$CUDA_KEYRING_SHA256  /tmp/$CUDA_KEYRING_DEB" | sha256sum -c - || {
+            echo "ERROR: CUDA keyring checksum mismatch — aborting CUDA install."
+            # Continue script despite CUDA failure
+        } && {
+            sudo dpkg -i "/tmp/$CUDA_KEYRING_DEB"
+            sudo apt-get update
+            # Pin to a specific version or use cuda-toolkit for the latest
+            sudo apt-get install -y cuda-libraries-dev-12-6
+        }
+    fi
 fi
 
+# -----------------------------------------------------------------------------------------------------------------------
+# Razer peripherals
+# -----------------------------------------------------------------------------------------------------------------------
 
-if lsusb | grep  "Razer"
-then
-  lsusb | grep  "Razer"
-  echo
-  echo "Do you want to install Razer drivers and stuff? " 
-  echo
-  echo -n " (Y/N)?"
-  read answer
-  if test "$answer" != "N" -a "$answer" != "n";
-  then 
-    #Get Vulkan
-    sudo apt-get install openrazer-meta
-    sudo add-apt-repository ppa:polychromatic/stable
-    sudo apt update
-    sudo apt install polychromatic
-  fi
+RAZER_DEVICE=$(lsusb | grep "Razer" || true)
+if [ -n "$RAZER_DEVICE" ]; then
+    echo
+    echo "Detected Razer device: $RAZER_DEVICE"
+    echo
+
+    if prompt_yn "Install Razer drivers (openrazer) and Polychromatic RGB tool?"; then
+        sudo apt-get install -y openrazer-meta
+        sudo add-apt-repository -y ppa:polychromatic/stable
+        sudo apt-get update
+        sudo apt-get install -y polychromatic
+    fi
 fi
 
+# -----------------------------------------------------------------------------------------------------------------------
+# Package groups
+# -----------------------------------------------------------------------------------------------------------------------
 
-#Go to hwe kernel..
-#sudo apt-get install --install-recommends linux-generic-hwe-18.04 xserver-xorg-hwe-18.04 
+BASICAPPS="firefox thunderbird vlc mumble libreoffice myspell-el-gr synaptic catfish \
+    usb-creator-gtk remmina baobab brasero aisleriot"
+# pidgin removed (unmaintained); consider hexchat or fractal for chat
 
-#-----------------------------------------------------------------------------------------------------------------------
-BASICAPPS="firefox thunderbird vlc pidgin mumble libreoffice  myspell-el-gr synaptic catfish usb-creator-gtk remmina baobab xbacklight brasero aisleriot" #gcalctool hunspell-el lyx vino xtightvncviewer libreoffice-avmedia-backend-gstreamer
-GRAPHICS="gimp darktable" # luminance-hdr  hugin autopano-sift"
-AUDIO="mixxx audacity audacious" 
-MOREAPPS="simplescreenrecorder units qrencode lm-sensors " #gtg glabels freemind firestarter gnotime gtk-recordmydesktop gnome-system-monitor
-COMPATIBILITY="samba chntpw" #wine winetricks dosbox system-config-samba 
-SYSTEM="smartmontools iat iotop iftop iperf ifmetric htop screen traceroute powertop x11vnc net-tools libvdpau-va-gl1 curl wget vdpauinfo neofetch chrony gddrescue ntfs-3g" #grub-customizer  macchanger-gtk  sysv-rc-conf 
-#iat converts from .iso to .bin etc
-SCREENSAVERS="xscreensaver xscreensaver-data xscreensaver-data-extra  xscreensaver-gl xscreensaver-gl-extra"
-ADVLIBS="festival imagemagick numlockx gxmessage libnotify-bin htop  traceroute powertop x11vnc" #macchanger-gtk  sysv-rc-conf 
-CODECS="ubuntu-restricted-extras pavucontrol beep ffmpeg mplayer smplayer " #ffmpeg avconv
-SECURITY="network-manager-openvpn network-manager-openvpn-gnome" #vidalia tor 
-DIGITALSIGNING="poppler-utils poppler-data libnss3-tools" # r8168-dkms for elina laptop with RTL ethernet
-#-----------------------------------------------------------------------------------------------------------------------
-sudo apt-get install $BASICAPPS $MOREAPPS $ADVLIBS $COMPATIBILITY $SYSTEM $SCREENSAVERS $ADVLIBS $AUDIO $CODECS $GRAPHICS $SECURITY $DIGITALSIGNING
+GRAPHICS="gimp darktable"
 
-datectl
-#sudo chronyd -q
+AUDIO="mixxx audacity audacious"
 
-#Also upgrade everything else..
-sudo apt-get dist-upgrade
+MOREAPPS="simplescreenrecorder units qrencode lm-sensors"
 
+COMPATIBILITY="samba chntpw"
+# wine/winetricks: uncomment if needed
 
-#Extra Server Security maybe?
-#sudo apt-get install fail2ban
-#sudo iptables -S <- gia na dei kaneis to ban list
+SYSTEM="smartmontools iat iotop iftop iperf ifmetric htop screen traceroute powertop \
+    x11vnc net-tools libvdpau-va-gl1 curl wget vdpauinfo fastfetch chrony gddrescue ntfs-3g"
+# neofetch dropped (removed from Ubuntu 24.04 repos); using fastfetch instead
 
+SCREENSAVERS="xscreensaver xscreensaver-data xscreensaver-data-extra xscreensaver-gl xscreensaver-gl-extra"
 
-#DVD Playback maybe ?  :P no one uses DVD in 2021
-#sudo apt-get install libdvdread4
-#sudo /usr/share/doc/libdvdread4/install-css.sh
+ADVLIBS="festival imagemagick numlockx gxmessage libnotify-bin"
 
-#dbus is neede for gedit?
-#sudo apt-get install --reinstall dbus dbus-x11
+CODECS="ubuntu-restricted-extras pavucontrol beep ffmpeg mplayer smplayer"
 
-#sudo update-alternatives --config x86_64-linux-gnu_gl_conf
+SECURITY="network-manager-openvpn network-manager-openvpn-gnome"
 
-#esddsp festival palia
-echo "Installation Complete" |  festival --tts
+DIGITALSIGNING="poppler-utils poppler-data libnss3-tools"
 
-#Tell pulse audio not to stutter
-if cat /etc/pulse/daemon.conf | grep -q "ammar"
-then
-   echo "PulseAudio settings seem to be ok!" 
+sudo apt-get install -y \
+    $BASICAPPS $MOREAPPS $ADVLIBS $COMPATIBILITY $SYSTEM \
+    $SCREENSAVERS $AUDIO $CODECS $GRAPHICS $SECURITY $DIGITALSIGNING
+
+# -----------------------------------------------------------------------------------------------------------------------
+# System clock
+# -----------------------------------------------------------------------------------------------------------------------
+
+timedatectl
+
+# -----------------------------------------------------------------------------------------------------------------------
+# Dist-upgrade
+# -----------------------------------------------------------------------------------------------------------------------
+
+sudo apt-get dist-upgrade -y
+
+# -----------------------------------------------------------------------------------------------------------------------
+# PulseAudio / PipeWire anti-stutter tweaks
+# -----------------------------------------------------------------------------------------------------------------------
+
+# Ubuntu/Lubuntu 24.04 defaults to PipeWire. Only apply PulseAudio tweaks if actually using it.
+if systemctl --user is-active --quiet pulseaudio 2>/dev/null || \
+   { command -v pactl &>/dev/null && pactl info 2>/dev/null | grep -q "PulseAudio"; }; then
+
+    if grep -q "ammar" /etc/pulse/daemon.conf 2>/dev/null; then
+        echo "PulseAudio settings seem to be ok!"
+    else
+        echo "Applying PulseAudio anti-stutter settings..."
+        sudo_append "#ammar's lower stutter settings" /etc/pulse/daemon.conf
+        sudo_append "resample-method = trivial"          /etc/pulse/daemon.conf
+        sudo_append "default-sample-rate=44100"          /etc/pulse/daemon.conf
+        sudo_append "default-fragments = 14"             /etc/pulse/daemon.conf
+        sudo_append "default-fragment-size-msec = 16"    /etc/pulse/daemon.conf
+    fi
 else
- sudo echo "#ammar's lower stutter settings" >> /etc/pulse/daemon.conf
- sudo echo "resample-method = trivial" >> /etc/pulse/daemon.conf
- #sudo echo "default-sample-rate=48000" >> /etc/pulse/daemon.conf
- sudo echo "default-sample-rate=44100" >> /etc/pulse/daemon.conf
- sudo echo "default-fragments = 14" >> /etc/pulse/daemon.conf
- sudo echo "default-fragment-size-msec = 16" >> /etc/pulse/daemon.conf
- #sudo echo "frequency=48000" >> /etc/openal/alsoft.conf
- #sudo echo "frequency=44100" >> /etc/openal/alsoft.conf
+    echo "PipeWire detected (default on 24.04) — PulseAudio tweaks skipped."
+    echo "For PipeWire tuning, see: /usr/share/pipewire/pipewire.conf"
 fi
 
+# -----------------------------------------------------------------------------------------------------------------------
+# Kernel image symlinks
+# -----------------------------------------------------------------------------------------------------------------------
 
-
-
-#Allow apt-get to update kernels without symlinks 
-if cat /etc/kernel-img.conf | grep -q "do_symlinks"
-then
-   echo "Kernel image settings seem to be ok!" 
+if grep -q "do_symlinks" /etc/kernel-img.conf 2>/dev/null; then
+    echo "Kernel image settings seem to be ok!"
 else
- sudo echo "do_symlinks = no"  >> /etc/kernel-img.conf
- sudo echo "no_symlinks = yes" >> /etc/kernel-img.conf
+    sudo_append "do_symlinks = no"  /etc/kernel-img.conf
+    sudo_append "no_symlinks = yes" /etc/kernel-img.conf
 fi
 
+# -----------------------------------------------------------------------------------------------------------------------
+# TCP BBR congestion control
+# -----------------------------------------------------------------------------------------------------------------------
 
-
-
-
-
-
-
-
-#Tweak TCP congestion
-if cat /etc/sysctl.d/10-custom-kernel-bbr.conf | grep -q "tcp_congestion_control=bbr"
-then
-   echo "TCP BBR congestion control settings seem to be set!" 
+BBR_CONF="/etc/sysctl.d/10-custom-kernel-bbr.conf"
+if grep -q "tcp_congestion_control=bbr" "$BBR_CONF" 2>/dev/null; then
+    echo "TCP BBR congestion control is already set!"
 else
- echo "Setting up TCP BBR congestion control" 
- sudo echo "net.core.default_qdisc=fq" >> /etc/sysctl.d/10-custom-kernel-bbr.conf
- sudo echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.d/10-custom-kernel-bbr.conf
- sudo sysctl --system
+    echo "Setting up TCP BBR congestion control..."
+    sudo_append "net.core.default_qdisc=fq"              "$BBR_CONF"
+    sudo_append "net.ipv4.tcp_congestion_control=bbr"     "$BBR_CONF"
+    sudo sysctl --system
 fi
- 
 
-#Setup languages on login..
-if cat /etc/xdg/lxsession/Lubuntu/autostart | grep -q "setxkbmap"
-then
-   echo "Language settings seem to be ok!" 
+# -----------------------------------------------------------------------------------------------------------------------
+# Keyboard layout (English + Greek, toggled with Alt+Shift)
+# -----------------------------------------------------------------------------------------------------------------------
+
+LXSESSION_AUTOSTART="/etc/xdg/lxsession/Lubuntu/autostart"
+if grep -q "setxkbmap" "$LXSESSION_AUTOSTART" 2>/dev/null; then
+    echo "Language settings seem to be ok!"
 else
-   echo "Language Settings dont seem to exist , including English/Greek , interchangable with alt-shift  .." 
-   sudo sh -c 'echo "@setxkbmap -option grp:switch,grp:alt_shift_toggle,grp_led:scroll us,gr" >>/etc/xdg/lxsession/Lubuntu/autostart' 
+    echo "Adding English/Greek keyboard layout (Alt+Shift to toggle)..."
+    sudo sh -c "echo '@setxkbmap -option grp:switch,grp:alt_shift_toggle,grp_led:scroll us,gr' >> $LXSESSION_AUTOSTART"
 fi
 
+# -----------------------------------------------------------------------------------------------------------------------
+# Memory / swappiness optimisation (only if >8 GB RAM)
+# -----------------------------------------------------------------------------------------------------------------------
 
-MEM=`awk '/Mem:/ {print $2}' <(free)`
-if (( $MEM > 8000000 )) 
-then
-echo "We appear to have a lot of RAM ( $MEM bytes ) optimizing "
-if cat /etc/sysctl.conf | grep -q "vm.swappiness"
-then
-   echo "Memory usage optimizations seems to be already set-up.." 
+MEM_KB=$(awk '/MemTotal/{print $2}' /proc/meminfo)
+MEM_THRESHOLD_KB=$(( 8 * 1024 * 1024 ))   # 8 GB in kB
+
+if (( MEM_KB > MEM_THRESHOLD_KB )); then
+    echo "Detected plenty of RAM (${MEM_KB} kB) — optimising swappiness..."
+
+    if grep -q "vm.swappiness" /etc/sysctl.conf 2>/dev/null; then
+        echo "Memory usage optimisations already set up."
+    else
+        echo "Optimising memory usage for better disk access..."
+        sudo sysctl vm.swappiness=10
+        sudo sysctl vm.dirty_ratio=99
+        sudo sysctl vm.dirty_background_ratio=50
+        sudo sysctl vm.vfs_cache_pressure=10
+
+        sudo sh -c 'cat >> /etc/sysctl.conf << EOF
+vm.swappiness = 10
+vm.dirty_ratio = 99
+vm.dirty_background_ratio = 50
+vm.vfs_cache_pressure = 10
+vm.nr_hugepages = 128
+EOF'
+        sudo swapoff -a
+        sudo swapon -a
+    fi
+fi
+
+# -----------------------------------------------------------------------------------------------------------------------
+# Autostart directory
+# -----------------------------------------------------------------------------------------------------------------------
+
+mkdir -p ~/.config/autostart
+
+if [ -f ~/.config/autostart/autostart.desktop ]; then
+    echo "Found per-user autostart shortcut."
 else
-   echo "Optimizing memory usage for better disk access! .." 
-   sudo sysctl vm.swappiness=10
-   sudo sysctl vm.dirty_ratio=99
-   sudo sysctl vm.dirty_background_ratio=50
-   sudo sysctl vm.vfs_cache_pressure=10 
-
-   sudo sh -c 'echo "vm.swappiness = 10" >>/etc/sysctl.conf' 
-   sudo sh -c 'echo "vm.dirty_ratio = 99" >>/etc/sysctl.conf' 
-   sudo sh -c 'echo "vm.dirty_background_ratio = 50" >>/etc/sysctl.conf' 
-   sudo sh -c 'echo "vm.vfs_cache_pressure= 10" >>/etc/sysctl.conf'  
-  
-   sudo sh -c 'echo "vm.nr_hugepages=128" >>/etc/sysctl.conf'  
-
-   sudo swapoff -a
-   sudo swapon -a
-fi 
+    echo "Generating new per-user autostart shortcut..."
+    cat > ~/.config/autostart/autostart.desktop << EOF
+[Desktop Entry]
+Type=Application
+Name=MyThings
+Exec=$HOME/.autostart.sh
+EOF
+    chmod +x ~/.config/autostart/autostart.desktop
 fi
 
+# -----------------------------------------------------------------------------------------------------------------------
+# Autostart script (~/.autostart.sh)
+# -----------------------------------------------------------------------------------------------------------------------
 
-#Add 8GB of swap as a file in /
-#sudo swapon --show
-#sudo fallocate -l 8G /swapfile
-#sudo chmod 600 /swapfile 
-#sudo mkswap /swapfile
-#sudo swapon /swapfile
-#sudo swapon --show
-#echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
-
-
-#if cat /etc/fstab | grep -q "/ramfs"
-#then
-#   echo "RAM fs seems to be set up ok!" 
-#else
-#   echo "Adding some ramfs partitions.." 
-#   sudo sh -c 'echo "none    /ramfs    ramfs   nodev,nosuid,noexec,nodiratime,size=256M    0   0" >>/etc/fstab' 
-#   sudo sh -c 'echo "none    /tmp    ramfs   nodev,nosuid,noexec,nodiratime,size=256M    0   0" >>/etc/fstab' 
-#   sudo mount -t ramfs -o nodev,nosuid,noexec,nodiratime,size=256M none /ramfs
-#fi
-
-
-#Disable automount on BR-DVD-CD disks that may interfere with writing speed.. 
-#sudo sh -c 'echo "ACTION==\"add\", KERNEL==\"sr0\", ENV{UDISKS_IGNORE}=\"1\"" >> /etc/udev/rules.d/99-no-automount.rules' 
-#udevadm control --reload
-#sudo service udev restart
-
-
-#Add a DLNA server
-#sudo apt-get install minidlna
-#sudo nano /etc/minidlna.conf 
-#media_dir=V,/media/ammar/AmmarKriti/ammar/Videos/
-#media_dir=V,/home/ammar/Videos/DVD/
-#inotify=yes
-#nnotify_interval=30
-
-
-
-if [ -d ~/.config/autostart ] 
-   then
-     echo "Autostart Directory exists"
-   else
-     echo "Autostart Directory Does not exist"
-     mkdir ~/.config/autostart
-   fi
-
-
-
-if [ -f ~/.config/autostart/autostart.desktop ]
-then 
- echo "Found per-user autostart shortcut"
-else 
- echo "Generating new per-user autostart shortcut"
- echo "[Desktop Entry]" > ~/.config/autostart/autostart.desktop
- echo "Type=Application" >> ~/.config/autostart/autostart.desktop
- echo "Name=MyThings" >> ~/.config/autostart/autostart.desktop
-
- ORIG_DIR=`pwd`
- cd ~
- USER_DIR=`pwd`
- echo "Exec=$USER_DIR/.autostart.sh" >> ~/.config/autostart/autostart.desktop
- cd $ORIG_DIR 
- chmod +x ~/.config/autostart/autostart.desktop
-fi
-
-
-
-
-#This .autostart.sh file will be run on each session
-#you can edit it at any time using nano ~/.autostart.sh
-#this is software I typically use and want to automatically startup
-if [ -f ~/.autostart.sh ]
-then 
- echo "Found per-user autostart bash script"
-else 
- echo "Generating new per-user autostart bash script"
- echo "#!/bin/bash" > ~/.autostart.sh
- echo "setxkbmap -option grp:switch,grp:alt_shift_toggle,grp_led:scroll us,gr" >> ~/.autostart.sh 
- echo "xset r on" >> ~/.autostart.sh  
- echo "#xscreensaver -nosplash&" >> ~/.autostart.sh
- echo "nm-applet&" >> ~/.autostart.sh 
- echo "numlockx on&" >> ~/.autostart.sh 
- echo "firefox&" >> ~/.autostart.sh 
- echo "#mumble&" >> ~/.autostart.sh 
- echo "#audacious&" >> ~/.autostart.sh
- echo "plasmawindowed org.kde.kdeconnect --statusnotifier" >> ~/.autostart.sh
- echo "#x11vnc -nap -wait 50 -noxdamage -passwd ammar -display :0 -forever -o ~/x11vnc.log -bg" >> ~/.autostart.sh 
- echo "#ssh -L 8080:192.168.1.1:80 ammar.gr -c arcfour -p 2222" >> ~/.autostart.sh
-
- echo "sleep 38" >> ~/.autostart.sh
- #Go to the right workspace
- echo "xdotool key \"Ctrl+Alt+Right\" " >> ~/.autostart.sh
- echo "thunderbird&" >> ~/.autostart.sh
- echo "sleep 30" >> ~/.autostart.sh
- #Go to the left workspace
- echo "xdotool key \"Ctrl+Alt+Left\" " >> ~/.autostart.sh
-
-
-
- echo "exit 0" >> ~/.autostart.sh 
- chmod +x ~/.autostart.sh 
-fi
-
-
-
-
-#Create shared directory
-if [ -f /etc/samba/smb.conf ]
-then 
- if cat /etc/samba/smb.conf | grep -q "[SHARED]"
-then
-   echo "SAMBA seems to be already set-up.." 
+if [ -f ~/.autostart.sh ]; then
+    echo "Found per-user autostart bash script."
 else
- mkdir ~/SHARED
- USER=`whoami`
- echo "[SHARED]"  >> /etc/samba/smb.conf
- echo "path = /home/$USER/SHARED"  >> /etc/samba/smb.conf
- echo "writable = yes"  >> /etc/samba/smb.conf
- echo "guest ok = yes"  >> /etc/samba/smb.conf
- echo "guest only = yes"  >> /etc/samba/smb.conf
- echo "read only = no"  >> /etc/samba/smb.conf
- echo "create mode = 0777"  >> /etc/samba/smb.conf
- echo "directory mode = 0777"  >> /etc/samba/smb.conf
- echo "force user = nobody"  >> /etc/samba/smb.conf
- sudo systemctl restart smbd
- fi
+    echo "Generating new per-user autostart bash script..."
+    cat > ~/.autostart.sh << 'EOF'
+#!/bin/bash
+setxkbmap -option grp:switch,grp:alt_shift_toggle,grp_led:scroll us,gr
+xset r on
+# xscreensaver -nosplash &
+nm-applet &
+numlockx on &
+firefox &
+# mumble &
+# audacious &
+plasmawindowed org.kde.kdeconnect --statusnotifier &
+# x11vnc -nap -wait 50 -noxdamage -passwd YOUR_PASSWORD -display :0 -forever -o ~/x11vnc.log -bg
+
+sleep 38
+xdotool key "Ctrl+Alt+Right"   # Move to right workspace
+thunderbird &
+sleep 30
+xdotool key "Ctrl+Alt+Left"    # Move back to left workspace
+
+exit 0
+EOF
+    chmod +x ~/.autostart.sh
 fi
 
+# -----------------------------------------------------------------------------------------------------------------------
+# Samba shared directory
+# -----------------------------------------------------------------------------------------------------------------------
 
+if [ -f /etc/samba/smb.conf ]; then
+    if grep -q "\[SHARED\]" /etc/samba/smb.conf; then
+        echo "Samba share already configured."
+    else
+        echo "Configuring Samba share (guest access — LAN only, no password)..."
+        # WARNING: This share is open to all local network guests.
+        # Remove 'guest ok' and 'guest only' and add a samba password for better security:
+        #   sudo smbpasswd -a $(whoami)
+        mkdir -p ~/SHARED
+        sudo sh -c "cat >> /etc/samba/smb.conf << EOF
 
-#Create shared directory
-if [ -f ~/.local/share/applications/kde-sender.desktop ]
-then 
- if cat ~/.local/share/applications/kde-sender.desktop | grep -q "Desktop"
-then
-   echo "KDE Sender Shortcut seems to exist.." 
+[SHARED]
+path = $HOME/SHARED
+writable = yes
+guest ok = yes
+guest only = yes
+read only = no
+create mode = 0777
+directory mode = 0777
+force user = nobody
+EOF"
+        sudo systemctl restart smbd
+    fi
+fi
+
+# -----------------------------------------------------------------------------------------------------------------------
+# KDE Connect "Send to Phone" desktop shortcut
+# -----------------------------------------------------------------------------------------------------------------------
+
+KDE_SENDER_DESKTOP="$HOME/.local/share/applications/kde-sender.desktop"
+if [ -f "$KDE_SENDER_DESKTOP" ] && grep -q "Desktop" "$KDE_SENDER_DESKTOP"; then
+    echo "KDE Sender shortcut already exists."
 else
- mkdir -p  ~/.local/share/applications/
- USER=`whoami`
- echo "[Desktop Entry]"  >> ~/.local/share/applications/kde-sender.desktop 
- echo "Type=Application"  >> ~/.local/share/applications/kde-sender.desktop 
- echo "Name=Send to Phone"  >> ~/.local/share/applications/kde-sender.desktop 
- echo "Exec=kdeconnect-cli --device ef8c0afdfcbd48c5b50ca17838de0a56 --share %F"  >> ~/.local/share/applications/kde-sender.desktop 
- echo "Icon=phone"  >> ~/.local/share/applications/kde-sender.desktop 
- echo "Terminal=false"  >> ~/.local/share/applications/kde-sender.desktop 
- echo "MimeType=application/octet-stream;inode/directory;image/*;video/*;audio/*;text/*;"  >> ~/.local/share/applications/kde-sender.desktop
- update-desktop-database ~/.local/share/applications
- fi
+    # TODO: Replace the device ID below with your own (run: kdeconnect-cli -l)
+    KDE_DEVICE_ID="ef8c0afdfcbd48c5b50ca17838de0a56"
+    mkdir -p ~/.local/share/applications/
+    cat > "$KDE_SENDER_DESKTOP" << EOF
+[Desktop Entry]
+Type=Application
+Name=Send to Phone
+Exec=kdeconnect-cli --device $KDE_DEVICE_ID --share %F
+Icon=phone
+Terminal=false
+MimeType=application/octet-stream;inode/directory;image/*;video/*;audio/*;text/*;
+EOF
+    update-desktop-database ~/.local/share/applications
 fi
 
+# -----------------------------------------------------------------------------------------------------------------------
+# Apport (crash reporter) — disable to avoid spam
+# -----------------------------------------------------------------------------------------------------------------------
 
+echo "Disabling Apport crash reporter..."
+sudo service apport stop || true
+sudo sh -c 'cat > /etc/default/apport << EOF
+# Set to 0 to disable apport, 1 to enable
+# ammar: disabled to prevent crash report spam
+# Re-enable temporarily: sudo service apport start force_start=1
+enabled=0
+EOF'
 
+# -----------------------------------------------------------------------------------------------------------------------
+# sudo askpass helper
+# -----------------------------------------------------------------------------------------------------------------------
 
-
-
-
-#maybe add to /etc/fstab  :     tmpfs /tmp tmpfs defaults,noexec,nosuid 0 0
-#maybe add to /etc/fstab  :      tmpfs     /home/<user>/.mozilla/firefox/default/Cache tmpfs mode=1777,noatime 0 0 
-
-echo "Removing applications that we don't need.."
-#sudo apt-get remove abiword gnumeric
-
-
-
-echo "Saving you from Apport spam"
- sudo service apport stop
- sudo sh -c 'echo "# set this to 0 to disable apport, or to 1 to enable it" > /etc/default/apport' 
- sudo sh -c 'echo "# ammar settings dont like it" >> /etc/default/apport' 
- sudo sh -c 'echo "#Can be temporarily overwritten using : sudo service apport start force_start=1" >> /etc/default/apport' 
- sudo sh -c 'echo "enabled=0" >> /etc/default/apport' 
-#echo "Disable Apport maybe ? :P"
-#gksu leafpad /etc/default/apport
-
-
-
-#----------------------------------------------------------
-if [ -f /etc/sudo.conf ]
-then 
- echo "Found already set sudo.conf so not modifying it.."
-else 
- echo "Adding ssh-askpass as a utility to handle sudo -A calls in your system"
- sudo sh -c 'echo "Path askpass /usr/bin/ssh-askpass" > /etc/sudo.conf' 
+if [ -f /etc/sudo.conf ]; then
+    echo "Found /etc/sudo.conf — not modifying."
+else
+    echo "Setting ssh-askpass as sudo -A helper..."
+    sudo_write "Path askpass /usr/bin/ssh-askpass" /etc/sudo.conf
 fi
 
+# -----------------------------------------------------------------------------------------------------------------------
+# Squid web proxy (only if already installed)
+# -----------------------------------------------------------------------------------------------------------------------
 
-#Do you want to setup a Web proxy on this machine?
-#This can provide a boost in your web browsing
-#sudo apt-get install squid3 
-#If squid is found the rest will autocomplete..! The proxy will work on local network machines port 3128
-
-#Create shared directory
-if [ -f /etc/squid/squid.conf ]
-then
- USER=`whoami`
- mkdir -p /home/$USER/cache/
- echo "http_access allow localnet"  >> /etc/squid/conf.d/myProxy.conf
- echo "acl localnet src 192.168.1.0/255.255.255.0"  >> /etc/squid/conf.d/myProxy.conf
- echo "cache_dir diskd /home/$USER/cache 100 16 256"  >> /etc/squid/conf.d/myProxy.conf
- echo "#Don't forget to run this if you change something here"  >> /etc/squid/conf.d/myProxy.conf
- echo "#sudo systemctl restart squid.service"  >> /etc/squid/conf.d/myProxy.conf
- sudo systemctl restart squid.service
+if [ -f /etc/squid/squid.conf ]; then
+    echo "Squid detected — configuring local cache..."
+    mkdir -p ~/cache/
+    sudo sh -c "cat >> /etc/squid/conf.d/myProxy.conf << EOF
+http_access allow localnet
+acl localnet src 192.168.1.0/255.255.255.0
+cache_dir diskd $HOME/cache 100 16 256
+# Run: sudo systemctl restart squid.service  after any changes here
+EOF"
+    sudo systemctl restart squid.service
 fi
- 
 
-#For Lubuntu 20.04 + PDF export is broken in Libreoffice except if 
-#TODO add this automatically ? 
-#LXQt settings -> Click Environment (Advanced) -> Click Add 
-#    Double click the empty variable name, and type SAL_VCL_QT5_USE_CAIRO, press Enter
-#    Double click the Value field, and type true, press Enter
-#    Click Close
-#    Click OK to the dialog box 
-#SAL_VCL_QT5_USE_CAIRO=true
-#is added to environment
+# -----------------------------------------------------------------------------------------------------------------------
+# TRIM support check (works with both SATA SSDs and NVMe)
+# -----------------------------------------------------------------------------------------------------------------------
 
-#Check SSD partition for correct alignment , should return 0 
-#sudo blockdev --getalignoff /dev/sda1 
+echo "Checking for SSD TRIM support..."
+for disk in $(lsblk -dno NAME | grep -E '^(sd|nvme)'); do
+    if sudo hdparm -I "/dev/$disk" 2>/dev/null | grep -q "TRIM supported"; then
+        echo "  TRIM supported: /dev/$disk"
+    else
+        echo "  TRIM not reported or N/A: /dev/$disk"
+    fi
+done
 
-#Check SSD for trim support
-sudo hdparm -I /dev/sda |grep TRIM
-sudo hdparm -I /dev/sdb |grep TRIM
+# -----------------------------------------------------------------------------------------------------------------------
+# Disable intel_powerclamp (can cause thermal throttle jitter)
+# -----------------------------------------------------------------------------------------------------------------------
 
+sudo_write "blacklist intel_powerclamp" /etc/modprobe.d/disable-powerclamp.conf
 
-#TODO add to /etc/fstab : noatime,nodiratime,discard,errors=remount-ro
-#UUID=e3c59fb6-436d-4a42-84d4-9dc99daea30b /               ext4    noatime,nodiratime,discard,errors=remount-ro 0   
+# -----------------------------------------------------------------------------------------------------------------------
+# Custom wallpaper
+# -----------------------------------------------------------------------------------------------------------------------
 
-#Disable intel powerclamp
-sudo sh -c 'echo "blacklist intel_powerclamp" > /etc/modprobe.d/disable-powerclamp.conf'
+WALLPAPER_DIR="/usr/share/lubuntu/wallpapers"
+WALLPAPER_URL="https://raw.githubusercontent.com/AmmarkoV/MyScripts/master/Multimedia/startup.png"
+WALLPAPER_DEST="$WALLPAPER_DIR/startup.png"
+WALLPAPER_ORIG="$WALLPAPER_DIR/lubuntu-default-wallpaper.png"
 
-cd /usr/share/lubuntu/wallpapers/ 
-sudo wget https://raw.githubusercontent.com/AmmarkoV/MyScripts/master/Multimedia/startup.png 
-sudo mv /usr/share/lubuntu/wallpapers/lubuntu-default-wallpaper.png /usr/share/lubuntu/wallpapers/lubuntu-default-wallpaperOLD.png
-sudo ln -s  /usr/share/lubuntu/wallpapers/startup.png /usr/share/lubuntu/wallpapers/lubuntu-default-wallpaper.png
+if [ ! -f "$WALLPAPER_DEST" ]; then
+    echo "Downloading custom wallpaper..."
+    sudo wget -q -O "$WALLPAPER_DEST" "$WALLPAPER_URL" && {
+        [ -f "$WALLPAPER_ORIG" ] && sudo mv "$WALLPAPER_ORIG" "${WALLPAPER_ORIG%.png}OLD.png"
+        sudo ln -sf "$WALLPAPER_DEST" "$WALLPAPER_ORIG"
+    } || echo "WARNING: Wallpaper download failed — original wallpaper preserved."
+fi
 
+# -----------------------------------------------------------------------------------------------------------------------
+# Firefox extensions (opens tabs for manual install)
+# -----------------------------------------------------------------------------------------------------------------------
 
+echo "Opening Firefox extension pages..."
+firefox "https://addons.mozilla.org/en-US/firefox/addon/ublock-origin/" \
+        "https://addons.mozilla.org/en-US/firefox/addon/user-agent-switcher-revived/" &
+# uBlock Origin preferred over Adblock Plus (lighter, more effective)
 
-#https://make-linux-fast-again.com/
-# echo "GRUB_CMDLINE_LINUX_DEFAULT=\"quiet splash noibrs noibpb nopti nospectre_v2 nospectre_v1 l1tf=off nospec_store_bypass_disable no_stf_barrier mds=off tsx=on tsx_async_abort=off mitigations=off\"" >> /etc/default/grub
+# -----------------------------------------------------------------------------------------------------------------------
+# XScreensaver config
+# -----------------------------------------------------------------------------------------------------------------------
 
-#firefox https://addons.mozilla.org/en-US/firefox/addon/tab-list/&
-#firefox https://addons.mozilla.org/en-US/firefox/addon/os-x-yosemite/&
-#firefox https://addons.mozilla.org/en-US/firefox/addon/noscript/&
-firefox https://addons.mozilla.org/en-US/firefox/addon/adblock-plus/?src=ss&
-firefox https://addons.mozilla.org/en-US/firefox/addon/user-agent-switcher-revived/
-#firefox https://addons.mozilla.org/en-US/firefox/addon/video-downloadhelper/&
-#firefox https://addons.mozilla.org/en-US/firefox/addon/download-youtube/&
-
-#Hit about:config
-#set browser.sessionhistory.max_entries 10
-#set browser.cache.memory.enable 2048
-
-
-echo "Using a nice selection of XScreensavers"
 cd "$DIR"
-wget https://raw.githubusercontent.com/AmmarkoV/MyScripts/master/Setup/xscreensaver
-cp xscreensaver ~/.xscreensaver
-
-#----------------------------------------------------------
-if [ -f ~/.lock.sh ]
-then 
- echo "Found per-user lock bash script"
-else 
- echo "Generating new per-user lock bash script"
- echo "#!/bin/bash" > ~/.lock.sh 
- echo "NUMBEROFSCREENSAVERDAEMONSRUNNING=\`ps -A | grep xscreensaver | wc -l\`" > ~/.lock.sh
- echo "if [ "$NUMBEROFSCREENSAVERDAEMONSRUNNING" -eq \"0\" ]; then" > ~/.lock.sh
- echo "     echo \"XScreensaver not running, starting it up\" " > ~/.lock.sh
- echo "     xscreensaver -nosplash&" > ~/.lock.sh
- echo "     sleep 1" > ~/.lock.sh
- echo "fi" > ~/.lock.sh
- echo "xscreensaver-command -lock" > ~/.lock.sh
- echo "exit 0" >> ~/.lock.sh 
- chmod +x ~/.lock.sh 
-fi
-#----------------------------------------------------------
-#Create Lock Shortcut
-if [ -f ~/Desktop/lock.desktop ]
-then 
- if cat ~/Desktop/lock.desktop | grep -q "NUMBEROFSCREENSAVERDAEMONSRUNNING"
-then
-   echo "XScreensaver seems to be already set-up.." 
+if wget -q -O xscreensaver "https://raw.githubusercontent.com/AmmarkoV/MyScripts/master/Setup/xscreensaver"; then
+    cp xscreensaver ~/.xscreensaver
+    echo "XScreensaver config applied."
 else
- echo "[Desktop Entry]" > ~/Desktop/lock.desktop
- echo "Type=Application" >> ~/Desktop/lock.desktop
- echo "Name=Lock" >> ~/Desktop/lock.desktop
-
- ORIG_DIR=`pwd`
- cd ~
- USER_DIR=`pwd`
- echo "Exec=$USER_DIR/.lock.sh" >> ~/Desktop/lock.desktop
- fi
+    echo "WARNING: Could not download xscreensaver config."
 fi
-#----------------------------------------------------------
 
+# -----------------------------------------------------------------------------------------------------------------------
+# Lock screen script (~/.lock.sh)
+# -----------------------------------------------------------------------------------------------------------------------
 
+if [ -f ~/.lock.sh ]; then
+    echo "Found per-user lock script."
+else
+    echo "Generating lock screen script..."
+    cat > ~/.lock.sh << 'EOF'
+#!/bin/bash
+RUNNING=$(ps -A | grep -c xscreensaver || true)
+if [ "$RUNNING" -eq 0 ]; then
+    echo "XScreensaver not running — starting..."
+    xscreensaver -nosplash &
+    sleep 1
+fi
+xscreensaver-command -lock
+exit 0
+EOF
+    chmod +x ~/.lock.sh
+fi
 
-#Add sound when booting
-#sudo echo "GRUB_INIT_TUNE=\"1750 523 1 392 1 523 1 659 1 784 1 1047 1 784 1 415 1 523 1 622 1 831 1 622 1 831 1 1046 1 1244 1 1661 1 1244 1 466 1 587 1 698 1 932 1 1195 1 1397 1 1865 1 1397 1\"" >> /etc/default/grub
-#sudo update-grub
+# -----------------------------------------------------------------------------------------------------------------------
+# Lock screen desktop shortcut
+# -----------------------------------------------------------------------------------------------------------------------
 
+LOCK_DESKTOP="$HOME/Desktop/lock.desktop"
+if [ -f "$LOCK_DESKTOP" ] && grep -q "NUMBEROFSCREENSAVERDAEMONSRUNNING" "$LOCK_DESKTOP"; then
+    echo "XScreensaver lock shortcut already set up."
+else
+    cat > "$LOCK_DESKTOP" << EOF
+[Desktop Entry]
+Type=Application
+Name=Lock
+Exec=$HOME/.lock.sh
+Icon=system-lock-screen
+Terminal=false
+EOF
+fi
 
+# -----------------------------------------------------------------------------------------------------------------------
+# LibreOffice PDF export fix for Lubuntu (LXQt + Qt5 backend)
+# -----------------------------------------------------------------------------------------------------------------------
 
-#Spotify
-#curl -sS https://download.spotify.com/debian/pubkey_C85668DF69375001.gpg | sudo gpg --dearmor --yes -o /etc/apt/trusted.gpg.d/spotify.gpg
-#echo "deb https://repository.spotify.com stable non-free" | sudo tee /etc/apt/sources.list.d/spotify.list
-#sudo apt-get update && sudo apt-get install spotify-client
+LXQT_ENV="$HOME/.config/lxqt/session.conf"
+if grep -q "SAL_VCL_QT5_USE_CAIRO" "$LXQT_ENV" 2>/dev/null; then
+    echo "LibreOffice PDF export fix already applied."
+else
+    echo "Applying LibreOffice PDF export fix (SAL_VCL_QT5_USE_CAIRO=true)..."
+    mkdir -p "$(dirname "$LXQT_ENV")"
+    sudo_append "SAL_VCL_QT5_USE_CAIRO=true" /etc/environment
+fi
 
-#Teamviewer
+# -----------------------------------------------------------------------------------------------------------------------
+# SSH key generation
+# -----------------------------------------------------------------------------------------------------------------------
 
-#Don't use firefox snap
-#sudo snap remove firefox
-#sudo install -d -m 0755 /etc/apt/keyrings
-#wget -q https://packages.mozilla.org/apt/repo-signing-key.gpg -O- | sudo tee /etc/apt/keyrings/packages.mozilla.org.asc > /dev/null
-#echo "deb [signed-by=/etc/apt/keyrings/packages.mozilla.org.asc] https://packages.mozilla.org/apt mozilla main" | sudo tee -a /etc/apt/sources.list.d/mozilla.list > /dev/null
-#echo '
-#Package: *
-#Pin: origin packages.mozilla.org
-#Pin-Priority: 1000
-#' | sudo tee /etc/apt/preferences.d/mozilla
-#sudo apt update && sudo apt install firefox
- 
-
-#Install Steam
-#Steam needs 32bit libc
-#sudo apt-get install libc6-i386 libgl1-mesa-glx:i386
-#wget -O ~/Downloads/steam.deb "https://cdn.cloudflare.steamstatic.com/client/installer/steam.deb"
-#dpkg -i ~/Downloads/steam.deb
-
-#Install Discord 
-#wget -O /tmp/discord-installer.deb "https://discordapp.com/api/download/canary?platform=linux&format=deb"
-#dpkg -i /tmp/discord-installer.deb
- 
-#Install Signal
-#wget -O- https://updates.signal.org/desktop/apt/keys.asc | gpg --dearmor > signal-desktop-keyring.gpg;
-#cat signal-desktop-keyring.gpg | sudo tee /usr/share/keyrings/signal-desktop-keyring.gpg > /dev/null
-#wget -O signal-desktop.sources https://updates.signal.org/static/desktop/apt/signal-desktop.sources;
-#cat signal-desktop.sources | sudo tee /etc/apt/sources.list.d/signal-desktop.sources > /dev/null
-#sudo apt update && sudo apt install signal-desktop
-
-#Install Mullvad
-#sudo curl -fsSLo /usr/share/keyrings/mullvad-keyring.asc https://repository.mullvad.net/deb/mullvad-keyring.asc
-#echo "deb [signed-by=/usr/share/keyrings/mullvad-keyring.asc arch=$( dpkg --print-architecture )] https://repository.mullvad.net/deb/stable stable main" | sudo tee /etc/apt/sources.list.d/mullvad.list
-#sudo apt update && sudo apt install mullvad-vpn
-
-
-#Enable fingerprint authentication (e.g. lenovo laptop)
-#sudo apt install fprintd libpam-fprintd
-#fprintd-enroll
-#sudo pam-auth-update
-
-#Generate SSH Key
 KEY_FILE="$HOME/.ssh/id_ed25519.pub"
-
-# Check if the public key exists
 if [ -f "$KEY_FILE" ]; then
     echo "SSH key already exists at $KEY_FILE"
 else
     echo "No SSH key found."
-
-    # Prompt for email
-    read -p "Enter your email for SSH key generation: (e.g. ammarkov@gmail.com)" EMAIL
-
-    # Ensure ~/.ssh exists
+    read -rp "Enter your email for SSH key generation: " EMAIL
     mkdir -p "$HOME/.ssh"
-
-    # Generate the key
+    chmod 700 "$HOME/.ssh"
     ssh-keygen -t ed25519 -C "$EMAIL"
 fi
 
-echo "SSH Public Key for Github ( https://github.com/settings/keys ) : "
-cat $KEY_FILE
+echo
+echo "SSH Public Key (add to GitHub → https://github.com/settings/keys):"
+cat "$KEY_FILE"
 
-neofetch
-echo "Configuration Complete" |  festival --tts
+# -----------------------------------------------------------------------------------------------------------------------
+# Kernel image conf — allow apt to update kernels without symlinks
+# -----------------------------------------------------------------------------------------------------------------------
 
+if grep -q "do_symlinks" /etc/kernel-img.conf 2>/dev/null; then
+    echo "Kernel image settings already configured."
+else
+    sudo_append "do_symlinks = no"  /etc/kernel-img.conf
+    sudo_append "no_symlinks = yes" /etc/kernel-img.conf
+fi
 
+# -----------------------------------------------------------------------------------------------------------------------
+# Done
+# -----------------------------------------------------------------------------------------------------------------------
 
+echo "Removing applications we don't need..."
+# sudo apt-get remove -y abiword gnumeric
 
-# sensors-applet
+fastfetch
+echo "Configuration Complete" | festival --tts
+
+# -----------------------------------------------------------------------------------------------------------------------
+# Commented-out optional extras (uncomment to enable)
+# -----------------------------------------------------------------------------------------------------------------------
+
+# --- Replace Firefox Snap with Mozilla's official .deb ---
+# sudo snap remove firefox
+# sudo install -d -m 0755 /etc/apt/keyrings
+# wget -q https://packages.mozilla.org/apt/repo-signing-key.gpg -O- | sudo tee /etc/apt/keyrings/packages.mozilla.org.asc > /dev/null
+# echo "deb [signed-by=/etc/apt/keyrings/packages.mozilla.org.asc] https://packages.mozilla.org/apt mozilla main" | sudo tee /etc/apt/sources.list.d/mozilla.list > /dev/null
+# echo 'Package: *\nPin: origin packages.mozilla.org\nPin-Priority: 1000' | sudo tee /etc/apt/preferences.d/mozilla
+# sudo apt update && sudo apt install firefox
+
+# --- Spotify ---
+# curl -sS https://download.spotify.com/debian/pubkey_C85668DF69375001.gpg | sudo gpg --dearmor --yes -o /etc/apt/trusted.gpg.d/spotify.gpg
+# echo "deb https://repository.spotify.com stable non-free" | sudo tee /etc/apt/sources.list.d/spotify.list
+# sudo apt-get update && sudo apt-get install spotify-client
+
+# --- Signal ---
+# wget -O- https://updates.signal.org/desktop/apt/keys.asc | gpg --dearmor > signal-desktop-keyring.gpg
+# cat signal-desktop-keyring.gpg | sudo tee /usr/share/keyrings/signal-desktop-keyring.gpg > /dev/null
+# wget -O signal-desktop.sources https://updates.signal.org/static/desktop/apt/signal-desktop.sources
+# cat signal-desktop.sources | sudo tee /etc/apt/sources.list.d/signal-desktop.sources > /dev/null
+# sudo apt update && sudo apt install signal-desktop
+
+# --- Mullvad VPN ---
+# sudo curl -fsSLo /usr/share/keyrings/mullvad-keyring.asc https://repository.mullvad.net/deb/mullvad-keyring.asc
+# echo "deb [signed-by=/usr/share/keyrings/mullvad-keyring.asc arch=$(dpkg --print-architecture)] https://repository.mullvad.net/deb/stable stable main" | sudo tee /etc/apt/sources.list.d/mullvad.list
+# sudo apt update && sudo apt install mullvad-vpn
+
+# --- Discord ---
+# wget -O /tmp/discord-installer.deb "https://discordapp.com/api/download?platform=linux&format=deb"
+# sudo dpkg -i /tmp/discord-installer.deb
+
+# --- Steam ---
+# sudo apt-get install -y libc6-i386
+# wget -O ~/Downloads/steam.deb "https://cdn.cloudflare.steamstatic.com/client/installer/steam.deb"
+# sudo dpkg -i ~/Downloads/steam.deb
+
+# --- Fingerprint auth (e.g. Lenovo laptops) ---
+# sudo apt install fprintd libpam-fprintd
+# fprintd-enroll
+# sudo pam-auth-update
+
+# --- Swap file (8 GB) ---
+# sudo fallocate -l 8G /swapfile
+# sudo chmod 600 /swapfile
+# sudo mkswap /swapfile
+# sudo swapon /swapfile
+# echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+
+# --- Disable CPU speculation mitigations (performance, reduces security!) ---
+# https://make-linux-fast-again.com/
+# sudo sh -c 'echo "GRUB_CMDLINE_LINUX_DEFAULT=\"quiet splash mitigations=off\"" >> /etc/default/grub'
+# sudo update-grub
+
+# --- DVD playback ---
+# sudo apt-get install libdvdread4
+# sudo /usr/share/doc/libdvdread4/install-css.sh
+
+# --- Fail2ban (server hardening) ---
+# sudo apt-get install fail2ban
+
+# --- Boot sound via GRUB ---
+# sudo sh -c 'echo "GRUB_INIT_TUNE=\"1750 523 1 392 1 523 1 659 1 784 1 1047 1 784 1\"" >> /etc/default/grub'
+# sudo update-grub
+
 exit 0
