@@ -144,10 +144,10 @@ class PaperCollection:
 
 
 class MixedCollection:
-    """A collection that can hold papers, blog posts, and models.
+    """A collection that can hold papers, blog posts, models, and HN stories.
 
     This class provides a unified interface for managing content from
-    multiple sources (arxiv, HuggingFace blog, HuggingFace models).
+    multiple sources (arxiv, HuggingFace blog, HuggingFace models, Hacker News).
     """
 
     def __init__(self):
@@ -157,6 +157,8 @@ class MixedCollection:
         self._blog_slug_set: set = set()
         self._models: List[dict] = []
         self._model_id_set: set = set()
+        self._hn_stories: List[dict] = []
+        self._hn_story_id_set: set = set()
 
     # Paper methods
     def add_paper(self, paper: Paper) -> bool:
@@ -225,6 +227,31 @@ class MixedCollection:
                 count += 1
         return count
 
+    # HN story methods
+    def add_hn_story(self, story: dict) -> bool:
+        """Add HN story if not already present.
+
+        Args:
+            story: Dictionary with 'story_id' key
+
+        Returns:
+            True if added, False if duplicate
+        """
+        story_id = story.get('story_id', '')
+        if story_id in self._hn_story_id_set:
+            return False
+        self._hn_stories.append(story)
+        self._hn_story_id_set.add(story_id)
+        return True
+
+    def add_hn_stories(self, stories: List[dict]) -> int:
+        """Add multiple HN stories."""
+        count = 0
+        for story in stories:
+            if self.add_hn_story(story):
+                count += 1
+        return count
+
     # Unified methods
     def get_all_titles(self) -> List[str]:
         """Get all titles from all sources."""
@@ -232,6 +259,7 @@ class MixedCollection:
         titles.extend([p.title for p in self._papers if p.title])
         titles.extend([b.get('title', '') for b in self._blog_posts if b.get('title')])
         titles.extend([m.get('title', m.get('model_id', '')) for m in self._models])
+        titles.extend([h.get('title', '') for h in self._hn_stories if h.get('title')])
         return titles
 
     def get_all_items(self) -> List[dict]:
@@ -240,6 +268,7 @@ class MixedCollection:
         items.extend([p.to_dict() for p in self._papers])
         items.extend(self._blog_posts)
         items.extend(self._models)
+        items.extend(self._hn_stories)
         return items
 
     def to_export_format(self) -> dict:
@@ -248,19 +277,21 @@ class MixedCollection:
             'papers': [p.to_dict() for p in self._papers],
             'blog_posts': self._blog_posts,
             'models': self._models,
+            'hn_stories': self._hn_stories,
             'counts': {
                 'papers': len(self._papers),
                 'blog_posts': len(self._blog_posts),
                 'models': len(self._models),
-                'total': len(self._papers) + len(self._blog_posts) + len(self._models)
+                'hn_stories': len(self._hn_stories),
+                'total': len(self._papers) + len(self._blog_posts) + len(self._models) + len(self._hn_stories)
             }
         }
 
     def __len__(self) -> int:
-        return len(self._papers) + len(self._blog_posts) + len(self._models)
+        return len(self._papers) + len(self._blog_posts) + len(self._models) + len(self._hn_stories)
 
     def __repr__(self) -> str:
-        return f"MixedCollection(papers={len(self._papers)}, blog_posts={len(self._blog_posts)}, models={len(self._models)})"
+        return f"MixedCollection(papers={len(self._papers)}, blog_posts={len(self._blog_posts)}, models={len(self._models)}, hn_stories={len(self._hn_stories)})"
 
 
 def extract_authors(author_text: str) -> List[str]:

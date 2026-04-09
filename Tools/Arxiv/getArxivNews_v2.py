@@ -22,6 +22,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from paper_model import Paper, PaperCollection, MixedCollection, extract_authors
 from export_formats import export_all_formats
 from huggingface_scraper import fetch_hf_blog, fetch_hf_models
+from hackernews_scraper import fetch_hn_stories
 
 # Configure logging
 logging.basicConfig(
@@ -127,6 +128,17 @@ def main():
         help='Max models to fetch from HuggingFace (default: 50)'
     )
     parser.add_argument(
+        '--no-hackernews',
+        action='store_true',
+        help='Skip Hacker News stories'
+    )
+    parser.add_argument(
+        '--hn-limit',
+        type=int,
+        default=30,
+        help='Max stories to fetch from Hacker News (default: 30)'
+    )
+    parser.add_argument(
         '--quiet', '-q',
         action='store_true',
         help='Suppress output except errors'
@@ -182,6 +194,16 @@ def main():
         added_models = collection.add_models(model_dicts)
         logger.info(f"Models: {len(models)} fetched, {added_models} new")
 
+    # Fetch Hacker News content
+    if not args.no_hackernews:
+        logger.info("\n=== Fetching Hacker News Stories ===")
+
+        logger.info("Fetching Hacker News top stories...")
+        hn_stories = fetch_hn_stories(limit=args.hn_limit)
+        story_dicts = [story.to_dict() for story in hn_stories]
+        added_stories = collection.add_hn_stories(story_dicts)
+        logger.info(f"HN Stories: {len(hn_stories)} fetched, {added_stories} new")
+
     logger.info(f"\nTotal items in collection: {len(collection)}")
 
     if len(collection) == 0:
@@ -219,6 +241,7 @@ def main():
     print(f"  Papers (arxiv):       {len(collection._papers)}")
     print(f"  Blog Posts (HF):      {len(collection._blog_posts)}")
     print(f"  Models (HF):          {len(collection._models)}")
+    print(f"  HN Stories:           {len(collection._hn_stories)}")
     print(f"  Total:                {len(collection)}")
     print(f"\nOutput files:")
     for fmt, path in paths.items():

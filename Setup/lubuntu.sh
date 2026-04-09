@@ -107,7 +107,7 @@ fi
 # -----------------------------------------------------------------------------------------------------------------------
 
 BASICAPPS="firefox thunderbird vlc mumble libreoffice myspell-el-gr synaptic catfish \
-    usb-creator-gtk remmina baobab brasero aisleriot"
+    usb-creator-gtk remmina baobab brasero aisleriot tmux"
 # pidgin removed (unmaintained); consider hexchat or fractal for chat
 
 GRAPHICS="gimp darktable"

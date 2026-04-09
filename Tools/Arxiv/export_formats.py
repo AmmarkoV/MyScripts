@@ -467,7 +467,25 @@ def export_mixed_sqlite(
         )
     ''')
 
-    inserted = {'papers': 0, 'blog_posts': 0, 'models': 0}
+    # Create hn_stories table if not exists
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS hn_stories (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            story_id INTEGER UNIQUE NOT NULL,
+            title TEXT NOT NULL,
+            url TEXT,
+            domain TEXT,
+            author TEXT,
+            points INTEGER DEFAULT 0,
+            num_comments INTEGER DEFAULT 0,
+            time_ago TEXT,
+            import_date TEXT,
+            source TEXT DEFAULT 'hackernews',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+
+    inserted = {'papers': 0, 'blog_posts': 0, 'models': 0, 'hn_stories': 0}
 
     # Insert papers
     for paper in collection._papers:
@@ -522,6 +540,24 @@ def export_mixed_sqlite(
                 inserted['models'] += 1
         except sqlite3.Error as e:
             print(f"Error inserting model: {e}")
+
+    # Insert HN stories
+    for story in collection._hn_stories:
+        try:
+            cursor.execute('''
+                INSERT OR IGNORE INTO hn_stories
+                (story_id, title, url, domain, author, points, num_comments, time_ago, import_date, source)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                story.get('story_id', 0), story.get('title', ''), story.get('url', ''),
+                story.get('domain', ''), story.get('author', ''), story.get('points', 0),
+                story.get('num_comments', 0), story.get('time_ago', ''),
+                import_date, 'hackernews'
+            ))
+            if cursor.rowcount > 0:
+                inserted['hn_stories'] += 1
+        except sqlite3.Error as e:
+            print(f"Error inserting HN story: {e}")
 
     conn.commit()
     conn.close()
