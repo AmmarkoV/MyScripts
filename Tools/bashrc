@@ -132,14 +132,10 @@ alias capslock='xdotool key Caps_Lock'
 alias usbwrite='watch -n 1 "grep Dirty /proc/meminfo"'
 
 
-
-
 # set PATH so it includes user's private bin if it exists
 if [ -d "$HOME/androidSDK/bin" ] ; then
     PATH="$HOME/androidSDK/bin:$PATH"
 fi
-
-
 
 function gspeak
 {
@@ -165,11 +161,20 @@ function gtranslate
     )"
 }
 
+ 
+alias sendphone="kdeconnect-cli --device ef8c0afdfcbd48c5b50ca17838de0a56 --share"
+
+
 # Shrink video to half size (output: filename_s.mp4)
 shrink() {
   for f in "$@"; do
     base="${f%.*}"
-    ffmpeg -i "$f" -vf "scale=iw/2:ih/2" -c:v libx264 -crf 23 -preset fast -c:a copy "${base}_s.mp4"
+    ffmpeg -i "$f" -vf "scale=trunc(iw/4)*2:trunc(ih/4)*2" -c:v libx264 -crf 23 -preset fast -c:a copy "${base}_s.mp4"
   done
 }
+
+alias myclaude='ANTHROPIC_BASE_URL="http://ammar.gr:7860" claude --model "Qwen3.5-27B-Reasoning-v2"'
+alias gitmsg='(git status; git diff HEAD 2>/dev/null; git diff --cached 2>/dev/null) | myclaude --print --output-format text -p "Generate a concise git commit message based on this git status and diff. Output only the commit message, nothing else."'
+alias gitcommit='git commit -m "$((git status; git diff HEAD 2>/dev/null; git diff --cached 2>/dev/null) | myclaude --print --output-format text -p "Generate a concise git commit message based on this git status and diff. Output only the commit message, nothing else.")"'
+
 
