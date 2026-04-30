@@ -1,4 +1,7 @@
+- [Generating Daily Reports](#generating-daily-reports) — How to run `getArxivNews_v2.py` and filter for HCCV papers
 - [Emerging Research Trends](emerging_trends_2026-04-02.md) — Key trends in HCCV-relevant research from April 2, 2026
 - [HCCV Curation Reports](reference/hccv_curation_reports.md) — Location of HCCV arxiv curation reports
 - [Key Papers April 2026](project/key_papers_2026-04-03.md) — Priority papers from April 3, 2026 curation
 - [Research Trends April 2026](project/research_trends_april_2026.md) — Emerging trends in HCCV research
+- [Report April 22, 2026](reports/2026-04-22-hccv-curation.md) — 70 HCCV papers from 785 total; top areas: human-scene reconstruction, avatar efficiency, HOI unification
+- [Report April 24, 2026](reports/2026-04-24-hccv-curation.md) — 243 HCCV papers from 2460 total; top areas: human motion understanding, physics-based HOI, embodied foundation models, sign language infrastructure
