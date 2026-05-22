@@ -127,7 +127,7 @@ SCREENSAVERS="xscreensaver xscreensaver-data xscreensaver-data-extra xscreensave
 
 ADVLIBS="festival imagemagick numlockx gxmessage libnotify-bin"
 
-CODECS="ubuntu-restricted-extras pavucontrol beep ffmpeg mplayer smplayer"
+CODECS="ubuntu-restricted-extras pavucontrol pulseaudio-utils beep ffmpeg mplayer smplayer"
 
 SECURITY="network-manager-openvpn network-manager-openvpn-gnome"
 
@@ -171,6 +171,21 @@ else
     echo "PipeWire detected (default on 24.04) — PulseAudio tweaks skipped."
     echo "For PipeWire tuning, see: /usr/share/pipewire/pipewire.conf"
 fi
+
+
+
+
+# -----------------------------------------------------------------------------------------------------------------------
+# Faster startup ( systemd-analyze blame ) 
+# -----------------------------------------------------------------------------------------------------------------------
+sudo systemctl disable NetworkManager-wait-online.service 
+sudo systemctl disable systemd-networkd-wait-online.service
+sudo systemctl mask systemd-udev-settle.service
+sudo systemctl mask plymouth-quit-wait.service
+
+
+
+
 
 # -----------------------------------------------------------------------------------------------------------------------
 # Kernel image symlinks
