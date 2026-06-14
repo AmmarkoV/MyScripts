@@ -58,43 +58,66 @@ def open_db(path: str) -> sqlite3.Connection:
     return conn
 
 
+def build_trusted_lookups(conn, trusted_labels: list[str]):
+    """
+    Build two in-memory lookups over the trusted drives, ONCE.
+
+    The previous planner ran up to three correlated subqueries per faulty file —
+    millions of point queries that made planning crawl.  Streaming every trusted
+    file once into dicts turns each faulty-file decision into an O(1) lookup.
+
+      hash_to_path : hash            -> full_path        (hash-confirmed dupes)
+      namesize     : (filename,size) -> (full_path,hash) (name+size candidates)
+    """
+    trusted_ph = ",".join("?" * len(trusted_labels))
+    hash_to_path: dict[str, str] = {}
+    namesize: dict[tuple, tuple] = {}
+
+    cur = conn.execute(
+        f"SELECT filename, size, hash, full_path FROM files "
+        f"WHERE drive_label IN ({trusted_ph})",
+        trusted_labels,
+    )
+    for fn, size, h, path in cur:
+        if h and h not in hash_to_path:
+            hash_to_path[h] = path
+        key = (fn, size)
+        prev = namesize.get(key)
+        # Prefer a hashed candidate so REVIEW/DELETE can resolve without a re-scan.
+        if prev is None or (prev[1] is None and h is not None):
+            namesize[key] = (path, h)
+    return hash_to_path, namesize
+
+
 # ── Core analysis ─────────────────────────────────────────────────────────────
 
 def analyse_drive(
-    conn,
+    rconn,
     faulty_label: str,
-    trusted_labels: list[str],
+    hash_to_path: dict[str, str],
+    namesize: dict[tuple, tuple],
     trusted_mounts: dict[str, str],
     trusted_free: dict[str, int],
     frame_dirs: set[str],
     faulty_mount: str,
 ) -> list[dict]:
     """Return ordered list of operations for one faulty drive."""
-    trusted_ph = ",".join("?" * len(trusted_labels))
-
-    files = conn.execute(
-        "SELECT * FROM files WHERE drive_label=?", (faulty_label,)
-    ).fetchall()
+    # Stream faulty files from a dedicated read cursor — never fetchall() the
+    # (potentially millions of) rows into memory at once.
+    files = rconn.execute(
+        "SELECT relative_path, full_path, filename, size, hash "
+        "FROM files WHERE drive_label=?", (faulty_label,)
+    )
 
     ops: list[dict] = []
     tarball_queued: dict[str, list] = {}
 
-    for f in files:
-        fsize  = f["size"]
-        fname  = f["filename"]
-        fhash  = f["hash"]
-        fpath  = f["full_path"]
-        frp    = f["relative_path"]
+    for frp, fpath, fname, fsize, fhash in files:
         parent = str(PurePosixPath(frp).parent)
 
         # ── Hash-confirmed match on a trusted drive ───────────────────────────
         if fhash:
-            trusted_match = conn.execute(f"""
-                SELECT full_path FROM files
-                WHERE  hash = ? AND drive_label IN ({trusted_ph})
-                LIMIT  1
-            """, [fhash] + trusted_labels).fetchone()
-
+            trusted_match = hash_to_path.get(fhash)
             if trusted_match:
                 ops.append({
                     "type":        "DELETE",
@@ -102,44 +125,31 @@ def analyse_drive(
                     "drive":       faulty_label,
                     "size":        fsize,
                     "reason":      "hash_confirmed_duplicate",
-                    "verified_on": trusted_match["full_path"],
+                    "verified_on": trusted_match,
                 })
                 continue
 
-            mismatch = conn.execute(f"""
-                SELECT full_path, hash FROM files
-                WHERE  filename = ? AND size = ?
-                  AND  drive_label IN ({trusted_ph})
-                  AND  hash IS NOT NULL AND hash != ?
-                LIMIT  1
-            """, [fname, fsize] + trusted_labels + [fhash]).fetchone()
-
-            if mismatch:
+            cand = namesize.get((fname, fsize))
+            if cand and cand[1] is not None and cand[1] != fhash:
                 ops.append({
                     "type":         "REVIEW",
                     "faulty_path":  fpath,
-                    "trusted_path": mismatch["full_path"],
+                    "trusted_path": cand[0],
                     "drive":        faulty_label,
                     "size":         fsize,
                     "faulty_hash":  fhash,
-                    "trusted_hash": mismatch["hash"],
+                    "trusted_hash": cand[1],
                     "reason":       "hash_mismatch_same_name_and_size",
                 })
                 continue
 
         else:
-            name_match = conn.execute(f"""
-                SELECT full_path FROM files
-                WHERE  filename = ? AND size = ?
-                  AND  drive_label IN ({trusted_ph})
-                LIMIT  1
-            """, [fname, fsize] + trusted_labels).fetchone()
-
-            if name_match:
+            cand = namesize.get((fname, fsize))
+            if cand:
                 ops.append({
                     "type":         "VERIFY_THEN_DELETE",
                     "faulty_path":  fpath,
-                    "trusted_path": name_match["full_path"],
+                    "trusted_path": cand[0],
                     "drive":        faulty_label,
                     "size":         fsize,
                     "reason":       "name_size_match_unverified",
@@ -148,9 +158,10 @@ def analyse_drive(
 
         # ── File is unique — needs to go to a trusted drive ──────────────────
         if parent in frame_dirs:
-            tarball_queued.setdefault(parent, []).append(f)
+            tarball_queued.setdefault(parent, []).append(
+                {"full_path": fpath, "size": fsize})
         else:
-            _emit_copy(ops, fpath, frp, fsize, faulty_label, trusted_labels,
+            _emit_copy(ops, fpath, frp, fsize, faulty_label,
                        trusted_mounts, trusted_free)
 
     # ── Emit one TARBALL_COPY per frame directory ─────────────────────────────
@@ -185,7 +196,7 @@ def analyse_drive(
     return ops
 
 
-def _emit_copy(ops, fpath, frp, fsize, faulty_label, trusted_labels,
+def _emit_copy(ops, fpath, frp, fsize, faulty_label,
                trusted_mounts, trusted_free):
     best = max(trusted_free, key=trusted_free.get)
     if trusted_free[best] < fsize:
@@ -250,6 +261,14 @@ def cmd_plan(args):
     trusted_mounts = {k: v["mount_point"] for k, v in trusted.items()}
     trusted_labels = list(trusted)
 
+    console.print("[dim]Indexing trusted drives in memory…")
+    hash_to_path, namesize = build_trusted_lookups(conn, trusted_labels)
+    console.print(
+        f"[dim]  {len(hash_to_path):,} hashed + {len(namesize):,} name/size keys indexed"
+    )
+
+    rconn = open_db(args.db)   # dedicated streaming reader for faulty files
+
     all_ops: list[dict] = []
     op_id = 0
 
@@ -266,7 +285,7 @@ def cmd_plan(args):
             task = prog.add_task(f"[yellow]Analysing {faulty_label}", total=n_files)
 
             ops = analyse_drive(
-                conn, faulty_label, trusted_labels, trusted_mounts,
+                rconn, faulty_label, hash_to_path, namesize, trusted_mounts,
                 trusted_free,
                 frame_dirs_by_drive.get(faulty_label, set()),
                 faulty[faulty_label]["mount_point"],
@@ -279,6 +298,7 @@ def cmd_plan(args):
                 op["id"] = op_id
             all_ops.extend(ops)
 
+    rconn.close()
     conn.close()
 
     # ── Summary tables ────────────────────────────────────────────────────────

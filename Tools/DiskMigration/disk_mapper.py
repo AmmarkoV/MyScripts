@@ -6,6 +6,10 @@ Install: pip install rich xxhash
 
 Subcommands
   scan    Walk drives and record file metadata (fast, no hashing).
+            --restart  Forget previous scan progress and walk from scratch.
+            By default a scan is RESUMABLE: directories already completed on a
+            previous run are skipped, so if a faulty drive hangs the kernel and
+            you have to hard-reboot, just run the same command again.
   hash    Compute file hashes.
             --smart   Only hash files that share (name, size) across drives —
                       dramatically faster than hashing everything.
@@ -13,6 +17,18 @@ Subcommands
   detect  Identify directories packed with many small files (frame dumps,
           tile sets, etc.) that should be packed as tarballs during migration.
   status  Show database summary.
+
+Resilience notes (why this version exists)
+  The previous scan triggered a kernel soft-lockup: walking millions of files
+  filled the dentry/inode cache until a routine memory allocation got stuck
+  spinning in prune_dcache_sb.  This version:
+    * uses os.scandir so each file costs ONE stat syscall, not three;
+    * calls posix_fadvise(DONTNEED) after hashing so file contents don't pin
+      the page cache;
+    * marks each directory done so a hang can be killed and the scan resumed;
+    * writes the directory it is currently inside to <LABEL>.scan-current so a
+      D-state hang on a bad sector tells you exactly where the disk is failing;
+    * logs unreadable dirs/files to <LABEL>.scan-errors.log and keeps going.
 
 Example
   python disk_mapper.py scan \\
@@ -55,6 +71,7 @@ except ImportError:
 console = Console()
 CHUNK      = 4 << 20  # 4 MiB read chunks
 SKIP_DIRS  = {"lost+found", ".Trash-1000", "$RECYCLE.BIN", ".cache"}
+DONTNEED   = getattr(os, "POSIX_FADV_DONTNEED", None)
 
 
 # ── Schema ────────────────────────────────────────────────────────────────────
@@ -81,6 +98,13 @@ CREATE TABLE IF NOT EXISTS files (
     hash_error    TEXT,
     scan_time     REAL    NOT NULL,
     hash_time     REAL,
+    UNIQUE (drive_label, relative_path)
+);
+CREATE TABLE IF NOT EXISTS scanned_dirs (
+    drive_label   TEXT    NOT NULL,
+    relative_path TEXT    NOT NULL,
+    file_count    INTEGER NOT NULL,
+    scan_time     REAL    NOT NULL,
     UNIQUE (drive_label, relative_path)
 );
 CREATE TABLE IF NOT EXISTS frame_dirs (
@@ -126,6 +150,22 @@ def make_hasher():
         return hashlib.sha256()
 
 
+def drop_page_cache(fd: int) -> None:
+    """
+    Ask the kernel to drop this file's pages from the page cache.
+
+    Reading terabytes for hashing would otherwise keep every byte resident,
+    growing the page/dentry cache until the kernel's memory-reclaim path stalls
+    (the soft-lockup we saw in syslog).  POSIX_FADV_DONTNEED releases them
+    immediately after we are done reading.
+    """
+    if DONTNEED is not None:
+        try:
+            os.posix_fadvise(fd, 0, 0, DONTNEED)
+        except OSError:
+            pass
+
+
 # ── Scan ──────────────────────────────────────────────────────────────────────
 
 def cmd_scan(args):
@@ -138,7 +178,7 @@ def cmd_scan(args):
         TextColumn("files"),
         TextColumn("[dim]{task.fields[rate]:>14}"),
         console=console,
-        refresh_per_second=4,
+        refresh_per_second=2,        # keep terminal output light
     ) as prog:
         for label, mount, trust in args.drive:
             is_trusted = trust.lower() == "trusted"
@@ -161,105 +201,183 @@ def cmd_scan(args):
                   usage.total, usage.used, usage.free, time.time()))
             conn.commit()
 
-            task = prog.add_task(
-                f"[green]Scanning {label}", total=None, completed=0, rate=""
-            )
-            batch  = []
-            t0     = time.monotonic()
-            n_done = 0
+            if args.restart:
+                conn.execute("DELETE FROM scanned_dirs WHERE drive_label=?", (label,))
+                conn.commit()
+                done = set()
+            else:
+                done = {
+                    r[0] for r in conn.execute(
+                        "SELECT relative_path FROM scanned_dirs WHERE drive_label=?",
+                        (label,),
+                    )
+                }
+                if done:
+                    console.print(f"[dim]Resuming {label}: {len(done):,} directories already scanned")
 
-            for dirpath, dirnames, filenames in os.walk(mount, onerror=lambda _: None):
-                dirnames[:] = [d for d in dirnames if d not in SKIP_DIRS]
-                for fn in filenames:
-                    fp = os.path.join(dirpath, fn)
-                    try:
-                        st = os.stat(fp, follow_symlinks=False)
-                        if not os.path.isfile(fp):
-                            continue
-                        rp = os.path.relpath(fp, mount)
-                        batch.append((label, rp, fp, fn, st.st_size, st.st_mtime, time.time()))
-                    except OSError:
-                        pass
-
-                    if len(batch) >= 500:
-                        _flush(conn, batch)
-                        n_done += len(batch)
-                        elapsed = time.monotonic() - t0
-                        rate = f"{n_done / elapsed:,.0f} files/s" if elapsed > 0 else ""
-                        prog.advance(task, len(batch))
-                        prog.update(task, rate=rate)
-                        batch.clear()
-
-            if batch:
-                _flush(conn, batch)
-                n_done += len(batch)
-                prog.advance(task, len(batch))
-
-            prog.update(
-                task,
-                description=f"[green]Done: {label}",
-                total=n_done, completed=n_done, rate="",
-            )
+            _scan_drive(conn, prog, label, mount, done)
 
     conn.close()
     cmd_status(args)
 
 
-def _flush(conn, batch):
-    conn.executemany("""
-        INSERT INTO files
-            (drive_label, relative_path, full_path, filename, size, mtime, scan_time)
-        VALUES (?,?,?,?,?,?,?)
-        ON CONFLICT(drive_label, relative_path) DO UPDATE SET
-            full_path=excluded.full_path, size=excluded.size,
-            mtime=excluded.mtime, scan_time=excluded.scan_time
-    """, batch)
-    conn.commit()
+def _scan_drive(conn, prog, label, mount, done):
+    """
+    Depth-first scandir walk of one drive.
+
+    One stat per file (entry.stat), resumable via the scanned_dirs table, and
+    crash-safe: a directory is only marked done in the same transaction that
+    commits its files, so an interrupted run never records a directory whose
+    files were lost.
+    """
+    task = prog.add_task(f"[green]Scanning {label}", total=None, completed=0, rate="")
+    progress_file = f"{label}.scan-current"
+    err_log = open(f"{label}.scan-errors.log", "a")
+
+    batch        = []      # pending file rows
+    dir_markers  = []      # (label, rel, count, time) for dirs fully buffered
+    t0           = time.monotonic()
+    n_done       = 0
+
+    def flush():
+        nonlocal n_done
+        if batch:
+            conn.executemany("""
+                INSERT INTO files
+                    (drive_label, relative_path, full_path, filename, size, mtime, scan_time)
+                VALUES (?,?,?,?,?,?,?)
+                ON CONFLICT(drive_label, relative_path) DO UPDATE SET
+                    full_path=excluded.full_path, size=excluded.size,
+                    mtime=excluded.mtime, scan_time=excluded.scan_time
+            """, batch)
+        if dir_markers:
+            conn.executemany(
+                "INSERT OR REPLACE INTO scanned_dirs "
+                "(drive_label, relative_path, file_count, scan_time) VALUES (?,?,?,?)",
+                dir_markers,
+            )
+        if batch or dir_markers:
+            conn.commit()
+        n_done += len(batch)
+        if batch:
+            prog.advance(task, len(batch))
+            elapsed = time.monotonic() - t0
+            if elapsed > 0:
+                prog.update(task, rate=f"{n_done / elapsed:,.0f} files/s")
+        batch.clear()
+        dir_markers.clear()
+
+    stack = ["."]   # relative paths; "." == the mount root
+    while stack:
+        rel = stack.pop()
+        if rel in done:
+            continue
+        abs_dir = mount if rel == "." else os.path.join(mount, rel)
+
+        # Record where we are: if the disk hangs the kernel here, this file is
+        # the breadcrumb telling you which directory to skip on the next run.
+        try:
+            with open(progress_file, "w") as pf:
+                pf.write(abs_dir + "\n")
+        except OSError:
+            pass
+
+        dir_count = 0
+        try:
+            with os.scandir(abs_dir) as it:
+                for entry in it:
+                    try:
+                        if entry.is_dir(follow_symlinks=False):
+                            if entry.name in SKIP_DIRS:
+                                continue
+                            stack.append(entry.name if rel == "." else f"{rel}/{entry.name}")
+                        elif entry.is_file(follow_symlinks=False):
+                            st = entry.stat(follow_symlinks=False)
+                            rp = entry.name if rel == "." else f"{rel}/{entry.name}"
+                            batch.append((label, rp, entry.path, entry.name,
+                                          st.st_size, st.st_mtime, time.time()))
+                            dir_count += 1
+                    except OSError as e:
+                        err_log.write(f"{time.strftime('%F %T')}  ENTRY  {abs_dir}  {e}\n")
+                        err_log.flush()
+        except OSError as e:
+            # Unreadable directory (corruption / bad sector): log, mark done so a
+            # resume doesn't loop on it forever, and move on.
+            err_log.write(f"{time.strftime('%F %T')}  DIR    {abs_dir}  {e}\n")
+            err_log.flush()
+            dir_markers.append((label, rel, 0, time.time()))
+            flush()
+            continue
+
+        # All of this directory's files are now buffered; record the marker so
+        # it is committed atomically with them on the next flush.
+        dir_markers.append((label, rel, dir_count, time.time()))
+        if len(batch) >= 500:
+            flush()
+
+    flush()
+    err_log.close()
+    try:
+        os.remove(progress_file)
+    except OSError:
+        pass
+    prog.update(task, description=f"[green]Done: {label}",
+                total=n_done, completed=n_done, rate="")
 
 
 # ── Hash ──────────────────────────────────────────────────────────────────────
 
 def cmd_hash(args):
-    conn = open_db(args.db)
+    conn  = open_db(args.db)            # writer
+    rconn = sqlite3.connect(args.db)    # streaming reader (no fetchall)
 
     if args.smart:
-        rows = conn.execute("""
-            SELECT f.id, f.full_path, f.size, f.drive_label
-            FROM   files f
-            WHERE  f.hash IS NULL AND f.hash_error IS NULL
-              AND  EXISTS (
-                       SELECT 1 FROM files f2
-                       WHERE  f2.filename     = f.filename
-                         AND  f2.size         = f.size
-                         AND  f2.drive_label != f.drive_label
-                   )
-            ORDER  BY f.drive_label, f.size DESC
-        """).fetchall()
+        where = """
+            f.hash IS NULL AND f.hash_error IS NULL
+            AND EXISTS (
+                SELECT 1 FROM files f2
+                WHERE  f2.filename     = f.filename
+                  AND  f2.size         = f.size
+                  AND  f2.drive_label != f.drive_label
+            )"""
+        params: tuple = ()
+        sel = (f"SELECT f.id, f.full_path, f.size, f.drive_label FROM files f "
+               f"WHERE {where} ORDER BY f.drive_label, f.size DESC")
+        cnt = f"SELECT COUNT(*), COALESCE(SUM(f.size),0) FROM files f WHERE {where}"
         label = "smart-hash: match candidates only"
     elif args.drive:
-        rows = conn.execute("""
-            SELECT id, full_path, size, drive_label
-            FROM   files
-            WHERE  drive_label = ? AND hash IS NULL AND hash_error IS NULL
-            ORDER  BY size DESC
-        """, (args.drive,)).fetchall()
+        where  = "hash IS NULL AND hash_error IS NULL AND drive_label = ?"
+        params = (args.drive,)
+        sel = (f"SELECT id, full_path, size, drive_label FROM files "
+               f"WHERE {where} ORDER BY size DESC")
+        cnt = f"SELECT COUNT(*), COALESCE(SUM(size),0) FROM files WHERE {where}"
         label = f"hash all on {args.drive}"
     else:
-        rows = conn.execute("""
-            SELECT id, full_path, size, drive_label
-            FROM   files
-            WHERE  hash IS NULL AND hash_error IS NULL
-            ORDER  BY drive_label, size DESC
-        """).fetchall()
+        where  = "hash IS NULL AND hash_error IS NULL"
+        params = ()
+        sel = (f"SELECT id, full_path, size, drive_label FROM files "
+               f"WHERE {where} ORDER BY drive_label, size DESC")
+        cnt = f"SELECT COUNT(*), COALESCE(SUM(size),0) FROM files WHERE {where}"
         label = "hash all files"
 
-    if not rows:
+    n_rows, total_bytes = rconn.execute(cnt, params).fetchone()
+    if not n_rows:
         console.print("[yellow]Nothing to hash — all candidates already processed.")
+        rconn.close()
         conn.close()
         return
 
-    total_bytes = sum(r[2] for r in rows)
-    console.print(f"[bold]{label}[/]  ·  {len(rows):,} files  ·  {fmt_bytes(total_bytes)}")
+    console.print(f"[bold]{label}[/]  ·  {n_rows:,} files  ·  {fmt_bytes(total_bytes)}")
+
+    updates: list = []
+
+    def flush_updates():
+        if updates:
+            conn.executemany(
+                "UPDATE files SET hash=?, hash_time=?, hash_error=? WHERE id=?", updates
+            )
+            conn.commit()
+            updates.clear()
 
     with Progress(
         TextColumn("[progress.description]{task.description:<58}"),
@@ -268,12 +386,12 @@ def cmd_hash(args):
         TransferSpeedColumn(),
         TimeRemainingColumn(),
         console=console,
-        refresh_per_second=4,
+        refresh_per_second=2,
     ) as prog:
-        overall  = prog.add_task("[bold green]Overall", total=total_bytes)
+        overall  = prog.add_task("[bold green]Overall", total=max(total_bytes, 1))
         cur_file = prog.add_task("[cyan]—", total=1, completed=0)
 
-        for fid, fpath, fsize, dlabel in rows:
+        for fid, fpath, fsize, dlabel in rconn.execute(sel, params):
             name = PurePosixPath(fpath).name
             prog.update(cur_file,
                         description=f"[cyan]{dlabel}/{name[:50]}",
@@ -285,13 +403,16 @@ def cmd_hash(args):
                         h.update(chunk)
                         prog.advance(cur_file, len(chunk))
                         prog.advance(overall, len(chunk))
-                conn.execute("UPDATE files SET hash=?, hash_time=? WHERE id=?",
-                             (h.hexdigest(), time.time(), fid))
+                    drop_page_cache(f.fileno())
+                updates.append((h.hexdigest(), time.time(), None, fid))
             except OSError as e:
-                conn.execute("UPDATE files SET hash_error=? WHERE id=?",
-                             (str(e)[:200], fid))
-            conn.commit()
+                updates.append((None, None, str(e)[:200], fid))
+            if len(updates) >= 256:
+                flush_updates()
 
+        flush_updates()
+
+    rconn.close()
     conn.close()
     console.print("[bold green]Hashing complete.")
     cmd_status(args)
@@ -336,7 +457,7 @@ def cmd_detect(args):
         TextColumn("[progress.description]{task.description}"),
         MofNCompleteColumn(),
         TextColumn("files"),
-        console=console, refresh_per_second=4,
+        console=console, refresh_per_second=2,
     ) as prog:
         task = prog.add_task("Grouping files by directory", total=total_files)
 
@@ -345,6 +466,7 @@ def cmd_detect(args):
             "WHERE drive_label IN ({})".format(",".join("?" * len(faulty_labels))),
             faulty_labels,
         )
+        seen = 0
         for drive, rp, fn, size in cursor:
             parent = str(PurePosixPath(rp).parent)
             key    = (drive, parent)
@@ -354,7 +476,10 @@ def cmd_detect(args):
             ext = PurePosixPath(fn).suffix.lower()
             if ext:
                 s["exts"][ext] += 1
-            prog.advance(task)
+            seen += 1
+            if seen % 5000 == 0:           # advance in batches: lighter on the UI
+                prog.advance(task, 5000)
+        prog.update(task, completed=total_files)
 
     # Filter to candidates matching the thresholds
     candidates = []
@@ -498,6 +623,8 @@ def main():
         metavar=("LABEL", "MOUNTPOINT", "trusted|faulty"),
         help="Repeat for each drive",
     )
+    sp.add_argument("--restart", action="store_true",
+                    help="Forget previous scan progress and walk from scratch")
 
     hp = sub.add_parser("hash", help="Compute file hashes")
     hg = hp.add_mutually_exclusive_group()

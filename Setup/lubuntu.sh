@@ -56,8 +56,7 @@ if [ -n "$NVIDIA_GPU" ]; then
         sudo add-apt-repository -y ppa:graphics-drivers/ppa
         sudo apt-get update
         # Update the driver version below to match your GPU generation
-        sudo apt-get install -y nvidia-driver-570 libglew-dev nvtop freeglut3-dev \
-            vulkan-tools vulkan-utility-libraries-dev
+        sudo apt-get install -y nvidia-driver-595-open libglew-dev nvtop freeglut3-dev vulkan-tools vulkan-utility-libraries-dev
         # Allow resolution saving via polkit helper
         POLKIT_HELPER="/usr/share/screen-resolution-extra/nvidia-polkit"
         [ -f "$POLKIT_HELPER" ] && sudo chmod u+x "$POLKIT_HELPER"

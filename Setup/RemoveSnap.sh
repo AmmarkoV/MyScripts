@@ -52,7 +52,7 @@ Pin-Priority: 1000
 EOF
 
 echo "==> Installing Firefox .deb..."
-sudo apt-get update && sudo apt-get install -y firefox
+sudo apt-get update && sudo apt-get install -y --allow-downgrades firefox
 
 echo ""
 echo "==> Migrating snap profile to ~/.mozilla/firefox/ ? (y/N)"
@@ -66,6 +66,22 @@ if [[ "$MIGRATE" =~ ^[Yy]$ ]]; then
     else
         echo "No snap profile found at $SNAP_PROFILE — skipping."
     fi
+fi
+
+echo ""
+echo "==> Remove snapd completely? This will purge all snaps and prevent reinstallation. (y/N)"
+read -r REMOVE_SNAPD
+if [[ "$REMOVE_SNAPD" =~ ^[Yy]$ ]]; then
+    echo "==> Removing all remaining snaps..."
+    for snap in $(snap list 2>/dev/null | awk 'NR>1 {print $1}'); do
+        sudo snap remove --purge "$snap" 2>/dev/null || true
+    done
+    echo "==> Purging snapd..."
+    sudo apt-get remove --purge -y snapd
+    sudo apt-mark hold snapd
+    echo "==> Cleaning up snap directories..."
+    sudo rm -rf /snap /var/snap /var/lib/snapd ~/snap
+    echo "snapd removed and held."
 fi
 
 echo ""

@@ -51,6 +51,7 @@ except ImportError:
 
 console = Console()
 CHUNK = 4 << 20  # 4 MiB
+DONTNEED = getattr(os, "POSIX_FADV_DONTNEED", None)
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -70,6 +71,21 @@ def make_hasher():
         return xxhash.xxh64()
     except ImportError:
         return hashlib.sha256()
+
+
+def drop_page_cache(fd: int) -> None:
+    """
+    Drop this file's pages from the page cache once we are done with it.
+
+    Migrating terabytes would otherwise keep every transferred byte resident,
+    growing the page/dentry cache until memory reclaim stalls the machine — the
+    soft-lockup seen in syslog.  POSIX_FADV_DONTNEED frees them right away.
+    """
+    if DONTNEED is not None:
+        try:
+            os.posix_fadvise(fd, 0, 0, DONTNEED)
+        except OSError:
+            pass
 
 
 def setup_log(path: str) -> logging.Logger:
@@ -105,6 +121,10 @@ def copy_and_verify(
                 h_src.update(chunk)
                 prog.advance(file_bar, len(chunk))
                 prog.advance(overall,   len(chunk))
+            df.flush()
+            os.fsync(df.fileno())          # force to platter before we verify
+            drop_page_cache(sf.fileno())   # release source pages
+            drop_page_cache(df.fileno())   # release freshly-written dest pages
     except OSError as e:
         log.error(f"COPY FAIL  {src}  →  {dst}  :  {e}")
         try:
@@ -121,6 +141,7 @@ def copy_and_verify(
                 h_dst.update(chunk)
                 prog.advance(file_bar, len(chunk))
                 prog.advance(overall,   len(chunk))
+            drop_page_cache(f.fileno())
     except OSError as e:
         log.error(f"VERIFY FAIL  {dst}  :  {e}")
         return h_src.hexdigest(), None
@@ -143,18 +164,29 @@ def tarball_copy(
     prog.update(file_bar, description=f"[magenta]TAR    {dir_name[:52]}", total=max(total_size, 1), completed=0)
 
     bytes_written = 0
+    added_count   = 0
+    src_root = os.path.dirname(os.path.normpath(src_dir))  # archive keeps dir name
     try:
         with tarfile.open(dst_tar, "w:") as tar:
-            src_root = Path(src_dir).parent  # archive preserves the dir name
-            for item in sorted(Path(src_dir).rglob("*")):
-                if not item.is_file():
-                    continue
-                arcname = str(item.relative_to(src_root))
-                tar.add(str(item), arcname=arcname, recursive=False)
-                item_size = item.stat().st_size
-                bytes_written += item_size
-                prog.advance(file_bar, item_size)
-                prog.advance(overall,   item_size)
+            # Stream with os.walk: never materialise the full file list of a
+            # million-entry directory in memory the way sorted(rglob("*")) did.
+            for dirpath, dirnames, filenames in os.walk(src_dir, onerror=lambda _: None):
+                dirnames.sort()
+                for fn in sorted(filenames):
+                    item = os.path.join(dirpath, fn)
+                    try:
+                        if not os.path.isfile(item) or os.path.islink(item):
+                            continue
+                        arcname = os.path.relpath(item, src_root)
+                        tar.add(item, arcname=arcname, recursive=False)
+                        item_size = os.path.getsize(item)
+                    except OSError as e:
+                        log.warning(f"TAR skip member  {item}  :  {e}")
+                        continue
+                    bytes_written += item_size
+                    added_count   += 1
+                    prog.advance(file_bar, item_size)
+                    prog.advance(overall,   item_size)
     except (OSError, tarfile.TarError) as e:
         log.error(f"TAR FAIL  {src_dir}  →  {dst_tar}  :  {e}")
         try:
@@ -163,13 +195,19 @@ def tarball_copy(
             pass
         return False
 
-    # Verify: open the tarball and count members
+    # Verify: re-open the tarball and count members by streaming (no getmembers()
+    # list that would hold every TarInfo of a huge archive in memory).
     try:
+        actual_count = 0
         with tarfile.open(dst_tar, "r:") as tar:
-            actual_count = len([m for m in tar.getmembers() if m.isfile()])
+            for m in tar:
+                if m.isfile():
+                    actual_count += 1
     except tarfile.TarError as e:
         log.error(f"TAR VERIFY FAIL (unreadable)  {dst_tar}  :  {e}")
         return False
+
+    file_count = added_count or file_count
 
     if actual_count != file_count:
         log.warning(
