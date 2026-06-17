@@ -56,8 +56,7 @@ if [ -n "$NVIDIA_GPU" ]; then
         sudo add-apt-repository -y ppa:graphics-drivers/ppa
         sudo apt-get update
         # Update the driver version below to match your GPU generation
-        sudo apt-get install -y nvidia-driver-570 libglew-dev nvtop freeglut3-dev \
-            vulkan-tools vulkan-utility-libraries-dev
+        sudo apt-get install -y nvidia-driver-595-open libglew-dev nvtop freeglut3-dev vulkan-tools vulkan-utility-libraries-dev
         # Allow resolution saving via polkit helper
         POLKIT_HELPER="/usr/share/screen-resolution-extra/nvidia-polkit"
         [ -f "$POLKIT_HELPER" ] && sudo chmod u+x "$POLKIT_HELPER"
@@ -127,7 +126,7 @@ SCREENSAVERS="xscreensaver xscreensaver-data xscreensaver-data-extra xscreensave
 
 ADVLIBS="festival imagemagick numlockx gxmessage libnotify-bin"
 
-CODECS="ubuntu-restricted-extras pavucontrol beep ffmpeg mplayer smplayer"
+CODECS="ubuntu-restricted-extras pavucontrol pulseaudio-utils beep ffmpeg mplayer smplayer"
 
 SECURITY="network-manager-openvpn network-manager-openvpn-gnome"
 
@@ -171,6 +170,21 @@ else
     echo "PipeWire detected (default on 24.04) — PulseAudio tweaks skipped."
     echo "For PipeWire tuning, see: /usr/share/pipewire/pipewire.conf"
 fi
+
+
+
+
+# -----------------------------------------------------------------------------------------------------------------------
+# Faster startup ( systemd-analyze blame ) 
+# -----------------------------------------------------------------------------------------------------------------------
+sudo systemctl disable NetworkManager-wait-online.service 
+sudo systemctl disable systemd-networkd-wait-online.service
+sudo systemctl mask systemd-udev-settle.service
+sudo systemctl mask plymouth-quit-wait.service
+
+
+
+
 
 # -----------------------------------------------------------------------------------------------------------------------
 # Kernel image symlinks

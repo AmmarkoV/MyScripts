@@ -1,0 +1,2 @@
+rich>=13.0
+xxhash>=3.0   # optional but strongly recommended — ~10× faster than sha256
