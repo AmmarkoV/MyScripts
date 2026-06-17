@@ -494,6 +494,56 @@ else
 fi
 
 # -----------------------------------------------------------------------------------------------------------------------
+# picom compositor — switch from CPU xrender backend to GPU-accelerated glx
+# -----------------------------------------------------------------------------------------------------------------------
+
+# Only act if picom is installed and we're on an X11 session (picom is an X11 compositor).
+if command -v picom &>/dev/null && [ "${XDG_SESSION_TYPE:-}" = "x11" ]; then
+    PICOM_CONF="$HOME/.config/picom.conf"
+
+    # Verify the GPU exposes texture-from-pixmap, required by the glx backend.
+    # If glxinfo is unavailable we assume support and let picom fall back if needed.
+    GLX_OK=true
+    if command -v glxinfo &>/dev/null; then
+        glxinfo 2>/dev/null | grep -q "GLX_EXT_texture_from_pixmap" || GLX_OK=false
+    fi
+
+    if [ -f "$PICOM_CONF" ]; then
+        echo "picom config already present at $PICOM_CONF — leaving it untouched."
+    elif [ "$GLX_OK" != "true" ]; then
+        echo "picom found but GPU lacks GLX_EXT_texture_from_pixmap — skipping glx config."
+    else
+        echo "Generating GPU-accelerated picom config (glx backend)..."
+        cat > "$PICOM_CONF" << 'EOF'
+# picom performance config
+# GPU-accelerated compositing instead of the default CPU-bound xrender backend.
+
+backend = "glx";
+
+# Only repaint screen regions that actually changed (big CPU/GPU saving).
+use-damage = true;
+
+# Tear-free, low overhead on GPUs supporting swap_control_tear.
+vsync = true;
+
+# GLX tuning
+glx-no-stencil = true;
+glx-no-rebind-pixmap = true;
+
+# Keep effects off for maximum speed (these are picom defaults, set explicitly).
+shadow = false;
+fading = false;
+EOF
+        # Restart picom so the new backend takes effect this session, if it's running.
+        if pgrep -x picom &>/dev/null; then
+            pkill -x picom || true
+            sleep 1
+            nohup picom >/dev/null 2>&1 &
+        fi
+    fi
+fi
+
+# -----------------------------------------------------------------------------------------------------------------------
 # SSH key generation
 # -----------------------------------------------------------------------------------------------------------------------
 
