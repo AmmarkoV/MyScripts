@@ -544,6 +544,9 @@ vsync = true;
 glx-no-stencil = true;
 glx-no-rebind-pixmap = true;
 
+# Let fullscreen games/apps bypass the compositor for low input lag.
+unredir-if-possible = true;
+
 # Keep effects off for maximum speed (these are picom defaults, set explicitly).
 shadow = false;
 fading = false;
