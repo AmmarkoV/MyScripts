@@ -116,6 +116,22 @@ if (isset($_GET['img'])) {
     exit;
 }
 
+/* Generic starter history for a new list: everything starts checked ("in the
+   basket"), so the active list is clean but re-adding a known name is instant. */
+function seed_items() {
+    $staples = ['ψωμί','γάλα','αυγά','φέτα','γιαούρτι','βούτυρο','τυρί τοστ','ζαμπόν',
+        'κοτόπουλο','κιμάς','ρύζι','μακαρόνια','φακές','φασόλια','αλεύρι','ζάχαρη',
+        'αλάτι','πιπέρι','ελαιόλαδο','ξύδι','ντομάτες','πατάτες','κρεμμύδια','σκόρδο',
+        'λεμόνια','μπανάνες','μήλα','πορτοκάλια','καρότα','σαλάτα','καφές','τσάι',
+        'χυμός','νερό','δημητριακά','μέλι','μαρμελάδα','σοκολάτα','μπισκότα',
+        'κατεψυγμένα λαχανικά','χαρτί υγείας','χαρτί κουζίνας','χαρτομάντηλα',
+        'οδοντόκρεμα','σαμπουάν','σαπούνι','απορρυπαντικό πλυντηρίου','υγρό πιάτων',
+        'χλωρίνη','σακούλες σκουπιδιών','αλουμινόχαρτο','λαδόκολλα'];
+    $items = [];
+    foreach ($staples as $n) $items[] = ['id' => new_id(), 'n' => $n, 'q' => 1, 'c' => 1];
+    return $items;
+}
+
 function new_id() {
     return substr(bin2hex(random_bytes(5)), 0, 8);
 }
@@ -128,7 +144,7 @@ function with_cart($file, $mutate = null) {
     $raw = stream_get_contents($fp);
     $cart = $raw ? json_decode($raw, true) : null;
     if (!is_array($cart) || !isset($cart['items']) || !is_array($cart['items'])) {
-        $cart = ['items' => []];
+        $cart = ['items' => seed_items()];
     }
     if ($mutate) $cart = $mutate($cart);
     rewind($fp);

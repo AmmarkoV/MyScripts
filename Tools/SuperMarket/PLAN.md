@@ -17,9 +17,10 @@ A single-file PHP shared shopping list (no database), to be hosted at
       instead of creating a duplicate.
     - "🔗 Κοινή χρήση" button: native share sheet or copy-link.
     - List refreshes when the tab regains focus (picks up edits from other phones).
-  - New carts start **empty** (2026-07-10: seeding removed — every new list looked
-    like a clone of the existing one). The ~110 Listonic-OCR items live on in the
-    two real carts and in git history (`seed_items()` before commit 53b6a99).
+  - New carts are seeded with ~50 **generic** staples, all checked (clean active
+    list, instant re-adds from history). The original personal Listonic-OCR seed
+    was dropped 2026-07-10 (made every new list a clone of the existing one);
+    it lives on in the two real carts and in git history before commit 53b6a99.
   - Storage: JSON per token, written under `flock(LOCK_EX)`; token sanitized to `[A-Za-z0-9_-]{1,40}`.
   - `data/` is auto-created with a `.htaccess` (`Require all denied`) so carts aren't
     directly downloadable on Apache.
