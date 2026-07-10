@@ -58,6 +58,15 @@ A single-file PHP shared shopping list (no database), to be hosted at
   garbage file → 422 «Μη έγκυρη εικόνα», >32M → 422 «Πολύ μεγάλο αρχείο»,
   wrong-token image fetch → 404, del/imgdel clean up the .jpg.
 
+## List name + cover image ✅ (2026-07-10)
+- Tap the header title (✏️) → prompt → `a=name` stores `name` in the cart JSON
+  (≤60 chars; empty resets to the default «Λίστα Σούπερ Μάρκετ»). Shown in the
+  header, the browser tab, and the share sheet.
+- Round cover button left of the title: no cover → opens the picker; has cover →
+  fullscreen viewer with change/delete. Reuses the item-photo machinery via the
+  special id `cover` (item ids are pure hex, so no collision): file is
+  `data/cover-TOKEN.jpg`, served by `?img=cover`, mtime rides on the cart as `cimg`.
+
 ## What remains
 1. Confirm from a phone + second device that both see the same cart.
 2. Give the wife her token URL. 🎉

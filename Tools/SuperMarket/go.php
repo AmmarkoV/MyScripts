@@ -85,20 +85,24 @@ if ($token === '') {
 
 $FILE = "$DATA/$token.json";
 
-/* Path of an item's photo (data/ITEMID-TOKEN.jpg), '' if the id is garbage. */
+/* Path of a photo (data/ID-TOKEN.jpg), '' if the id is garbage.
+   Item ids are hex; the special id 'cover' is the list's own image. */
 function img_file($id) {
     global $DATA, $token;
-    $id = substr(preg_replace('/[^a-f0-9]/', '', $id), 0, 16);
+    $id = substr(preg_replace('/[^a-z0-9]/', '', $id), 0, 16);
     return $id === '' ? '' : "$DATA/$id-$token.jpg";
 }
 
-/* Add 'img' (photo mtime, 0 = none) to every item; doubles as cache-buster. */
+/* Add 'img' (photo mtime, 0 = none) to every item and 'cimg' for the list's
+   cover image; the mtimes double as cache-busters. */
 function annotate_images($cart) {
     foreach ($cart['items'] as &$it) {
         $f = img_file($it['id']);
         $it['img'] = ($f && is_file($f)) ? filemtime($f) : 0;
     }
     unset($it);
+    $f = img_file('cover');
+    $cart['cimg'] = ($f && is_file($f)) ? filemtime($f) : 0;
     return $cart;
 }
 
@@ -227,6 +231,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $f = img_file($id);
                 if ($f && is_file($f)) unlink($f);
                 break;
+            case 'name':
+                $n = trim($_POST['n'] ?? '');
+                if ($n === '') unset($cart['name']);       // back to the default title
+                elseif (mb_strlen($n) <= 60) $cart['name'] = $n;
+                break;
         }
         $cart['items'] = $items;
         return $cart;
@@ -259,6 +268,11 @@ header('Content-Type: text/html; charset=utf-8');
         padding:14px 16px 12px;position:sticky;top:0;z-index:10;
         box-shadow:0 2px 12px rgba(232,93,61,.35)}
  header h1{margin:0;font-size:1.25em;display:flex;align-items:center;gap:8px}
+ #coverbtn{background:rgba(255,255,255,.2);border:none;width:40px;height:40px;
+        border-radius:50%;font-size:1.15em;padding:0;flex-shrink:0;overflow:hidden}
+ #coverbtn img{width:100%;height:100%;object-fit:cover}
+ #title{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer}
+ #title::after{content:' ✏️';font-size:.7em;opacity:.7}
  header .sub{font-size:.8em;opacity:.9;margin-top:2px}
  #share{margin-left:auto;background:rgba(255,255,255,.25);border:none;color:#fff;
         border-radius:999px;padding:8px 14px;font-size:.85em;font-weight:600}
@@ -310,7 +324,8 @@ header('Content-Type: text/html; charset=utf-8');
 </head>
 <body>
 <header>
-  <h1>🛒 Λίστα Σούπερ Μάρκετ
+  <h1><button id="coverbtn" onclick="coverClick()" aria-label="Εικόνα λίστας">🛒</button>
+      <span id="title" onclick="editName()">Λίστα Σούπερ Μάρκετ</span>
       <button id="share" onclick="share()">🔗 Κοινή χρήση</button></h1>
   <div class="sub" id="counter"></div>
 </header>
@@ -388,7 +403,13 @@ function rowHTML(it){
   </div>`;
 }
 
+function listName(){return CART.name||'Λίστα Σούπερ Μάρκετ';}
 function render(){
+  document.getElementById('title').textContent=listName();
+  document.title='🛒 '+listName();
+  document.getElementById('coverbtn').innerHTML=CART.cimg
+    ? `<img src="go.php?i=${encodeURIComponent(TOKEN)}&img=cover&t=${CART.cimg}" alt="">`
+    : '🛒';
   const items=CART.items;
   const todo=items.filter(i=>!i.c);
   const done=items.filter(i=>i.c)
@@ -436,12 +457,24 @@ document.getElementById('imgfile').addEventListener('change',async function(){
   }catch(e){toast('⚠️ Πρόβλημα σύνδεσης, δοκίμασε ξανά');}
 });
 function viewImg(id){
-  const it=CART.items.find(i=>i.id===id);
-  if(!it||!it.img)return;
+  let name,t;
+  if(id==='cover'){name=listName();t=CART.cimg;}
+  else{
+    const it=CART.items.find(i=>i.id===id);
+    if(!it)return;
+    name=it.n;t=it.img;
+  }
+  if(!t)return;
   VIEWID=id;
-  document.getElementById('vname').textContent=it.n;
-  document.getElementById('vimg').src=imgURL(it);
+  document.getElementById('vname').textContent=name;
+  document.getElementById('vimg').src=
+    'go.php?i='+encodeURIComponent(TOKEN)+'&img='+id+'&t='+t;
   document.getElementById('viewer').style.display='flex';
+}
+function coverClick(){CART.cimg?viewImg('cover'):pickImg('cover');}
+function editName(){
+  const v=prompt('Όνομα λίστας:',CART.name||'');
+  if(v!==null)post({a:'name',n:v.trim()});
 }
 function closeViewer(){
   document.getElementById('viewer').style.display='none';
@@ -460,7 +493,7 @@ function share(){
   /* navigator.share / navigator.clipboard only exist on HTTPS or localhost,
      so fall through: share sheet → clipboard → execCommand → show the link */
   if(navigator.share){
-    navigator.share({title:'Λίστα Σούπερ Μάρκετ 🛒',url:url}).catch(()=>{});
+    navigator.share({title:listName()+' 🛒',url:url}).catch(()=>{});
     return;
   }
   if(navigator.clipboard&&navigator.clipboard.writeText){
