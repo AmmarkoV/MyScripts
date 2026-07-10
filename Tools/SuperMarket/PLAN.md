@@ -23,23 +23,25 @@ A single-file PHP shared shopping list (no database), to be hosted at
   - `data/` is auto-created with a `.htaccess` (`Require all denied`) so carts aren't
     directly downloadable on Apache.
 
-## What remains (to do on the server machine)
-1. **Syntax check**: `php -l go.php` (dev machine had no PHP installed).
-2. **Local smoke test**: `php -S localhost:8099` in this directory, then:
-   - `curl 'http://localhost:8099/go.php'` → landing page HTML.
-   - `curl 'http://localhost:8099/go.php?i=test1&api=1'` → JSON with the ~110 seeded items.
-   - `curl -X POST -d 'a=add&n=δοκιμή' 'http://localhost:8099/go.php?i=test1'` → JSON, item added at top.
-   - Same for `a=qty` (`id`,`d`=±1 or `v`=value), `a=toggle` (`id`), `a=del` (`id`).
-   - Verify `data/test1.json` was created and is valid JSON; delete it after testing.
-3. **Deploy**: copy `go.php` to the webroot as `/supermarket/go.php`.
-   - Ensure the `supermarket/` directory is writable by the web server user
-     (script mkdirs `data/` on first hit): `chown www-data` or `chmod` as appropriate.
-   - If the server is nginx (not Apache), the `data/.htaccess` does nothing —
-     add an nginx rule to deny `/supermarket/data/` instead.
-4. **Verify in production**: open `https://ammar.gr/supermarket/go.php`, create a list,
-   add/check/delete items from a phone, open the same token URL on a second device
-   and confirm both see the same cart.
-5. Give the wife her token URL. 🎉
+## Deployed ✅ (2026-07-10, server machine)
+- Served by local Apache: DocumentRoot **is** `/home/ammar/public_html`, so the app
+  lives at `http://127.0.0.1/supermarket/go.php` (= `ammar.gr/supermarket/go.php`).
+  `~/public_html/supermarket/go.php` is a **symlink** into this repo directory.
+- Fixes made during deployment:
+  - `$DATA` now uses `dirname($_SERVER['SCRIPT_FILENAME'])` instead of `__DIR__` —
+    `__DIR__` resolves symlinks, which would have put carts inside the git repo.
+    Carts live in `~/public_html/supermarket/data/`.
+  - Server PHP 8.3 has **no mbstring**: added a polyfill (iconv_strlen +
+    Latin/Greek strtr lowercase map) so Greek case-insensitive dedup still works.
+  - `data/.htaccess` and a dummy `data/index.html` are now (re)created on every
+    hit if missing, so carts aren't browsable even if the dir pre-exists or
+    .htaccess is ignored. Verified: `/supermarket/data/` and `data/*.json` → 403.
+- Smoke-tested against production: seeds (112 items, 6 active), add, qty ±/set,
+  toggle, uppercase-Greek re-add dedup, del — all pass; JSON on disk valid.
+
+## What remains
+1. Confirm from a phone + second device that both see the same cart.
+2. Give the wife her token URL. 🎉
 
 ## Notes / decisions made
 - No DB, no framework, no external assets (works offline-ish, no CDN).

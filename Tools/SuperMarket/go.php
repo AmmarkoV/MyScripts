@@ -6,12 +6,38 @@
  */
 
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
-mb_internal_encoding('UTF-8');
 
-$DATA = __DIR__ . '/data';
+if (function_exists('mb_internal_encoding')) {
+    mb_internal_encoding('UTF-8');
+} else {
+    /* mbstring extension not installed: UTF-8-safe fallbacks (Latin + Greek). */
+    function mb_strlen($s) {
+        return function_exists('iconv_strlen') ? iconv_strlen($s, 'UTF-8') : strlen($s);
+    }
+    function mb_strtolower($s) {
+        $s = strtr($s, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz');
+        return strtr($s, ['Α'=>'α','Β'=>'β','Γ'=>'γ','Δ'=>'δ','Ε'=>'ε','Ζ'=>'ζ','Η'=>'η',
+            'Θ'=>'θ','Ι'=>'ι','Κ'=>'κ','Λ'=>'λ','Μ'=>'μ','Ν'=>'ν','Ξ'=>'ξ','Ο'=>'ο',
+            'Π'=>'π','Ρ'=>'ρ','Σ'=>'σ','Τ'=>'τ','Υ'=>'υ','Φ'=>'φ','Χ'=>'χ','Ψ'=>'ψ',
+            'Ω'=>'ω','Ά'=>'ά','Έ'=>'έ','Ή'=>'ή','Ί'=>'ί','Ό'=>'ό','Ύ'=>'ύ','Ώ'=>'ώ',
+            'Ϊ'=>'ϊ','Ϋ'=>'ϋ']);
+    }
+}
+
+/* Keep data/ next to the *deployed* script (SCRIPT_FILENAME does not resolve
+   symlinks, unlike __DIR__), so a symlinked go.php stores carts in the webroot. */
+$DATA = dirname($_SERVER['SCRIPT_FILENAME'] ?? __FILE__) . '/data';
 if (!is_dir($DATA)) {
     mkdir($DATA, 0775, true);
+}
+/* Keep carts from being browsable: deny on Apache, and a dummy index so
+   directory listings show nothing even where .htaccess is ignored. */
+if (!file_exists($DATA . '/.htaccess')) {
     file_put_contents($DATA . '/.htaccess', "Require all denied\n");
+}
+if (!file_exists($DATA . '/index.html')) {
+    file_put_contents($DATA . '/index.html',
+        "<!DOCTYPE html><meta charset=\"utf-8\"><title>🛒</title>Τίποτα εδώ.\n");
 }
 
 $token = preg_replace('/[^A-Za-z0-9_-]/', '', $_GET['i'] ?? '');
