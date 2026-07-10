@@ -254,13 +254,29 @@ if (isset($_GET['api'])) {
     exit;
 }
 header('Content-Type: text/html; charset=utf-8');
+
+/* Link previews (WhatsApp/Viber/Messenger…): list name + cover as OG tags. */
+$title  = trim($cart['name'] ?? '') !== '' ? $cart['name'] : 'Λίστα Σούπερ Μάρκετ';
+$active = count(array_filter($cart['items'], function ($it) { return !$it['c']; }));
+$desc   = $active ? "$active προϊόντα για αγορά" : 'Όλα έτοιμα! ✨';
+$scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+$self   = $scheme . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_NAME'];
 ?><!DOCTYPE html>
 <html lang="el">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#ff7e5f">
-<title>🛒 Λίστα Σούπερ Μάρκετ</title>
+<title>🛒 <?= htmlspecialchars($title) ?></title>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Λίστα Σούπερ Μάρκετ 🛒">
+<meta property="og:title" content="🛒 <?= htmlspecialchars($title) ?>">
+<meta property="og:description" content="<?= htmlspecialchars($desc) ?>">
+<meta property="og:url" content="<?= htmlspecialchars("$self?i=$token") ?>">
+<?php if ($cart['cimg']) { ?>
+<meta property="og:image" content="<?= htmlspecialchars("$self?i=$token&img=cover&t={$cart['cimg']}") ?>">
+<meta name="twitter:card" content="summary">
+<?php } ?>
 <style>
  *{box-sizing:border-box}
  body{margin:0;font-family:-apple-system,"Segoe UI",Roboto,sans-serif;background:#fff7ef;color:#4a3f38}
