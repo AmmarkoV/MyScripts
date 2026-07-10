@@ -85,6 +85,37 @@ if ($token === '') {
 
 $FILE = "$DATA/$token.json";
 
+/* Path of an item's photo (data/ITEMID-TOKEN.jpg), '' if the id is garbage. */
+function img_file($id) {
+    global $DATA, $token;
+    $id = substr(preg_replace('/[^a-f0-9]/', '', $id), 0, 16);
+    return $id === '' ? '' : "$DATA/$id-$token.jpg";
+}
+
+/* Add 'img' (photo mtime, 0 = none) to every item; doubles as cache-buster. */
+function annotate_images($cart) {
+    foreach ($cart['items'] as &$it) {
+        $f = img_file($it['id']);
+        $it['img'] = ($f && is_file($f)) ? filemtime($f) : 0;
+    }
+    unset($it);
+    return $cart;
+}
+
+/* ---------- GET ?img=ITEMID: stream the item's photo ---------- */
+if (isset($_GET['img'])) {
+    $img = img_file($_GET['img']);
+    if ($img && is_file($img)) {
+        header('Content-Type: image/jpeg');
+        header('Content-Length: ' . filesize($img));
+        header('Cache-Control: private, max-age=31536000, immutable');
+        readfile($img);
+    } else {
+        http_response_code(404);
+    }
+    exit;
+}
+
 /* ---------- Initial items (from the Listonic screenshots) ---------- */
 function seed_items() {
     $active = ['κρεμοσάπουνο','οδοντόβουρτσες','πάπια','βούτυρο','γάλα','μανιτόμπα'];
@@ -136,6 +167,30 @@ function with_cart($file, $mutate = null) {
     return $cart;
 }
 
+/* ---------- POST a=img: photo upload (resized to jpg via ImageMagick) ---------- */
+if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
+    (($_POST['a'] ?? '') === 'img' ||
+     /* post_max_size exceeded: PHP silently drops $_POST/$_FILES */
+     (empty($_POST) && (int)($_SERVER['CONTENT_LENGTH'] ?? 0) > 0))) {
+    $err = '';
+    $dst = img_file($_POST['id'] ?? '');
+    if (empty($_POST))       $err = 'Πολύ μεγάλο αρχείο';
+    elseif ($dst === '')     $err = 'Άγνωστο προϊόν';
+    elseif (!isset($_FILES['f']) || $_FILES['f']['error'] !== UPLOAD_ERR_OK)
+                             $err = 'Το ανέβασμα απέτυχε (πολύ μεγάλο αρχείο;)';
+    else {
+        exec('convert ' . escapeshellarg($_FILES['f']['tmp_name'] . '[0]')
+           . ' -auto-orient -strip -resize ' . escapeshellarg('1000x1000>')
+           . ' -quality 82 ' . escapeshellarg('jpg:' . $dst) . ' 2>&1', $o, $rc);
+        if ($rc !== 0 || !is_file($dst)) $err = 'Μη έγκυρη εικόνα';
+    }
+    $cart = annotate_images(with_cart($FILE));
+    if ($err) { http_response_code(422); $cart['error'] = $err; }
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode($cart, JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
 /* ---------- API: POST mutations, return JSON cart ---------- */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $a  = $_POST['a']  ?? '';
@@ -173,21 +228,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 unset($it);
                 break;
             case 'del':
+                $f = img_file($id);
+                if ($f && is_file($f)) unlink($f);
                 $items = array_values(array_filter($items, function ($it) use ($id) {
                     return $it['id'] !== $id;
                 }));
+                break;
+            case 'imgdel':
+                $f = img_file($id);
+                if ($f && is_file($f)) unlink($f);
                 break;
         }
         $cart['items'] = $items;
         return $cart;
     });
+    $cart = annotate_images($cart);
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode($cart, JSON_UNESCAPED_UNICODE);
     exit;
 }
 
 /* ---------- GET: page (or ?api=1 for JSON) ---------- */
-$cart = with_cart($FILE);
+$cart = annotate_images(with_cart($FILE));
 if (isset($_GET['api'])) {
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode($cart, JSON_UNESCAPED_UNICODE);
@@ -235,6 +297,17 @@ header('Content-Type: text/html; charset=utf-8');
  .qty input{width:44px;height:40px;text-align:center;font-size:1.05em;border-radius:10px;
       border:2px solid #ffd9c4;background:#fff}
  .del{background:none;border:none;font-size:1.1em;color:#d9c6ba;flex-shrink:0;padding:6px}
+ .cam{background:none;border:none;font-size:1.05em;flex-shrink:0;padding:4px;opacity:.4}
+ .thumb{width:38px;height:38px;object-fit:cover;border-radius:10px;flex-shrink:0;
+        border:2px solid #ffd9c4}
+ #viewer{position:fixed;inset:0;background:rgba(30,20,15,.92);z-index:30;
+         display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+ #viewer img{max-width:92vw;max-height:70vh;border-radius:16px}
+ #viewer .vname{color:#fff;font-size:1.1em;font-weight:600;max-width:90vw;text-align:center}
+ #viewer button{border:none;border-radius:999px;padding:12px 20px;font-size:1em;
+         font-weight:600;color:#fff;margin:0 6px}
+ #viewer .vchg{background:#2bb3a3}
+ #viewer .vdel{background:#e85d3d}
  .sect{display:flex;align-items:center;gap:8px;width:100%;background:#ffe8d6;border:none;
        border-radius:14px;padding:12px 16px;margin:14px 0 10px;font-size:1em;
        font-weight:700;color:#a4643f}
@@ -268,6 +341,15 @@ header('Content-Type: text/html; charset=utf-8');
 </main>
 
 <div id="toast"></div>
+<input type="file" id="imgfile" accept="image/*" style="display:none">
+<div id="viewer" style="display:none" onclick="closeViewer()">
+  <div class="vname" id="vname"></div>
+  <img id="vimg" alt="">
+  <div>
+    <button class="vchg" onclick="event.stopPropagation();pickImg(VIEWID)">📷 Αλλαγή</button>
+    <button class="vdel" onclick="event.stopPropagation();delImg(VIEWID)">🗑️ Διαγραφή</button>
+  </div>
+</div>
 
 <script>
 const TOKEN = <?= json_encode($token) ?>;
@@ -293,6 +375,9 @@ async function post(data){
   }catch(e){toast('⚠️ Πρόβλημα σύνδεσης, δοκίμασε ξανά');}
 }
 
+function imgURL(it){
+  return 'go.php?i='+encodeURIComponent(TOKEN)+'&img='+it.id+'&t='+it.img;
+}
 function rowHTML(it){
   const done=it.c?' done':'';
   const qty=it.c?'':`
@@ -302,8 +387,12 @@ function rowHTML(it){
              onchange="qtySet('${it.id}',this.value)">
       <button class="plus" onclick="qty('${it.id}',1)">＋</button>
     </span>`;
+  const photo=it.img
+    ? `<img class="thumb" src="${imgURL(it)}" onclick="viewImg('${it.id}')" alt="">`
+    : `<button class="cam" onclick="pickImg('${it.id}')" aria-label="Φωτογραφία">📷</button>`;
   return `<div class="row${done}">
     <button class="circ" onclick="toggle('${it.id}')">${it.c?'✓':''}</button>
+    ${photo}
     <span class="name">${esc(it.n)}${it.c&&it.q>1?' ×'+it.q:''}</span>
     ${qty}
     <button class="del" onclick="del('${it.id}',this)">🗑️</button>
@@ -337,6 +426,40 @@ function toggle(id){post({a:'toggle',id:id});}
 function del(id,btn){
   const name=btn.parentNode.querySelector('.name').textContent;
   if(confirm('Διαγραφή «'+name+'» ;'))post({a:'del',id:id});
+}
+let IMGID=null, VIEWID=null;
+function pickImg(id){
+  IMGID=id;
+  document.getElementById('imgfile').click();
+}
+document.getElementById('imgfile').addEventListener('change',async function(){
+  const file=this.files[0];
+  this.value='';
+  if(!file||!IMGID)return;
+  toast('⏳ Ανέβασμα φωτογραφίας...');
+  try{
+    const fd=new FormData();
+    fd.append('a','img');fd.append('id',IMGID);fd.append('f',file);
+    const r=await fetch('go.php?i='+encodeURIComponent(TOKEN),{method:'POST',body:fd});
+    const c=await r.json();
+    CART=c;render();closeViewer();
+    toast(c.error?'⚠️ '+c.error:'📷 Η φωτογραφία ανέβηκε!');
+  }catch(e){toast('⚠️ Πρόβλημα σύνδεσης, δοκίμασε ξανά');}
+});
+function viewImg(id){
+  const it=CART.items.find(i=>i.id===id);
+  if(!it||!it.img)return;
+  VIEWID=id;
+  document.getElementById('vname').textContent=it.n;
+  document.getElementById('vimg').src=imgURL(it);
+  document.getElementById('viewer').style.display='flex';
+}
+function closeViewer(){
+  document.getElementById('viewer').style.display='none';
+  VIEWID=null;
+}
+function delImg(id){
+  if(confirm('Διαγραφή φωτογραφίας;')){closeViewer();post({a:'imgdel',id:id});}
 }
 function toggleDone(){
   showDone=!showDone;

@@ -39,6 +39,23 @@ A single-file PHP shared shopping list (no database), to be hosted at
 - Smoke-tested against production: seeds (112 items, 6 active), add, qty ±/set,
   toggle, uppercase-Greek re-add dedup, del — all pass; JSON on disk valid.
 
+## Item photos ✅ (2026-07-10)
+- Each item can have one photo: 📷 button in the row → file picker (camera on
+  mobile); thumbnail once set; tap thumbnail → fullscreen viewer with
+  «📷 Αλλαγή» / «🗑️ Διαγραφή».
+- Storage stays database-free: `data/ITEMID-TOKEN.jpg`. Uploads go through
+  ImageMagick `convert` (`-auto-orient -strip -resize '1000x1000>' -quality 82`,
+  forced `jpg:` output, first frame only) — also validates the file is an image.
+- `data/` is 403, so photos are streamed by `go.php?i=TOKEN&img=ITEMID`
+  (long-cache headers; the photo mtime rides on items as `img` and cache-busts).
+- Deleting an item deletes its photo; `a=imgdel` deletes just the photo.
+- PHP upload limits were 2M/8M — too small for phone photos. Raised to 30M/32M
+  via `~/public_html/supermarket/.htaccess` (php_value; AllowOverride All).
+  **This file is not in the repo** — recreate it if the deployment moves.
+- Tested in production: 3.8MB upload OK, resize to ≤1000px OK, PNG→JPG OK,
+  garbage file → 422 «Μη έγκυρη εικόνα», >32M → 422 «Πολύ μεγάλο αρχείο»,
+  wrong-token image fetch → 404, del/imgdel clean up the .jpg.
+
 ## What remains
 1. Confirm from a phone + second device that both see the same cart.
 2. Give the wife her token URL. 🎉
