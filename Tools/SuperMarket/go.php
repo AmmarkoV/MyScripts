@@ -468,9 +468,27 @@ function toggleDone(){
 }
 function share(){
   const url=location.origin+location.pathname+'?i='+encodeURIComponent(TOKEN);
-  if(navigator.share){navigator.share({title:'Λίστα Σούπερ Μάρκετ 🛒',url:url});}
-  else{navigator.clipboard.writeText(url).then(()=>toast('📋 Ο σύνδεσμος αντιγράφηκε!'));}
+  /* navigator.share / navigator.clipboard only exist on HTTPS or localhost,
+     so fall through: share sheet → clipboard → execCommand → show the link */
+  if(navigator.share){
+    navigator.share({title:'Λίστα Σούπερ Μάρκετ 🛒',url:url}).catch(()=>{});
+    return;
+  }
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(url)
+      .then(()=>toast('📋 Ο σύνδεσμος αντιγράφηκε!'),()=>showLink(url));
+    return;
+  }
+  const ta=document.createElement('textarea');
+  ta.value=url;ta.style.position='fixed';ta.style.opacity='0';
+  document.body.appendChild(ta);ta.select();
+  let ok=false;
+  try{ok=document.execCommand('copy');}catch(e){}
+  ta.remove();
+  if(ok)toast('📋 Ο σύνδεσμος αντιγράφηκε!');
+  else showLink(url);
 }
+function showLink(url){prompt('Αντίγραψε τον σύνδεσμο:',url);}
 
 render();
 /* refresh when returning to the tab, so shared edits show up */
