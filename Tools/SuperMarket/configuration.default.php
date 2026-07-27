@@ -17,6 +17,9 @@ define('SYNC_LABEL_SECONDS', 5);
 /* List title used when a list hasn't been given a name. */
 define('DEFAULT_TITLE', 'Λίστα Σούπερ Μάρκετ');
 
+/* Label of the share button in the header (e.g. just '🔗' to save space). */
+define('SHARE_LABEL', '🔗 Κοινή χρήση');
+
 /* Where carts (TOKEN.json) and photos live. SCRIPT_FILENAME (not __DIR__)
    so a symlinked deployment keeps its data next to the *deployed* script. */
 define('DATA_DIR', dirname($_SERVER['SCRIPT_FILENAME'] ?? __FILE__) . '/data');

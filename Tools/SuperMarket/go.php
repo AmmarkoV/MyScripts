@@ -7,14 +7,17 @@
 
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
 
-/* Local config is a git-ignored copy of the tracked defaults; if the copy
-   fails (read-only checkout) just run on the defaults. */
+/* Local config is a git-ignored copy of the tracked defaults. The local copy
+   loads first so its values win (define() keeps the first definition); the
+   defaults then fill in any knob the copy is missing or doesn't exist to
+   provide (read-only checkout, older copy after a git pull adds new knobs). */
 if (!file_exists(__DIR__ . '/configuration.php')) {
     @copy(__DIR__ . '/configuration.default.php', __DIR__ . '/configuration.php');
 }
-require_once file_exists(__DIR__ . '/configuration.php')
-    ? __DIR__ . '/configuration.php'
-    : __DIR__ . '/configuration.default.php';
+if (file_exists(__DIR__ . '/configuration.php')) {
+    require_once __DIR__ . '/configuration.php';
+}
+require_once __DIR__ . '/configuration.default.php';
 
 if (function_exists('mb_internal_encoding')) {
     mb_internal_encoding('UTF-8');
@@ -360,7 +363,7 @@ $self   = $scheme . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_NAME'];
   <h1><button id="coverbtn" onclick="coverClick()" aria-label="Εικόνα λίστας">🛒</button>
       <span id="title" onclick="editName()"><?= htmlspecialchars(DEFAULT_TITLE) ?></span>
       <button id="sync" onclick="refreshNow()" aria-label="Ανανέωση">🔄 τώρα</button>
-      <button id="share" onclick="share()">🔗</button></h1>
+      <button id="share" onclick="share()"><?= htmlspecialchars(SHARE_LABEL) ?></button></h1>
   <div class="sub" id="counter"></div>
 </header>
 
