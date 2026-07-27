@@ -7,6 +7,15 @@
 
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
 
+/* Local config is a git-ignored copy of the tracked defaults; if the copy
+   fails (read-only checkout) just run on the defaults. */
+if (!file_exists(__DIR__ . '/configuration.php')) {
+    @copy(__DIR__ . '/configuration.default.php', __DIR__ . '/configuration.php');
+}
+require_once file_exists(__DIR__ . '/configuration.php')
+    ? __DIR__ . '/configuration.php'
+    : __DIR__ . '/configuration.default.php';
+
 if (function_exists('mb_internal_encoding')) {
     mb_internal_encoding('UTF-8');
 } else {
@@ -24,20 +33,19 @@ if (function_exists('mb_internal_encoding')) {
     }
 }
 
-/* Keep data/ next to the *deployed* script (SCRIPT_FILENAME does not resolve
-   symlinks, unlike __DIR__), so a symlinked go.php stores carts in the webroot. */
-$DATA = dirname($_SERVER['SCRIPT_FILENAME'] ?? __FILE__) . '/data';
+$DATA = DATA_DIR;
 if (!is_dir($DATA)) {
     mkdir($DATA, 0775, true);
 }
-/* Keep carts from being browsable: deny on Apache, and a dummy index so
-   directory listings show nothing even where .htaccess is ignored. */
+/* Keep carts from being browsable: deny on Apache, and an index.php so the
+   directory can't be listed even where .htaccess is ignored (as on the current
+   symlinked deployment, where AllowOverride doesn't cover the resolved path). */
 if (!file_exists($DATA . '/.htaccess')) {
     file_put_contents($DATA . '/.htaccess', "Require all denied\n");
 }
-if (!file_exists($DATA . '/index.html')) {
-    file_put_contents($DATA . '/index.html',
-        "<!DOCTYPE html><meta charset=\"utf-8\"><title>🛒</title>Τίποτα εδώ.\n");
+if (!file_exists($DATA . '/index.php')) {
+    file_put_contents($DATA . '/index.php',
+        "<?php http_response_code(403); ?>Τίποτα εδώ. 🛒\n");
 }
 
 $token = preg_replace('/[^A-Za-z0-9_-]/', '', $_GET['i'] ?? '');
@@ -56,7 +64,7 @@ if ($token === '') {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#ff7e5f">
-<title>Λίστα Σούπερ Μάρκετ 🛒</title>
+<title><?= htmlspecialchars(DEFAULT_TITLE) ?> 🛒</title>
 <style>
  body{margin:0;font-family:-apple-system,"Segoe UI",Roboto,sans-serif;
       background:linear-gradient(160deg,#ff7e5f,#feb47b);min-height:100vh;
@@ -73,7 +81,7 @@ if ($token === '') {
 <body>
 <div class="card">
   <div style="font-size:3em">🛒✨</div>
-  <h1>Λίστα Σούπερ Μάρκετ</h1>
+  <h1><?= htmlspecialchars(DEFAULT_TITLE) ?></h1>
   <p>Φτιάξε μια λίστα και μοιράσου τον σύνδεσμο 
      όποιος τον έχει, βλέπει και αλλάζει τη λίστα.</p>
   <a class="btn" href="go.php?new=1">➕ Νέα λίστα</a>
@@ -120,19 +128,19 @@ if (isset($_GET['img'])) {
     exit;
 }
 
-/* Generic starter history for a new list: everything starts checked ("in the
-   basket"), so the active list is clean but re-adding a known name is instant. */
+/* ---------- GET ?rev=1: cheap "did anything change?" probe ----------
+   Lock-free read; a torn read just decodes to null → rev 0 → one spare refetch. */
+if (isset($_GET['rev'])) {
+    $j = is_file($FILE) ? json_decode(file_get_contents($FILE), true) : null;
+    header('Content-Type: application/json; charset=utf-8');
+    header('Cache-Control: no-store');
+    echo json_encode(['rev' => $j['rev'] ?? 0]);
+    exit;
+}
+
 function seed_items() {
-    $staples = ['ψωμί','γάλα','αυγά','φέτα','γιαούρτι','βούτυρο','τυρί τοστ','ζαμπόν',
-        'κοτόπουλο','κιμάς','ρύζι','μακαρόνια','φακές','φασόλια','αλεύρι','ζάχαρη',
-        'αλάτι','πιπέρι','ελαιόλαδο','ξύδι','ντομάτες','πατάτες','κρεμμύδια','σκόρδο',
-        'λεμόνια','μπανάνες','μήλα','πορτοκάλια','καρότα','σαλάτα','καφές','τσάι',
-        'χυμός','νερό','δημητριακά','μέλι','μαρμελάδα','σοκολάτα','μπισκότα',
-        'κατεψυγμένα λαχανικά','χαρτί υγείας','χαρτί κουζίνας','χαρτομάντηλα',
-        'οδοντόκρεμα','σαμπουάν','σαπούνι','απορρυπαντικό πλυντηρίου','υγρό πιάτων',
-        'χλωρίνη','σακούλες σκουπιδιών','αλουμινόχαρτο','λαδόκολλα'];
     $items = [];
-    foreach ($staples as $n) $items[] = ['id' => new_id(), 'n' => $n, 'q' => 1, 'c' => 1];
+    foreach (SEED_STAPLES as $n) $items[] = ['id' => new_id(), 'n' => $n, 'q' => 1, 'c' => 1];
     return $items;
 }
 
@@ -150,7 +158,12 @@ function with_cart($file, $mutate = null) {
     if (!is_array($cart) || !isset($cart['items']) || !is_array($cart['items'])) {
         $cart = ['items' => seed_items()];
     }
-    if ($mutate) $cart = $mutate($cart);
+    if ($mutate) {
+        $cart = $mutate($cart);
+        /* rev only moves on mutations, so pollers can probe it cheaply
+           without their own reads counting as changes */
+        $cart['rev'] = ($cart['rev'] ?? 0) + 1;
+    }
     rewind($fp);
     ftruncate($fp, 0);
     fwrite($fp, json_encode($cart, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
@@ -173,11 +186,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
                              $err = 'Το ανέβασμα απέτυχε (πολύ μεγάλο αρχείο;)';
     else {
         exec('convert ' . escapeshellarg($_FILES['f']['tmp_name'] . '[0]')
-           . ' -auto-orient -strip -resize ' . escapeshellarg('1000x1000>')
-           . ' -quality 82 ' . escapeshellarg('jpg:' . $dst) . ' 2>&1', $o, $rc);
+           . ' -auto-orient -strip -resize ' . escapeshellarg(IMG_MAX_DIM . 'x' . IMG_MAX_DIM . '>')
+           . ' -quality ' . (int)IMG_QUALITY . ' ' . escapeshellarg('jpg:' . $dst) . ' 2>&1', $o, $rc);
         if ($rc !== 0 || !is_file($dst)) $err = 'Μη έγκυρη εικόνα';
     }
-    $cart = annotate_images(with_cart($FILE));
+    /* a new photo must bump rev so other phones refetch; failures must not */
+    $cart = annotate_images(with_cart($FILE, $err ? null : function ($c) { return $c; }));
     if ($err) { http_response_code(422); $cart['error'] = $err; }
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode($cart, JSON_UNESCAPED_UNICODE);
@@ -193,7 +207,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         switch ($a) {
             case 'add':
                 $name = trim($_POST['n'] ?? '');
-                if ($name !== '' && mb_strlen($name) <= 100) {
+                if ($name !== '' && mb_strlen($name) <= MAX_NAME_LEN) {
                     foreach ($items as &$it) {
                         if (mb_strtolower($it['n']) === mb_strtolower($name)) {
                             $it['c'] = 0; // already known: just bring it back to the list
@@ -209,7 +223,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 foreach ($items as &$it) {
                     if ($it['id'] === $id) {
                         $q = isset($_POST['d']) ? $it['q'] + (int)$_POST['d'] : (int)$_POST['v'];
-                        $it['q'] = max(1, min(999, $q));
+                        $it['q'] = max(1, min(MAX_QTY, $q));
                     }
                 }
                 unset($it);
@@ -234,7 +248,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 'name':
                 $n = trim($_POST['n'] ?? '');
                 if ($n === '') unset($cart['name']);       // back to the default title
-                elseif (mb_strlen($n) <= 60) $cart['name'] = $n;
+                elseif (mb_strlen($n) <= MAX_TITLE_LEN) $cart['name'] = $n;
                 break;
         }
         $cart['items'] = $items;
@@ -256,7 +270,7 @@ if (isset($_GET['api'])) {
 header('Content-Type: text/html; charset=utf-8');
 
 /* Link previews (WhatsApp/Viber/Messenger…): list name + cover as OG tags. */
-$title  = trim($cart['name'] ?? '') !== '' ? $cart['name'] : 'Λίστα Σούπερ Μάρκετ';
+$title  = trim($cart['name'] ?? '') !== '' ? $cart['name'] : DEFAULT_TITLE;
 $active = count(array_filter($cart['items'], function ($it) { return !$it['c']; }));
 $desc   = $active ? "$active προϊόντα για αγορά" : 'Όλα έτοιμα! ✨';
 $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
@@ -269,7 +283,7 @@ $self   = $scheme . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_NAME'];
 <meta name="theme-color" content="#ff7e5f">
 <title>🛒 <?= htmlspecialchars($title) ?></title>
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="Λίστα Σούπερ Μάρκετ 🛒">
+<meta property="og:site_name" content="<?= htmlspecialchars(DEFAULT_TITLE) ?> 🛒">
 <meta property="og:title" content="🛒 <?= htmlspecialchars($title) ?>">
 <meta property="og:description" content="<?= htmlspecialchars($desc) ?>">
 <meta property="og:url" content="<?= htmlspecialchars("$self?i=$token") ?>">
@@ -290,8 +304,11 @@ $self   = $scheme . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_NAME'];
  #title{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer}
  #title::after{content:' ✏️';font-size:.7em;opacity:.7}
  header .sub{font-size:.8em;opacity:.9;margin-top:2px}
- #share{margin-left:auto;background:rgba(255,255,255,.25);border:none;color:#fff;
-        border-radius:999px;padding:8px 14px;font-size:.85em;font-weight:600}
+ #sync{margin-left:auto;background:rgba(255,255,255,.25);border:none;color:#fff;
+        border-radius:999px;padding:8px 10px;font-size:.85em;font-weight:600;
+        flex-shrink:0;font-variant-numeric:tabular-nums}
+ #share{background:rgba(255,255,255,.25);border:none;color:#fff;
+        border-radius:999px;padding:8px 14px;font-size:.85em;font-weight:600;flex-shrink:0}
  .addbar{display:flex;gap:8px;padding:12px 12px 4px;position:sticky;top:62px;z-index:9;
          background:linear-gradient(#fff7ef 80%,rgba(255,247,239,0))}
  .addbar input{flex:1;min-width:0;font-size:1.05em;padding:12px 16px;border-radius:999px;
@@ -341,13 +358,14 @@ $self   = $scheme . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_NAME'];
 <body>
 <header>
   <h1><button id="coverbtn" onclick="coverClick()" aria-label="Εικόνα λίστας">🛒</button>
-      <span id="title" onclick="editName()">Λίστα Σούπερ Μάρκετ</span>
-      <button id="share" onclick="share()">🔗 Κοινή χρήση</button></h1>
+      <span id="title" onclick="editName()"><?= htmlspecialchars(DEFAULT_TITLE) ?></span>
+      <button id="sync" onclick="refreshNow()" aria-label="Ανανέωση">🔄 τώρα</button>
+      <button id="share" onclick="share()">🔗</button></h1>
   <div class="sub" id="counter"></div>
 </header>
 
 <div class="addbar">
-  <input id="newname" type="text" placeholder="Πρόσθεσε προϊόν... 🍅" maxlength="100"
+  <input id="newname" type="text" placeholder="Πρόσθεσε προϊόν... 🍅" maxlength="<?= (int)MAX_NAME_LEN ?>"
          onkeydown="if(event.key==='Enter')addItem()">
   <button onclick="addItem()" aria-label="Προσθήκη">＋</button>
 </div>
@@ -373,6 +391,8 @@ $self   = $scheme . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_NAME'];
 
 <script>
 const TOKEN = <?= json_encode($token) ?>;
+const DEFTITLE = <?= json_encode(DEFAULT_TITLE, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) ?>;
+const MAXQ = <?= (int)MAX_QTY ?>;
 let CART = <?= json_encode($cart, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) ?>;
 let showDone = false;
 
@@ -392,8 +412,36 @@ async function post(data){
     if(!r.ok)throw 0;
     CART=await r.json();
     render();
-  }catch(e){toast('⚠️ Πρόβλημα σύνδεσης, δοκίμασε ξανά');}
+    synced();
+  }catch(e){OFFLINE=true;updSync();toast('⚠️ Πρόβλημα σύνδεσης, δοκίμασε ξανά');}
 }
+
+/* ----- auto refresh: poll a tiny rev counter, refetch only on change ----- */
+let SYNCAT=Date.now(), OFFLINE=false;
+function synced(){SYNCAT=Date.now();OFFLINE=false;updSync();}
+function updSync(){
+  const s=Math.floor((Date.now()-SYNCAT)/1000);
+  const t=s<10?'τώρα':s<60?s+'″':s<3600?Math.floor(s/60)+'′':Math.floor(s/3600)+'ω';
+  document.getElementById('sync').textContent=(OFFLINE?'⚠️':'🔄')+' '+t;
+}
+async function poll(){
+  if(document.hidden)return;
+  /* don't yank a qty box out from under someone mid-edit */
+  if(document.activeElement&&document.activeElement.closest&&
+     document.activeElement.closest('.qty'))return;
+  const base='go.php?i='+encodeURIComponent(TOKEN);
+  try{
+    const j=await(await fetch(base+'&rev=1')).json();
+    if(j.rev!==(CART.rev||0)){
+      CART=await(await fetch(base+'&api=1')).json();
+      render();
+    }
+    synced();
+  }catch(e){OFFLINE=true;updSync();}
+}
+function refreshNow(){poll().then(()=>{if(!OFFLINE)toast('✅ Ενημερώθηκε!');});}
+setInterval(poll,<?= (int)POLL_SECONDS * 1000 ?>);
+setInterval(updSync,<?= (int)SYNC_LABEL_SECONDS * 1000 ?>);
 
 function imgURL(it){
   return 'go.php?i='+encodeURIComponent(TOKEN)+'&img='+it.id+'&t='+it.img;
@@ -403,7 +451,7 @@ function rowHTML(it){
   const qty=it.c?'':`
     <span class="qty">
       <button class="minus" onclick="qty('${it.id}',-1)">−</button>
-      <input type="number" inputmode="numeric" min="1" max="999" value="${it.q}"
+      <input type="number" inputmode="numeric" min="1" max="${MAXQ}" value="${it.q}"
              onchange="qtySet('${it.id}',this.value)">
       <button class="plus" onclick="qty('${it.id}',1)">＋</button>
     </span>`;
@@ -419,7 +467,7 @@ function rowHTML(it){
   </div>`;
 }
 
-function listName(){return CART.name||'Λίστα Σούπερ Μάρκετ';}
+function listName(){return CART.name||DEFTITLE;}
 function render(){
   document.getElementById('title').textContent=listName();
   document.title='🛒 '+listName();
@@ -468,7 +516,7 @@ document.getElementById('imgfile').addEventListener('change',async function(){
     fd.append('a','img');fd.append('id',IMGID);fd.append('f',file);
     const r=await fetch('go.php?i='+encodeURIComponent(TOKEN),{method:'POST',body:fd});
     const c=await r.json();
-    CART=c;render();closeViewer();
+    CART=c;render();closeViewer();synced();
     toast(c.error?'⚠️ '+c.error:'📷 Η φωτογραφία ανέβηκε!');
   }catch(e){toast('⚠️ Πρόβλημα σύνδεσης, δοκίμασε ξανά');}
 });
@@ -529,11 +577,9 @@ function share(){
 function showLink(url){prompt('Αντίγραψε τον σύνδεσμο:',url);}
 
 render();
+updSync();
 /* refresh when returning to the tab, so shared edits show up */
-document.addEventListener('visibilitychange',()=>{
-  if(!document.hidden)fetch('go.php?i='+encodeURIComponent(TOKEN)+'&api=1')
-     .then(r=>r.json()).then(c=>{CART=c;render();}).catch(()=>{});
-});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)poll();});
 </script>
 </body>
 </html>

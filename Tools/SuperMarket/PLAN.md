@@ -67,6 +67,45 @@ A single-file PHP shared shopping list (no database), to be hosted at
   special id `cover` (item ids are pure hex, so no collision): file is
   `data/cover-TOKEN.jpg`, served by `?img=cover`, mtime rides on the cart as `cimg`.
 
+## Auto-refresh + sync indicator ✅ (2026-07-27)
+- Cart JSON carries a `rev` counter, bumped inside `with_cart()` **only when a
+  mutation runs** (plain reads never bump it, so two open phones don't ping-pong
+  refetches). Successful photo uploads bump it via a no-op mutation.
+- `?i=TOKEN&rev=1` is a cheap lock-free probe returning `{"rev":N}` (a torn read
+  during a write just decodes to rev 0 → one harmless extra refetch).
+- The page polls the probe every 10 s (skipped while the tab is hidden or while
+  a qty box is focused) and refetches + re-renders only when rev differs. On
+  network failure nothing is touched — the list stays as-is.
+- 🔄 button next to 🔗 in the header shows time since the **last successful
+  check with the server** (τώρα / 30″ / 5′ / 2ω, ticking every 5 s); it turns ⚠️
+  while offline, and tapping it forces a check now. Every successful poll, save,
+  or upload resets it.
+
+## Deployment moved (2026-07-27) — now the workspace itself
+- `~/public_html/supermarket` is now a **directory symlink** to this repo dir.
+- Consequence: Apache matches `<Directory>`/AllowOverride on the *resolved*
+  path, so **`.htaccess` files here are ignored** (verified: garbage in
+  data/.htaccess doesn't 500). Both the data/ deny and the php_value upload
+  limits are dead letters; PHP upload limits are back to defaults (2M/8M) —
+  accepted for now.
+- data/ had to be recreated (`chmod 777` so www-data can write); the old carts
+  were lost — old tokens re-seed with the generic staples on first visit.
+- Cart privacy is instead handled by `data/index.php` (403, auto-recreated by
+  go.php if missing), which blocks directory listing/token enumeration.
+  Individual `data/TOKEN.json` files are technically fetchable, but knowing a
+  token already grants full access through the app — same trust model.
+- `.gitignore` added: `data/` and `.htaccess` stay out of the repo.
+
+## Configuration ✅ (2026-07-27)
+- Knobs: POLL_SECONDS (10), SYNC_LABEL_SECONDS (5), DEFAULT_TITLE, DATA_DIR,
+  IMG_MAX_DIM/IMG_QUALITY, MAX_QTY/MAX_NAME_LEN/MAX_TITLE_LEN, and
+  SEED_STAPLES (new-list starter items). Edit + save applies on next page load.
+- `configuration.default.php` is the tracked template; go.php copies it to
+  `configuration.php` (git-ignored) if missing and requires the copy — so local
+  tweaks never diverge from the repo. If the copy can't be created (web user
+  can't write the dir — the case here, so it was created manually as ammar),
+  go.php silently runs on the defaults.
+
 ## What remains
 1. Confirm from a phone + second device that both see the same cart.
 2. Give the wife her token URL. 🎉
