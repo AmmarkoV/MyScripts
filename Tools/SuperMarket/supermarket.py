@@ -16,9 +16,19 @@ Configure in ~/.bashrc:
 import json
 import os
 import sys
+import unicodedata
 import urllib.error
 import urllib.parse
 import urllib.request
+
+# digraphs first: each rule outputs Latin, so no later rule can re-match it
+GREEKLISH = [
+    ('ου', 'u'), ('ει', 'i'), ('οι', 'i'), ('υι', 'i'), ('αι', 'e'),
+    ('α', 'a'), ('β', 'v'), ('γ', 'g'), ('δ', 'd'), ('ε', 'e'), ('ζ', 'z'),
+    ('η', 'i'), ('θ', 'th'), ('ι', 'i'), ('κ', 'k'), ('λ', 'l'), ('μ', 'm'),
+    ('ν', 'n'), ('ξ', 'ks'), ('ο', 'o'), ('π', 'p'), ('ρ', 'r'), ('σ', 's'),
+    ('τ', 't'), ('υ', 'i'), ('φ', 'f'), ('χ', 'x'), ('ψ', 'ps'), ('ω', 'o'),
+]
 
 MAX_NAME_LEN = 100      # kept in step with configuration.default.php
 MAX_QTY = 999
@@ -75,17 +85,29 @@ def request(url, fields=None):
 
 
 def exact(items, name):
-    """Items whose name equals `name`. casefold(), not lower(), so a typed final
-       sigma folds to σ and ΓΆΛΑΣ still matches γάλας. Accents are not stripped,
-       matching the server's own mb_strtolower()."""
-    key = name.casefold()
-    return [it for it in items if it.get('n', '').casefold() == key]
+    """Items whose name sounds like `name`."""
+    key = norm(name)
+    return [it for it in items if norm(it.get('n', '')) == key]
 
 
 def find(items, name):
     """Exact matches if there are any, otherwise substring matches."""
-    key = name.casefold()
-    return exact(items, name) or [it for it in items if key in it.get('n', '').casefold()]
+    key = norm(name)
+    return exact(items, name) or [it for it in items if key in norm(it.get('n', ''))]
+
+
+def norm(s):
+    """Greeklish key, kept in step with norm() in go.php: names are compared by
+       how they sound, so "Ψωμι", the misspelt "Ψωμή" and a typed "psomi" all
+       reduce to "psomi" and find the same ψωμί. casefold() folds case and final
+       sigma; NFD-minus-combining takes the accents and διαλυτικά off. The
+       digraphs are substituted before the single letters they contain, and
+       every replacement lands on Latin, which no later rule can match."""
+    s = unicodedata.normalize('NFD', s.strip().casefold())
+    s = ''.join(c for c in s if not unicodedata.combining(c))
+    for greek, latin in GREEKLISH:
+        s = s.replace(greek, latin)
+    return s
 
 
 def label(it):

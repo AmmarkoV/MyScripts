@@ -36,6 +36,26 @@ if (function_exists('mb_internal_encoding')) {
     }
 }
 
+/* Products are compared as greeklish, so a name is matched by how it sounds
+   rather than how it is spelled: "Ψωμι", the misspelt "Ψωμή" and even a typed
+   "psomi" all reduce to "psomi" and find the ψωμί already crossed off in the
+   basket, instead of quietly adding a second one beside it.
+   Case, accents, διαλυτικά and final sigma go first; then every spelling of a
+   sound lands on one letter — η/υ/ι/ει/οι/υι on i, ω/ο on o, ε/αι on e.
+   strtr() with an array takes the longest key at each position and never
+   re-reads what it just wrote, so the digraphs are listed before the single
+   letters they contain: "ου" claims its υ before the bare "υ" rule sees it. */
+function norm($s) {
+    $s = strtr(mb_strtolower(trim($s)),
+        ['ά'=>'α','έ'=>'ε','ή'=>'η','ί'=>'ι','ό'=>'ο','ύ'=>'υ','ώ'=>'ω',
+         'ϊ'=>'ι','ϋ'=>'υ','ΐ'=>'ι','ΰ'=>'υ','ς'=>'σ']);
+    return strtr($s, [
+        'ου'=>'u','ει'=>'i','οι'=>'i','υι'=>'i','αι'=>'e',
+        'α'=>'a','β'=>'v','γ'=>'g','δ'=>'d','ε'=>'e','ζ'=>'z','η'=>'i','θ'=>'th',
+        'ι'=>'i','κ'=>'k','λ'=>'l','μ'=>'m','ν'=>'n','ξ'=>'ks','ο'=>'o','π'=>'p',
+        'ρ'=>'r','σ'=>'s','τ'=>'t','υ'=>'i','φ'=>'f','χ'=>'x','ψ'=>'ps','ω'=>'o']);
+}
+
 $DATA = DATA_DIR;
 if (!is_dir($DATA)) {
     mkdir($DATA, 0775, true);
@@ -212,7 +232,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $name = trim($_POST['n'] ?? '');
                 if ($name !== '' && mb_strlen($name) <= MAX_NAME_LEN) {
                     foreach ($items as &$it) {
-                        if (mb_strtolower($it['n']) === mb_strtolower($name)) {
+                        if (norm($it['n']) === norm($name)) {
                             $it['c'] = 0; // already known: just bring it back to the list
                             $cart['items'] = $items;
                             return $cart;
