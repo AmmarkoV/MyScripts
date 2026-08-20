@@ -1,0 +1,12 @@
+[Unit]
+Description=Cap NVIDIA GPU power limit
+After=multi-user.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=nvidia-power-cap.sh
+
+[Install]
+WantedBy=multi-user.target
+
