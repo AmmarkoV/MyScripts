@@ -77,7 +77,7 @@ setup_device() {
         die "v4l2loopback is already loaded without $DEVICE. Use --device with its number."
     fi
     log "Creating virtual camera $DEVICE"
-    sudo modprobe v4l2loopback video_nr="$VIDEO_NR" card_label="GoPro" exclusive_caps=1 \
+    sudo modprobe v4l2loopback video_nr="$VIDEO_NR" card_label="GoPro" exclusive_caps=1 max_buffers=8 \
         || die "could not load v4l2loopback"
     LOADED_MODULE=1
 }
