@@ -1,0 +1,35 @@
+{
+  "preset": {
+    "id": "mcc004-batch1",
+    "displayName": "MCC/004/0 DVD+R (disc-probe, BU40N)",
+    "description": "Drive-timing calibration (discprobe) + varying-pitch correction from timing; fitted over 25.64-54.255 mm, max angle difference to the measured map 0.004 deg; full-capacity mapping difference 1.245 deg",
+    "totalSectors": 2295104,
+    "innerRadiusMm": 23.952666320979557,
+    "outerRadiusMm": 57.98089780919333,
+    "channelBitLengthNm": 133.3,
+    "pitchLinear": -2.7621923983206538e-05,
+    "pitchQuadratic": 1.9480957534534254e-05,
+    "pitchCubic": 3.77140978822723e-08
+  },
+  "fit": {
+    "innerRadiusMm": 23.952666320979557,
+    "outerRadiusMm": 57.98089780919333,
+    "pitchLinear": -2.7621923983206538e-05,
+    "pitchQuadratic": 1.9480957534534254e-05,
+    "pitchCubic": 3.77140978822723e-08,
+    "p0_um": 0.7400238513362404,
+    "fit_range_mm": [
+      25.64,
+      54.255
+    ],
+    "full_angle_diff_deg": 1.2446009838175058,
+    "outside_angle_diff_deg": 1.2446009838175058,
+    "max_angle_diff_deg": 0.004007975597527902,
+    "rms_angle_diff_deg": 0.000744846530557234,
+    "peak_to_peak_angle_diff_deg": 0.006458298730762863
+  },
+  "source": {
+    "geo": "summary.json",
+    "correction": "correction-quadratic.json"
+  }
+}
