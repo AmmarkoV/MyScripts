@@ -1,0 +1,90 @@
+{
+  "format": "dvd-nrzi-disc-fill-v2",
+  "sourceImage": "/home/ammar/Documents/3dParty/DiscImageStudio/calib/target_slim.png",
+  "isoOutput": "/home/ammar/Documents/3dParty/DiscImageStudio/calib/crosshair-mcc004.iso",
+  "startLba": 0,
+  "filesAtOuterRing": false,
+  "fillSectors": 2295104,
+  "totalSectors": 2295104,
+  "psnOffset": "0x30000",
+  "blockCount": 143444,
+  "algorithm": "dispersion",
+  "fastOutput": true,
+  "readCompatibility": "off",
+  "compatibilityChanges": 0,
+  "fastParallelism": 16,
+  "exactEccEfmReplay": false,
+  "finalBoundary": null,
+  "dispersionPool": {
+    "domain": "scrambled-main-data-byte-at-efmplus-input",
+    "blackByte": "0xA5",
+    "whiteByte": "0x92",
+    "blackTransitionsPerCodeword": 5,
+    "whiteTransitionsPerCodeword": 2,
+    "luminanceCalibration": "nominal-black-white-not-photometric-measurement",
+    "rasterSampling": "nearest-for-opaque-binary-grayscale-otherwise-alpha-weighted-bilinear",
+    "levels": [
+      {
+        "inputMinimum": 0,
+        "inputMaximum": 127,
+        "previewLuminance": 0,
+        "scrambledByte": "0xA5",
+        "transitionsPerCodeword": 5
+      },
+      {
+        "inputMinimum": 128,
+        "inputMaximum": 255,
+        "previewLuminance": 255,
+        "scrambledByte": "0x92",
+        "transitionsPerCodeword": 2
+      }
+    ]
+  },
+  "constraintStep": 64,
+  "constraintStepUsed": false,
+  "totalScore": 0,
+  "totalScoreMaximum": 4700372992,
+  "scoreMetric": "payload-transition-class-error",
+  "normalizedScore": 0,
+  "elapsedSeconds": 21.263074,
+  "imageMapping": {
+    "totalSectors": 2295104,
+    "innerRadiusMm": 23.952666321,
+    "outerRadiusMm": 57.9808978092,
+    "channelBitLengthNm": 133.3,
+    "startAngleDegrees": 0,
+    "clockwise": true,
+    "luminanceThreshold": 128,
+    "alphaThreshold": 1,
+    "sampleEveryChannelBits": 64,
+    "pitchLinear": -2.76219239832E-05,
+    "pitchQuadratic": 1.94809575345E-05,
+    "pitchCubic": 3.77140978823E-08,
+    "tone": {
+      "ditherStrength": 0,
+      "levels": 2,
+      "brightness": 0,
+      "srgbLinearization": false
+    },
+    "usableSectors": null,
+    "imageOuterRadiusMm": null,
+    "outputSectors": 2295104,
+    "samplingOuterRadiusMm": 57.9808978092
+  },
+  "pitchPolynomial": {
+    "variable": "x=(radiusMm-innerRadiusMm)/(outerRadiusMm-innerRadiusMm)",
+    "unit": "micrometres",
+    "constant": 0.7400238513394436,
+    "linear": -2.0440882567453006E-05,
+    "quadratic": 1.4416373222460841E-05,
+    "cubic": 2.79093319646524E-08
+  },
+  "iso": {
+    "mode": "raw-sector-image",
+    "logicalSectorBytes": 2048,
+    "imageSectors": 2295104,
+    "sparseFile": false,
+    "mountableFilesystem": false,
+    "hybrid": null
+  }
+}
